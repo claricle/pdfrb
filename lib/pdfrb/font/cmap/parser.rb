@@ -46,9 +46,9 @@ module Pdfrb
           lines = text.each_line.to_a
           i = 0
           while i < lines.length
-            if lines[i].strip =~ /\Abeginbfchar\b/
+            if lines[i].strip =~ /beginbfchar\b/
               i += 1
-              until lines[i].strip == "endbfchar"
+              until lines[i]&.strip == "endbfchar"
                 pair = lines[i].strip.split(/\s+/)
                 if pair.length >= 2
                   key = hex_to_int(pair[0])
@@ -84,11 +84,26 @@ module Pdfrb
 
         def hex_to_utf16(str)
           raw = str.sub(/\A</, "").sub(/>\z/, "")
-          if raw.length == 4
-            [raw.to_i(16)].pack("U")
-          else
-            raw.scan(/.{4}/).map { |h| h.to_i(16) }.pack("U*")
+          codepoints = raw.scan(/.{4}/).map { |h| h.to_i(16) }
+          decode_surrogates(codepoints)
+        end
+
+        def decode_surrogates(codepoints)
+          result = +""
+          i = 0
+          while i < codepoints.length
+            cp = codepoints[i]
+            if cp >= 0xD800 && cp <= 0xDBFF && i + 1 < codepoints.length &&
+               codepoints[i + 1] >= 0xDC00 && codepoints[i + 1] <= 0xDFFF
+              combined = 0x10000 + ((cp - 0xD800) << 10) + (codepoints[i + 1] - 0xDC00)
+              result << combined
+              i += 2
+            else
+              result << cp
+              i += 1
+            end
           end
+          result
         end
       end
     end
