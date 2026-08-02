@@ -33,7 +33,7 @@ module Pdfrb
           emit_codespacerange(buffer)
           emit_bfchar(buffer)
           emit_footer(buffer)
-          buffer.force_encoding(::Encoding::BINARY)
+          buffer.force_encoding(Encoding::BINARY)
         end
 
         private
@@ -89,7 +89,7 @@ module Pdfrb
         # Encode a Unicode string as hex pairs suitable for CMap.
         # Characters above U+FFFF are emitted as UTF-16 surrogate pairs.
         def encode_unicode(str)
-          str.to_s.codepoints.map do |cp|
+          str.to_s.codepoints.map { |cp|
             if cp <= 0xFFFF
               "%04X" % cp
             else
@@ -99,7 +99,7 @@ module Pdfrb
               low = 0xDC00 + (adjusted & 0x3FF)
               "%04X%04X" % [high, low]
             end
-          end.join
+          }.join
         end
 
         def emit_footer(buffer)

@@ -83,7 +83,6 @@ module Pdfrb
         # must check the type explicitly.
         def as_parms_list(parms)
           case parms
-          when nil then []
           when ::Array then parms
           when Pdfrb::Model::PdfArray then parms.value
           when ::Hash then [parms]

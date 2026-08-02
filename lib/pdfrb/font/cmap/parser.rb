@@ -93,8 +93,8 @@ module Pdfrb
           i = 0
           while i < codepoints.length
             cp = codepoints[i]
-            if cp >= 0xD800 && cp <= 0xDBFF && i + 1 < codepoints.length &&
-               codepoints[i + 1] >= 0xDC00 && codepoints[i + 1] <= 0xDFFF
+            if cp.between?(0xD800, 0xDBFF) && i + 1 < codepoints.length &&
+                codepoints[i + 1] >= 0xDC00 && codepoints[i + 1] <= 0xDFFF
               combined = 0x10000 + ((cp - 0xD800) << 10) + (codepoints[i + 1] - 0xDC00)
               result << combined
               i += 2

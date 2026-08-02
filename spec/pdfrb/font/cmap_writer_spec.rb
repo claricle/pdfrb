@@ -68,15 +68,15 @@ RSpec.describe Pdfrb::Font::CMap::Writer do
 
   describe "chunking" do
     it "splits bfchar into sections of ≤100 entries" do
-      mapping = (1..250).each_with_object({}) { |i, h| h[i] = i.chr }
+      mapping = (1..250).to_h { |i| [i, i.chr] }
       writer = described_class.new(
         cmap_name: "Chunked",
         cid_system_info: cid_system_info,
         mapping: mapping
       )
       text = writer.to_s
-      bfchar_count = text.scan(/beginbfchar/).length
-      expect(bfchar_count).to be >= 3  # 250 / 100 = 3 sections
+      bfchar_count = text.scan("beginbfchar").length
+      expect(bfchar_count).to be >= 3 # 250 / 100 = 3 sections
     end
   end
 

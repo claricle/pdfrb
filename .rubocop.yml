@@ -25,3 +25,8 @@ AllCops:
 # because they exercise multiple classes through a real workflow.
 RSpec/DescribeClass:
   Enabled: false
+
+# pdfrb uses compact module names (CMap not C_Map) that don't match
+# the snake_case → CamelCase file-path convention.
+RSpec/SpecFilePathFormat:
+  Enabled: false
