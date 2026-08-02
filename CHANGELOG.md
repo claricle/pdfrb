@@ -2,7 +2,31 @@
 
 All notable changes to the pdfrb gem will be documented in this file.
 
+## [0.3.0] — 2026-08-02
+
+### Added — Semantic PDF diff
+
+* **Pdfrb::Compare** — semantic PDF comparison engine. Compares two
+  PDFs at the structural level: page count, per-page text similarity
+  (Levenshtein), font inventory diffs, image count delta, outline
+  (bookmark) diffs, metadata (/Info) diffs, and structural (Catalog +
+  Trailer key) diffs.
+* **Pdfrb::Compare::Report** — immutable report with `equivalent?`,
+  `similarity` (0..1), `summary` string, and `to_h` serialisation.
+* **CLI: `pdfrb diff LEFT RIGHT`** — compare two PDFs from the
+  command line. Exits 0 if equivalent, 1 if different.
+* **Programmatic API**: `Pdfrb::Compare.compare(left, right)` and
+  `Pdfrb::Compare.equivalent?(left, right)`. Accepts bytes, IO, or
+  Document objects.
+
+### Metrics
+
+* 550 specs (was 537), 0 failures, 4 pending.
+* 0 rubocop offenses.
+* 182 → 185 lib files; 49 → 50 spec files.
+
 ## [0.2.1] — 2026-08-02
+
 
 ### Added
 

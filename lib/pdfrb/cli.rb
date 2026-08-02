@@ -67,7 +67,28 @@ module Pdfrb
       puts "Wrote #{output}"
     end
 
-    desc "encrypt INPUT OUTPUT --password PASSWORD", "Encrypt a PDF (stub — needs Phase 11 integration)"
+    desc "diff LEFT RIGHT", "Compare two PDFs semantically"
+    def diff(left, right)
+      report = Pdfrb::Compare.compare(
+        File.binread(left),
+        File.binread(right)
+      )
+      puts report.summary
+      unless report.equivalent?
+        puts
+        report.per_page_text_diffs.first(5).each do |d|
+          puts "  Page #{d[:page] + 1}: #{(d[:similarity] * 100).round(1)}% similar"
+        end
+        unless report.font_diff[:added].empty? && report.font_diff[:removed].empty?
+          puts "  Fonts added: #{report.font_diff[:added].join(', ')}" unless report.font_diff[:added].empty?
+          puts "  Fonts removed: #{report.font_diff[:removed].join(', ')}" unless report.font_diff[:removed].empty?
+        end
+        puts "  Page count delta: #{report.page_count_delta}" unless report.page_count_delta.zero?
+        exit 1
+      end
+    end
+
+    desc "encrypt INPUT OUTPUT --password PASSWORD", "Encrypt a PDF"
     method_option :password, type: :string, required: true
     def encrypt(input, output)
       warn "encrypt: not yet fully implemented (Phase 11 integration pending)"

@@ -93,5 +93,7 @@ module Pdfrb
 
   # CLI (only loaded when invoked via the +pdfrb+ executable; avoids
   # pulling in thor for library-only users).
+  autoload :Compare, "pdfrb/compare"
+
   autoload :CLI, "pdfrb/cli"
 end
