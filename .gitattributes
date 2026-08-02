@@ -1,0 +1,18 @@
+# Vendored data: line endings are normative.
+*.tsv eol=lf
+*.afm eol=lf
+*.icc binary
+
+# Source files: LF.
+*.rb eol=lf
+*.adoc eol=lf
+*.md eol=lf
+Rakefile eol=lf
+Gemfile eol=lf
+pdfrb.gemspec eol=lf
+
+# Test fixtures marked binary so git doesn't try CRLF translation.
+spec/fixtures/**/*.pdf binary
+spec/fixtures/**/*.ttf binary
+spec/fixtures/**/*.otf binary
+spec/fixtures/**/*.icc binary

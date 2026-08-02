@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Resolve the gem's lib/ directory relative to this exe so the CLI
+# works whether or not the gem is installed.
+$LOAD_PATH.unshift(File.expand_path("../../lib", __dir__))
+
+require "pdfrb/cli"
+
+Pdfrb::CLI.start(ARGV)

@@ -1,0 +1,4 @@
+--no-private
+--markup markdown
+--files CHANGELOG.md,LICENSE
+--output-dir doc/yard

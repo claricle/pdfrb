@@ -1,0 +1,88 @@
+= Pdfrb
+
+Pure-Ruby PDF library: a byte-level reader, an Arlington-model-driven
+typed domain model, and a serializer. The PDF object model is sourced
+_directly_ from the vendored Arlington PDF Model TSVs (the
+machine-readable definition of ISO 32000-2:2020), so field metadata,
+version predicates, and validators stay aligned with the spec by
+_data_, not by hand-coded mimicry.
+
+Two-direction contract:
+
+* *"PDF file <=> Model"* — parse PDF bytes into a typed Model and
+  serialize a Model back to PDF bytes. Round-trip is the correctness
+  backbone.
+* *"API Builder Input => Model"* — `Document` and `Canvas` build a
+  typed Model from user intent, which the serializer then writes.
+
+Pdfrb is deliberately scoped to the PDF byte format. Layout concerns
+(page templates, flows, line breaking, tables, etc.) live in the
+sibling `arroolio` gem.
+
+Mirrors the layered design of the sibling
+https://github.com/claricle/postscript[postscript] gem (PS/EPS parser
++ serializer). Architecture blueprint cross-referenced against
+https://github.com/gettalong/hexapdf[HexaPDF].
+
+== Installation
+
+[source,sh]
+----
+gem install pdfrb
+----
+
+== Usage (sketch — APIs land across the TODO sequence)
+
+[source,ruby]
+----
+require "pdfrb"
+
+# Read
+doc = Pdfrb.open("input.pdf")
+puts doc.catalog.pages.count
+
+# Create
+doc = Pdfrb::Document.new
+page = doc.pages.add
+page.canvas.text("Hello, PDF", at: [72, 720])
+doc.write("hello.pdf")
+----
+
+== Architecture
+
+[cols="1,4", options="header"]
+|===
+| Layer | Owns
+| `Pdfrb::Source` | PDF bytes -> tokens -> COS object graph (read direction).
+| `Pdfrb::Model` | Typed PDF domain model: COS scalars + `Type::*` semantics.
+| `Pdfrb::Arlington` | Loads vendored TSVs; evaluates `fn:` predicates. Drives `Model` field definitions.
+| `Pdfrb::Filter` | Stream filter pipeline (FlateDecode, LZWDecode, ...).
+| `Pdfrb::Content` | Content-stream operators + Canvas drawing API.
+| `Pdfrb::Serializer` | Model -> PDF bytes (COS).
+| `Pdfrb::Writer` | Document -> file (xref + trailer assembly).
+| `Pdfrb::Document` | Top-level facade.
+|===
+
+Adding a new PDF type = adding one `Model::Type::*` subclass that
+declares `arlington_object "Name"`. Adding a new content operator =
+one subclass + `register_as`. Adding a new filter = one subclass +
+register. No switch edits (Open/Closed).
+
+== Reference materials
+
+[cols="1,4", options="header"]
+|===
+| Path | Role
+| `~/src/claricle/postscript/` | Sibling gem to mimic for conventions.
+| `~/src/pdfa/arlington-pdf-model/` | Canonical PDF object model (TSV data).
+| `~/src/external/hexapdf/` | Reference Ruby implementation.
+| `~/src/pdfa/spec-pdf-core/` | AsciiDoc source of ISO 32000-2.
+| `~/src/pdfa/appnote-pdf20-002-af/` | App Note 002: Associated Files.
+| `~/src/pdfa/appnote-pdf20-003-metadata/` | App Note 003: Metadata stream locations.
+| `~/src/pdfa/technote-pdfua1-001/` | PDF/UA Tech Note 001: ActualText on Figure.
+| `~/src/pdfa/technote-pdfua1-002/` | PDF/UA Tech Note 002: Reference elements with links.
+|===
+
+== License
+
+BSD-2-Clause. See `LICENSE`.

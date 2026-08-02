@@ -1,0 +1,22 @@
+inherit_from:
+  - https://raw.githubusercontent.com/riboseinc/oss-guides/main/ci/rubocop.yml
+  - .rubocop_todo.yml
+
+inherit_mode:
+  merge:
+    - Exclude
+
+plugins:
+  - rubocop-rspec
+  - rubocop-performance
+  - rubocop-rake
+
+AllCops:
+  TargetRubyVersion: 3.0
+  NewCops: enable
+  Exclude:
+    - "data/**/*"
+    - "pkg/**/*"
+
+# Project-specific: TSV files are data, not code; PDFs are binary.
+# Both are excluded via AllCops above. Local overrides go here.

@@ -1,0 +1,20 @@
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/spec/fixtures/pdf-core-examples/
+/tmp/
+/.rspec_status
+/Gemfile.lock
+*.gem
+*.pdf
+*.ttf
+*.otf
+.byebug_history
+
+# Never commit TODO files — they are scratch planning docs.
+TODO*
+
