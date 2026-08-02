@@ -87,7 +87,7 @@ module Pdfrb
           when ::Array then parms
           when Pdfrb::Model::PdfArray then parms.value
           when ::Hash then [parms]
-          else [parms]
+          else []
           end
         end
       end

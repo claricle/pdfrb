@@ -18,3 +18,4 @@
 # Never commit TODO files — they are scratch planning docs.
 TODO*
 
+/coverage/

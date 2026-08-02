@@ -14,7 +14,7 @@ RSpec.describe "Arlington conformance" do
   end
 
   it "walks every fixture through the predicate evaluator" do
-    pending "needs TODO 149 full implementation + fixture corpus"
+    skip "needs TODO 149 full implementation + fixture corpus"
     raise "not yet implemented"
   end
 end
@@ -27,7 +27,7 @@ RSpec.describe "Content stream corpus round-trip" do
   end
 
   it "round-trips content streams through Processor" do
-    pending "needs fixture corpus"
+    skip "needs fixture corpus"
     raise "not yet implemented"
   end
 end
@@ -38,7 +38,7 @@ RSpec.describe "Cross-impl diff vs HexaPDF" do
   end
 
   it "parses the same Catalog and Page count" do
-    pending "needs HexaPDF gem + fixture corpus"
+    skip "needs HexaPDF gem + fixture corpus"
     raise "not yet implemented"
   end
 end

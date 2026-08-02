@@ -74,10 +74,10 @@ module Pdfrb
         def read_format_header
           @format = u16(@subtable_offset)
           case @format
-          when 0 then parse_format_0
-          when 4 then parse_format_4
-          when 6 then parse_format_6
-          when 12 then parse_format_12
+          when 0 then parse_format_zero
+          when 4 then parse_format_four
+          when 6 then parse_format_six
+          when 12 then parse_format_twelve
           else
             @format = nil
           end
@@ -85,27 +85,27 @@ module Pdfrb
 
         def lookup(unicode)
           case @format
-          when 0 then lookup_format_0(unicode)
-          when 4 then lookup_format_4(unicode)
-          when 6 then lookup_format_6(unicode)
-          when 12 then lookup_format_12(unicode)
+          when 0 then lookup_format_zero(unicode)
+          when 4 then lookup_format_four(unicode)
+          when 6 then lookup_format_six(unicode)
+          when 12 then lookup_format_twelve(unicode)
           else 0
           end
         end
 
         # Format 0: 256-entry byte table.
-        def parse_format_0
+        def parse_format_zero
           @f0_glyph_ids = (0..255).map { |i| u8(@subtable_offset + 6 + i) }
         end
 
-        def lookup_format_0(unicode)
+        def lookup_format_zero(unicode)
           return 0 unless unicode < 256
 
           @f0_glyph_ids[unicode]
         end
 
         # Format 4: segment mapping. BMP only.
-        def parse_format_4
+        def parse_format_four
           seg_count_x2 = u16(@subtable_offset + 6)
           seg_count = seg_count_x2 / 2
           end_codes_off = @subtable_offset + 14
@@ -123,7 +123,7 @@ module Pdfrb
           }
         end
 
-        def lookup_format_4(unicode)
+        def lookup_format_four(unicode)
           return 0 unless @f4
 
           seg = @f4
@@ -154,7 +154,7 @@ module Pdfrb
         end
 
         # Format 6: trimmed table.
-        def parse_format_6
+        def parse_format_six
           first = u16(@subtable_offset + 6)
           count = u16(@subtable_offset + 8)
           @f6 = {
@@ -164,7 +164,7 @@ module Pdfrb
           }
         end
 
-        def lookup_format_6(unicode)
+        def lookup_format_six(unicode)
           return 0 unless @f6
 
           idx = unicode - @f6[:first_code]
@@ -174,7 +174,7 @@ module Pdfrb
         end
 
         # Format 12: sparse coverage, full Unicode.
-        def parse_format_12
+        def parse_format_twelve
           num_groups = u32(@subtable_offset + 12)
           @f12 = []
           num_groups.times do |i|
@@ -187,7 +187,7 @@ module Pdfrb
           end
         end
 
-        def lookup_format_12(unicode)
+        def lookup_format_twelve(unicode)
           return 0 unless @f12
 
           # Binary search for the group covering this codepoint.

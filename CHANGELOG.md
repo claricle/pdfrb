@@ -2,6 +2,67 @@
 
 All notable changes to the pdfrb gem will be documented in this file.
 
+## [0.1.1] — 2026-08-02
+
+### Housekeeping
+
+* **Layout/Composer extracted to sibling `arroolio` gem.** Pdfrb is now
+  pure PDF: bytes ↔ model. No page templates, no flows, no Knuth-Plass,
+  no tables, no SVG. Removed `lib/pdfrb/layout/`, `lib/pdfrb/composer.rb`,
+  `lib/pdfrb/layout.rb`, `spec/pdfrb/layout/`, `TODO.layout/`.
+* **Removed `rexml` runtime dependency** (was only needed for the FO
+  parser, which moved to Arroolio).
+* **Fixed all 12 rubocop offenses.** 0 offenses remaining. Disabled
+  `RSpec/DescribeClass` (legitimate string describes in integration tests).
+* **Added SimpleCov** (opt-in via `COVERAGE=1` env var). Current line
+  coverage: **84.5%**. Grouped by Source / Model / Filters / Content /
+  Font / Encryption / Tasks / CLI / Document.
+* **Replaced 3 `pending` specs with `skip`** — clearer exit semantics
+  for strict CI runs.
+* **Fixed `Model::Cos::Stream#as_parms_list`** — Hash parms now
+  correctly wraps to `[parms]` instead of `Array(parms)` which
+  produced `[[:k, :v], ...]`. Bug was hidden by tests that didn't
+  exercise DecodeParms as a Hash through the Stream facade.
+* **Renamed CMap format dispatchers** — `parse_format_4` →
+  `parse_format_four`, etc. (rubocop `Naming/VariableNumber`).
+* **README/CLAUDE.md** updated to reflect pure-PDF scope; layout
+  concerns documented as living in `arroolio`.
+
+### Verified
+
+* 503 examples, 0 failures, 3 pending (conformance specs awaiting
+  fixture corpus).
+* 0 rubocop offenses.
+* `gem build pdfrb.gemspec` produces `pdfrb-0.1.1.gem`.
+* End-to-end round-trip: build PDF → write → read → extract text →
+  matches.
+
+## [0.1.0] — 2026-08-02
+
+### Initial release
+
+Pure-Ruby PDF library: byte-level reader, Arlington-model-driven typed
+domain model, and serializer.
+
+* Source: bytes → tokens → COS graph.
+* Model: typed COS values + Type::* semantics, sourced from vendored
+  Arlington PDF Model TSVs (ISO 32000-2:2020).
+* Filter pipeline: FlateDecode, ASCII-Hex, ASCII-85, LZW, RunLength,
+  CCITTFax, DCT, JPX, JBIG2, Crypt.
+* Content: 52 content-stream operators + Canvas drawing API.
+* Encryption: RC4 (pure Ruby), AES (OpenSSL), StandardSecurityHandler
+  (V1-V6 / R2-R6).
+* Font machinery: AFM parser, 5 encoding tables, CMap parser, TrueType
+  file parser (head/hhea/hmtx/cmap/OS-2), Type1 metrics.
+* Image loaders: JPEG, PNG, PDF page import.
+* Tasks: ExtractText (with /ToUnicode CMap), ExtractImages, Merge,
+  Optimize.
+* CLI: version, info, tree, merge, extract-text/images, encrypt,
+  decrypt, optimize, form.
+* Conformance: PDF/A + PDF/UA rule subsets.
+* Round-trip property tested against ISO 32000-2 Annex H examples
+  (12 PDFs).
+
 ## [Unreleased]
 
 ### Added — 2026-08-01 (layout engine session)

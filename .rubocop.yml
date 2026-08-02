@@ -20,3 +20,8 @@ AllCops:
 
 # Project-specific: TSV files are data, not code; PDFs are binary.
 # Both are excluded via AllCops above. Local overrides go here.
+
+# Integration tests use string describes ("FOP-generated PDF reading")
+# because they exercise multiple classes through a real workflow.
+RSpec/DescribeClass:
+  Enabled: false
