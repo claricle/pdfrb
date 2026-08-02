@@ -29,7 +29,19 @@ module Pdfrb
       # are emitted with /Filter /FlateDecode on write. Existing
       # /Filter values are honoured (no double compression).
       "writer.compress_streams" => false,
-      "writer.compress_min_size" => 256
+      "writer.compress_min_size" => 256,
+
+      # When true, write an XRef stream (PDF 1.5+) instead of a
+      # classical xref table. Enables compressed-object references.
+      "writer.use_xref_stream" => false,
+
+      # When true, pack eligible small objects into /Type /ObjStm
+      # streams. Reduces file size 20-50%. Requires xref stream.
+      "writer.pack_object_streams" => false,
+
+      # Objects smaller than this (serialized bytes) are eligible
+      # for ObjStm packing.
+      "writer.object_stream_threshold" => 200
     }.freeze
 
     attr_reader :settings

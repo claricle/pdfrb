@@ -39,12 +39,29 @@ module Pdfrb
       @io.truncate(0) if @io.respond_to?(:truncate)
       write_header
       dispatch_before_write
+
+      use_stream = document.config["writer.use_xref_stream"]
+      pack_objstm = document.config["writer.pack_object_streams"]
+
+      packed = pack_objstm ? pack_object_streams : {}
+
       each_indirect_object do |obj|
+        next if packed.key?(obj.oid)
+
         @xref_offsets[obj.oid] = @io.pos
         @io << @serializer.serialize_indirect(obj)
       end
-      xref_pos = write_xref
-      write_trailer(xref_pos)
+
+      xref_pos = if use_stream
+                   write_xref_stream(packed)
+                 else
+                   write_xref
+                 end
+      if use_stream
+        write_xref_stream_trailer(xref_pos)
+      else
+        write_trailer(xref_pos)
+      end
       @io.flush
       self
     end
@@ -99,6 +116,123 @@ module Pdfrb
       pos
     end
 
+    # Emit an XRef stream (PDF 1.5+). The xref data is encoded as
+    # binary in a /Type /XRef stream object. /W [1 3 1] gives
+    # 5 bytes per entry: type (1), offset_or_objstm_oid (3),
+    # gen_or_index (1).
+    def write_xref_stream(packed = {})
+      require "zlib"
+
+      oids = (@xref_offsets.keys + packed.keys).sort
+      max_oid = oids.max || 0
+      size = max_oid + 1
+
+      w_type = 1
+      w_field2 = 3
+      w_field3 = 1
+      w_type + w_field2 + w_field3
+
+      data = +""
+      (0..max_oid).each do |oid|
+        if oid.zero?
+          data << encode_xref_entry(0, 0, 0, w_type, w_field2, w_field3)
+        elsif @xref_offsets.key?(oid)
+          data << encode_xref_entry(1, @xref_offsets[oid], 0,
+                                    w_type, w_field2, w_field3)
+        elsif packed.key?(oid)
+          objstm_oid, index = packed[oid]
+          data << encode_xref_entry(2, objstm_oid, index,
+                                    w_type, w_field2, w_field3)
+        end
+      end
+
+      compressed = Zlib::Deflate.deflate(data)
+
+      xref_stream_oid = document.instance_variable_get(:@next_oid) || (max_oid + 1)
+      stream_offset = @io.pos
+      header = "#{xref_stream_oid} 0 obj\n"
+
+      trailer_fields = trailer_hash_for_stream
+      dict_str = @serializer.serialize(
+        **trailer_fields,
+        Type: :XRef,
+        Size: size,
+        W: [w_type, w_field2, w_field3],
+        Filter: :FlateDecode,
+        Length: compressed.bytesize
+      )
+      @io << header
+      @io << dict_str
+      @io << "\nstream\n"
+      @io << compressed
+      @io << "\nendstream\nendobj\n"
+
+      stream_offset
+    end
+
+    def write_xref_stream_trailer(xref_pos)
+      @io << "startxref\n#{xref_pos}\n%%EOF\n"
+    end
+
+    def encode_xref_entry(type, f2, f3, w1, w2, w3)
+      entry = +""
+      entry << [type].pack("C") if w1.positive?
+      entry << [f2].pack("N").byteslice(-w2, w2) if w2.positive?
+      entry << [f3].pack("C") if w3 == 1
+      entry
+    end
+
+    # Pack eligible objects into /Type /ObjStm streams.
+    # Returns a Hash { oid => [objstm_oid, index] }.
+    def pack_object_streams
+      threshold = document.config["writer.object_stream_threshold"] || 200
+      packed = {}
+
+      candidates = []
+      each_indirect_object do |obj|
+        next if obj.is_a?(Pdfrb::Model::Cos::Stream)
+        next if obj.value[:Type] == :XRef
+        next if obj.value[:Type] == :ObjStm
+
+        serialized = @serializer.serialize(obj.value.is_a?(::Hash) ? obj.value : obj)
+        next if serialized.bytesize > threshold
+
+        candidates << [obj.oid, serialized]
+      end
+
+      return packed if candidates.empty?
+
+      header_pairs = +""
+      body = +""
+      candidates.each_with_index do |(oid, serialized), _index|
+        offset = body.bytesize
+        header_pairs << "#{oid} #{offset}\n"
+        body << serialized << "\n"
+      end
+
+      n = candidates.length
+      first = header_pairs.bytesize
+      combined = header_pairs + body
+      compressed = Zlib::Deflate.deflate(combined)
+
+      objstm = document.add(
+        { Type: :ObjStm, N: n, First: first, Length: compressed.bytesize },
+        type: Pdfrb::Model::Cos::Stream
+      )
+      objstm.stream = compressed
+      objstm.value[:Filter] = :FlateDecode
+
+      packed_offset = @io.pos
+      @io << @serializer.serialize_indirect(objstm)
+
+      candidates.each_with_index do |(oid, _serialized), index|
+        packed[oid] = [objstm.oid, index]
+      end
+
+      @xref_offsets[objstm.oid] = packed_offset
+      packed
+    end
+
     def write_trailer(xref_pos, prev: nil)
       root = document.catalog
       root_ref = root && root.respond_to?(:indirect?) && root.indirect? ?
@@ -139,6 +273,29 @@ module Pdfrb
 
     def each_indirect_object
       document.each_indirect_object { |obj| yield obj }
+    end
+
+    def root_reference
+      root = document.catalog
+      return nil unless root && root.indirect?
+
+      Pdfrb::Model::Reference.new(root.oid, root.gen)
+    end
+
+    def trailer_hash_for_stream
+      hash = {}
+      ref = root_reference
+      hash[:Root] = ref if ref
+
+      existing = document.trailer || {}
+      existing.each do |k, v|
+        next if %i[Size Root Prev XRefStm Type W Filter Length].include?(k)
+
+        hash[k] = v
+      end
+      [(@xref_offsets.keys.max || 0) + 1,
+       document.instance_variable_get(:@next_oid) || 1].max
+      hash
     end
   end
 end
