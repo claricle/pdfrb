@@ -49,7 +49,7 @@ RSpec.describe Pdfrb::Document::Outline do
     expect(doc.catalog.value[:Outlines]).not_to be_nil
   end
 
-  it "round-trips through write+read", skip: "StringEncoding stack overflow" do
+  it "round-trips through write+read" do
     doc.outline.add("Chapter 1")
     doc.outline.add("Chapter 2")
     doc.outline.build!
@@ -64,7 +64,7 @@ RSpec.describe Pdfrb::Document::Outline do
     expect(outlines[:Type]).to eq(:Outlines)
   end
 
-  it "supports nested entries", skip: "StringEncoding stack overflow" do
+  it "supports nested entries" do
     ch1 = doc.outline.add("Chapter 1")
     doc.outline.add("Section 1.1", parent: ch1)
     doc.outline.add("Section 1.2", parent: ch1)

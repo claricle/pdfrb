@@ -12,19 +12,8 @@ module Pdfrb
         @entries = []
       end
 
-      # Add a top-level bookmark entry.
-      #
-      # @param title [String] display text.
-      # @param dest [Pdfrb::Model::Reference, Array, nil] destination
-      #   (page reference or explicit destination array).
-      # @param parent [OutlineEntry, nil] for nested entries.
-      # @return [OutlineEntry]
       def add(title, dest: nil, parent: nil)
-        entry = OutlineEntry.new(
-          title: title.to_s,
-          dest: dest,
-          document: @document
-        )
+        entry = OutlineEntry.new(title: title.to_s, dest: dest)
         if parent
           parent.add_child(entry)
         else
@@ -36,45 +25,43 @@ module Pdfrb
       def build!
         return if @entries.empty?
 
-        entries = @entries
         root = @document.add(
-          { Type: :Outlines, First: nil, Last: nil, Count: entries.length },
+          { Type: :Outlines },
           type: Pdfrb::Model::Cos::Dictionary
         )
+        root_ref = Pdfrb::Model::Reference.new(root.oid, root.gen)
 
-        prev_ref = nil
+        prev_dict = nil
         first_ref = nil
-        entries.each_with_index do |entry, _i|
-          ref = entry.build!(@document)
-          entry.value[:Parent] = Pdfrb::Model::Reference.new(root.oid, root.gen)
-          entry.value[:Prev] = prev_ref if prev_ref
-          entry.value[:Next] = nil
-          prev_ref&.value&.[]=(:Next, ref)
+        @entries.each do |entry|
+          dict = entry.build!(@document)
+          ref = Pdfrb::Model::Reference.new(dict.oid, dict.gen)
+
+          dict.value[:Parent] = root_ref
+          dict.value[:Prev] = Pdfrb::Model::Reference.new(prev_dict.oid, dict.gen) if prev_dict
+          dict.value[:Next] = nil
+          prev_dict&.value&.[]=(:Next, ref)
+
           first_ref ||= ref
-          prev_ref = ref
+          prev_dict = dict
         end
 
         root.value[:First] = first_ref
-        root.value[:Last] = prev_ref
+        root.value[:Last] = Pdfrb::Model::Reference.new(prev_dict.oid, prev_dict.gen) if prev_dict
+        root.value[:Count] = @entries.length
 
-        @document.catalog.value[:Outlines] =
-          Pdfrb::Model::Reference.new(root.oid, root.gen)
-
+        @document.catalog.value[:Outlines] = root_ref
         root
       end
     end
 
     class OutlineEntry
-      attr_reader :title, :dest, :children, :value
-      attr_accessor :oid
+      attr_reader :title, :dest, :children
 
-      def initialize(title:, dest:, document:)
+      def initialize(title:, dest:)
         @title = title
         @dest = dest
-        @document = document
         @children = []
-        @value = {}
-        @oid = nil
       end
 
       def add_child(entry)
@@ -83,32 +70,28 @@ module Pdfrb
       end
 
       def build!(document)
-        dict = document.add(
-          {
-            Title: @title,
-            Parent: nil,
-          },
-          type: Pdfrb::Model::Cos::Dictionary
-        )
+        dict = document.add({ Title: @title }, type: Pdfrb::Model::Cos::Dictionary)
         dict.value[:Dest] = @dest if @dest
 
-        @oid = dict.oid
-        @value = dict.value
-
         if @children.any?
-          first_child = nil
-          prev_child = nil
+          prev_child_dict = nil
+          first_ref = nil
           @children.each do |child|
-            child_ref = child.build!(document)
-            child.value[:Parent] =
-              Pdfrb::Model::Reference.new(dict.oid, dict.gen)
-            child.value[:Prev] = prev_child.value ? Pdfrb::Model::Reference.new(prev_child.oid, 0) : nil if prev_child
-            prev_child&.value&.[]=(:Next, Pdfrb::Model::Reference.new(child_ref.oid, 0))
-            first_child ||= child_ref
-            prev_child = child
+            child_dict = child.build!(document)
+            child_ref = Pdfrb::Model::Reference.new(child_dict.oid, child_dict.gen)
+            parent_ref = Pdfrb::Model::Reference.new(dict.oid, dict.gen)
+
+            child_dict.value[:Parent] = parent_ref
+            child_dict.value[:Prev] = Pdfrb::Model::Reference.new(prev_child_dict.oid, prev_child_dict.gen) if prev_child_dict
+            child_dict.value[:Next] = nil
+            prev_child_dict&.value&.[]=(:Next, child_ref)
+
+            first_ref ||= child_ref
+            prev_child_dict = child_dict
           end
-          dict.value[:First] = Pdfrb::Model::Reference.new(first_child.oid, 0)
-          dict.value[:Last] = Pdfrb::Model::Reference.new(prev_child.oid, 0)
+
+          dict.value[:First] = first_ref
+          dict.value[:Last] = Pdfrb::Model::Reference.new(prev_child_dict.oid, prev_child_dict.gen) if prev_child_dict
           dict.value[:Count] = @children.length
         end
 
