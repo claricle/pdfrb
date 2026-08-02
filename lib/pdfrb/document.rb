@@ -18,6 +18,7 @@ module Pdfrb
     autoload :Files, "pdfrb/document/files"
     autoload :Destinations, "pdfrb/document/destinations"
     autoload :Annotations, "pdfrb/document/annotations"
+    autoload :Outline, "pdfrb/document/outline"
 
     def initialize(io: nil, config: {})
       @config = Configuration.new(config)
@@ -120,6 +121,10 @@ module Pdfrb
 
     def annotations
       @annotations ||= Document::Annotations.new(self)
+    end
+
+    def outline
+      @outline ||= Document::Outline.new(self)
     end
 
     # Replace an indirect object in the @objects table. Used by the

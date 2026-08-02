@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "zlib"
+
 module Pdfrb
   # Writes a Document to an IO as a complete PDF file: header,
   # indirect objects, xref section, trailer.
@@ -146,7 +148,7 @@ module Pdfrb
         end
       end
 
-      compressed = Zlib::Deflate.deflate(data)
+      compressed = ::Zlib::Deflate.deflate(data)
 
       xref_stream_oid = document.instance_variable_get(:@next_oid) || (max_oid + 1)
       stream_offset = @io.pos
@@ -213,7 +215,7 @@ module Pdfrb
       n = candidates.length
       first = header_pairs.bytesize
       combined = header_pairs + body
-      compressed = Zlib::Deflate.deflate(combined)
+      compressed = ::Zlib::Deflate.deflate(combined)
 
       objstm = document.add(
         { Type: :ObjStm, N: n, First: first, Length: compressed.bytesize },
