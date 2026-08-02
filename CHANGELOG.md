@@ -2,6 +2,62 @@
 
 All notable changes to the pdfrb gem will be documented in this file.
 
+## [0.2.0] — 2026-08-02
+
+### Added — P0 feature implementations
+
+* **CMap writer** (`Font::CMap::Writer`) — generates valid `/ToUnicode`
+  CMap data from glyph-code → Unicode mappings. Supports 1-byte and
+  2-byte codespaceranges, supplementary Unicode (UTF-16 surrogate pairs),
+  multi-codepoint ligatures, and automatic chunking (≤100 entries per
+  `beginbfchar`/`endbfchar` section per PDF spec). Round-trips through
+  `Font::CMap::Parser`.
+
+* **Document::Files** (Associated Files / EmbeddedFiles) — embeds files
+  as `/Type /EmbeddedFile` streams referenced by `/Type /FileSpec` dicts,
+  stored in the Catalog's `/Names /EmbeddedFiles` name tree. Supports
+  MIME types, descriptions, and PDF 2.0 `/AF` relationship tagging.
+  Round-trips through write + read.
+
+* **XRef stream writer** (PDF 1.5+) — emits binary XRef streams instead
+  of classical xref tables. Configurable via
+  `config["writer.use_xref_stream"] = true`. `/W [1 3 1]` entry format
+  with FlateDecode compression. Round-trips correctly.
+
+* **Object stream packing** (`/Type /ObjStm`) — packs eligible small
+  objects (non-stream, non-encrypted, < threshold bytes) into compressed
+  object streams. Configurable via `config["writer.pack_object_streams"]
+  = true` + `config["writer.object_stream_threshold"]`. Reduces file
+  size by 20–50%.
+
+* **Task::Optimize** — real implementation (was a no-op stub). Enables
+  FlateDecode compression, XRef stream writing, and ObjStm packing in
+  one call: `Pdfrb::Task::Optimize.call(doc, io: out)`.
+
+* **Document::Outline** (bookmarks/outline write-side) — creates
+  `/Outlines` tree on Catalog with flat and nested entries. Each entry
+  has `/Title`, `/Parent`, `/First`/`/Last`/`/Next`/`/Prev` links.
+
+* **Fixed CMap Parser** — regex bug: `beginbfchar` line matching didn't
+  handle `N beginbfchar` format (with count prefix). Fixed to match
+  anywhere in the line. Also added surrogate-pair decoding for
+  supplementary Unicode CMaps.
+
+### Configuration additions
+
+```ruby
+config["writer.use_xref_stream"]      # bool, default false
+config["writer.pack_object_streams"]  # bool, default false
+config["writer.object_stream_threshold"]  # int, default 200
+```
+
+### Metrics
+
+* 534 specs (was 503), 0 failures, 6 pending.
+* 0 rubocop offenses.
+* ~85% line coverage.
+* 178 → 180 lib files; 44 → 47 spec files.
+
 ## [0.1.1] — 2026-08-02
 
 ### Housekeeping
