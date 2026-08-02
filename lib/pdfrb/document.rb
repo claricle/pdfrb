@@ -19,6 +19,7 @@ module Pdfrb
     autoload :Destinations, "pdfrb/document/destinations"
     autoload :Annotations, "pdfrb/document/annotations"
     autoload :Outline, "pdfrb/document/outline"
+    autoload :FormXObject, "pdfrb/document/form_xobject"
 
     def initialize(io: nil, config: {})
       @config = Configuration.new(config)
@@ -125,6 +126,10 @@ module Pdfrb
 
     def outline
       @outline ||= Document::Outline.new(self)
+    end
+
+    def create_form_xobject(name: nil, bbox: nil, matrix: nil)
+      FormXObject.new(self, name: name, bbox: bbox, matrix: matrix)
     end
 
     # Replace an indirect object in the @objects table. Used by the

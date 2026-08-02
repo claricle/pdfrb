@@ -2,7 +2,28 @@
 
 All notable changes to the pdfrb gem will be documented in this file.
 
+## [0.2.1] — 2026-08-02
+
+### Added
+
+* **Form XObjects** (`Document::FormXObject`) — create reusable form
+  templates with a Canvas; register on pages and draw via /Do operator.
+* **TTF subsetting** (`Font::TrueType::Subsetter`) — real glyph subsetting
+  with composite glyph support, loca/glyf/cmap/hmtx rewriting, graceful
+  fallback to full embedding.
+* **Outline circular-reference fix** — bookmarks now store References
+  (not raw Dictionaries), preventing infinite serialization recursion.
+* **Document::Outline round-trips** — flat and nested outlines survive
+  write + read correctly.
+
+### Metrics
+
+* 537 specs (was 534), 0 failures, 4 pending.
+* 0 rubocop offenses.
+* 180 → 182 lib files; 47 → 49 spec files.
+
 ## [0.2.0] — 2026-08-02
+
 
 ### Added — P0 feature implementations
 
