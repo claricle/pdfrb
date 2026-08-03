@@ -15,7 +15,8 @@ module Pdfrb
           return bytes unless table
 
           bytes.each_byte.with_object(+"") do |b, buf|
-            buf << (table[b] ? [table[b]].pack("U") : "?")
+            cp = table.is_a?(::Array) ? table[b] : table[b.to_s.to_sym]
+            buf << (cp ? [cp].pack("U") : "?")
           end.encode("UTF-8")
         end
 
@@ -27,7 +28,7 @@ module Pdfrb
           text.to_s.each_char.with_object(+"") do |ch, buf|
             cp = ch.ord
             byte = reverse[cp] || (cp < 0x80 ? cp : nil)
-            buf << (byte || 0x3F)
+            buf << [byte || 0x3F].pack("C")
           end.b
         end
 
@@ -50,7 +51,13 @@ module Pdfrb
           table = table_for(name)
           return {} unless table
 
-          table.each_with_object({}) { |(byte, cp), h| h[cp] = byte }
+          if table.is_a?(::Array)
+            table.each_with_index.with_object({}) do |(cp, byte), h|
+              h[cp] = byte if cp
+            end
+          else
+            table.each_with_object({}) { |(byte, cp), h| h[cp] = byte }
+          end
         end
       end
     end
