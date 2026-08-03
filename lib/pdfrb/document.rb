@@ -20,6 +20,17 @@ module Pdfrb
     autoload :Annotations, "pdfrb/document/annotations"
     autoload :Outline, "pdfrb/document/outline"
     autoload :FormXObject, "pdfrb/document/form_xobject"
+    autoload :AssociatedFiles, "pdfrb/document/associated_files"
+    autoload :Colors, "pdfrb/document/colors"
+    autoload :Display, "pdfrb/document/display"
+    autoload :Form, "pdfrb/document/form"
+    autoload :Layers, "pdfrb/document/layers"
+    autoload :Portfolio, "pdfrb/document/portfolio"
+    autoload :Structure, "pdfrb/document/structure"
+    autoload :Shadings, "pdfrb/document/shadings"
+    autoload :OutputIntents, "pdfrb/document/output_intents"
+    autoload :Info, "pdfrb/document/info"
+    autoload :PageLabels, "pdfrb/document/page_labels"
 
     def initialize(io: nil, config: {})
       @config = Configuration.new(config)
@@ -127,6 +138,32 @@ module Pdfrb
     def outline
       @outline ||= Document::Outline.new(self)
     end
+
+    def structure; @structure ||= Document::Structure.new(self); end
+
+    def form; @form ||= Document::Form.new(self); end
+
+    def shadings; @shadings ||= Document::Shadings.new(self); end
+
+    def colors; @colors ||= Document::Colors.new(self); end
+
+    def layers; @layers ||= Document::Layers.new(self); end
+
+    def associated_files; @associated_files ||= Document::AssociatedFiles.new(self); end
+
+    def portfolio; @portfolio ||= Document::Portfolio.new(self); end
+
+    def output_intents; @output_intents ||= Document::OutputIntents.new(self); end
+
+    def page_labels; @page_labels ||= Document::PageLabels.new(self); end
+
+    def info; @info ||= Document::Info.new(self); end
+
+    def display; @display ||= Document::Display.new(self); end
+
+    def xmp; @xmp ||= Document::Metadata.new(self); end
+
+    def version=(v); @version = v.to_s; end
 
     def create_form_xobject(name: nil, bbox: nil, matrix: nil)
       FormXObject.new(self, name: name, bbox: bbox, matrix: matrix)

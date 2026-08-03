@@ -1,11 +1,15 @@
 # frozen_string_literal: true
 
 module Pdfrb
-  # PDF/A conformance checks (ISO 19005). Subset of constraints on
-  # top of ISO 32000-2: no JavaScript, no encryption (A-1), embedded
-  # fonts required, XMP metadata required, etc.
   module Conformance
+    autoload :Rule, "pdfrb/conformance/rule"
+    autoload :RuleSet, "pdfrb/conformance/rule"
+    autoload :Violation, "pdfrb/conformance/rule"
+    autoload :ValidationResult, "pdfrb/conformance/rule"
     autoload :PdfA, "pdfrb/conformance/pdf_a"
     autoload :PdfUA, "pdfrb/conformance/pdf_ua"
+    autoload :PdfX, "pdfrb/conformance/pdf_x"
+    autoload :StructureElements, "pdfrb/conformance/structure_elements"
+    autoload :VeraPdfBridge, "pdfrb/conformance/verapdf_bridge"
   end
 end

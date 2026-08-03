@@ -6,7 +6,9 @@ module Pdfrb
     # the subset constraints. Returns a +Result+ with per-rule verdicts.
     module PdfA
       Result = Struct.new(:level, :passed, :violations, keyword_init: true)
-      Violation = Struct.new(:rule, :message, :object, keyword_init: true)
+      Violation = Struct.new(:rule, :message, :object, keyword_init: true) do
+        def rule_id; rule; end
+      end
 
       module_function
 

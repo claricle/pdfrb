@@ -10,8 +10,6 @@ module Pdfrb
       autoload :ZapfDingbatsEncoding, "pdfrb/font/encoding/zapf_dingbats_encoding"
 
       class << self
-        # Decode +bytes+ (one byte per glyph) using +encoding_name+
-        # (a Symbol like :WinAnsiEncoding) to Unicode.
         def decode(encoding_name, bytes)
           table = table_for(encoding_name)
           return bytes unless table
@@ -19,6 +17,18 @@ module Pdfrb
           bytes.each_byte.with_object(+"") do |b, buf|
             buf << (table[b] ? [table[b]].pack("U") : "?")
           end.encode("UTF-8")
+        end
+
+        def encode(encoding_name, text)
+          table = table_for(encoding_name)
+          return text.to_s.b unless table
+
+          reverse = reverse_table_for(encoding_name)
+          text.to_s.each_char.with_object(+"") do |ch, buf|
+            cp = ch.ord
+            byte = reverse[cp] || (cp < 0x80 ? cp : nil)
+            buf << (byte || 0x3F)
+          end.b
         end
 
         def table_for(name)
@@ -29,6 +39,18 @@ module Pdfrb
           when :PDFDocEncoding then PDFDocEncoding::TABLE
           when :ZapfDingbatsEncoding then ZapfDingbatsEncoding::TABLE
           end
+        end
+
+        def reverse_table_for(name)
+          @reverse_tables ||= {}
+          @reverse_tables[name] ||= build_reverse_table(name)
+        end
+
+        def build_reverse_table(name)
+          table = table_for(name)
+          return {} unless table
+
+          table.each_with_object({}) { |(byte, cp), h| h[cp] = byte }
         end
       end
     end

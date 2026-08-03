@@ -61,6 +61,9 @@ module Pdfrb
           inheritable(:Resources)
         end
 
+        def media_box=(box)
+          self.value[:MediaBox] = box
+        end
         def rotate
           inheritable(:Rotate) || 0
         end

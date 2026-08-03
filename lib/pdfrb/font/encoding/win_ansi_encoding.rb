@@ -19,6 +19,16 @@ module Pdfrb
         }.each { |b, cp| TABLE[b] = cp }
         (0xA0..0xFF).each { |b| TABLE[b] = b }
         TABLE.freeze
+
+        class << self
+          def encode(text)
+            Pdfrb::Font::Encoding.encode(:WinAnsiEncoding, text)
+          end
+
+          def decode(bytes)
+            Pdfrb::Font::Encoding.decode(:WinAnsiEncoding, bytes)
+          end
+        end
       end
     end
   end
