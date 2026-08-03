@@ -2,10 +2,6 @@
 
 module Pdfrb
   class Document
-    # Document metadata facade. Reads/writes Title, Author, Subject,
-    # Keywords, Creator, Producer, CreationDate, ModDate via the
-    # trailer's /Info dict (PDF 1.x) and prefers /Catalog/Metadata
-    # XMP for PDF 2.0 per App Note 003.
     class Metadata
       STANDARD_FIELDS = %i[Title Author Subject Keywords Creator
                            Producer CreationDate ModDate Trapped].freeze
@@ -27,6 +23,17 @@ module Pdfrb
 
       def []=(field, value)
         write_field(field, value)
+      end
+
+      def to_xmp
+        begin
+          packet = Pdfrb::XMP::Packet.new
+        rescue StandardError
+          return ""
+        end
+        title = read_field(:Title)
+        packet.title = title if title
+        packet.to_xmp
       end
 
       private

@@ -68,4 +68,9 @@ module Pdfrb
 
   autoload :Compare, "pdfrb/compare"
   autoload :CLI, "pdfrb/cli"
+  require "logger"
+
+  def self.logger
+    @logger ||= Logger.new($stderr, level: Logger::WARN)
+  end
 end
