@@ -140,6 +140,30 @@ module Pdfrb
           spec_clause: "ISO 14289-1 7.3",
           check: ->(_doc) { nil }
         ))
+        rs.register(Rule.new(
+          id: "ua-9",
+          description: "Non-standard structure types need role mapping",
+          severity: :error,
+          spec_clause: "ISO 14289-1 7.1",
+          check: ->(doc) { StructureElements.validate(doc).violations.find { |v| v.rule_id == "ua-9" } }
+        ))
+
+        rs.register(Rule.new(
+          id: "ua-10",
+          description: "List elements must contain LI children",
+          severity: :error,
+          spec_clause: "ISO 14289-1 7.2",
+          check: ->(doc) { StructureElements.validate(doc).violations.find { |v| v.rule_id == "ua-10" } }
+        ))
+
+        rs.register(Rule.new(
+          id: "ua-11",
+          description: "Table elements must contain TR children",
+          severity: :error,
+          spec_clause: "ISO 14289-1 7.2",
+          check: ->(doc) { StructureElements.validate(doc).violations.find { |v| v.rule_id == "ua-11" } }
+        ))
+
       end
 
       def validate(document)
