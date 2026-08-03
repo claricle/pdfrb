@@ -12,6 +12,7 @@ module Pdfrb
         Symbol ZapfDingbats
       ].freeze
 
+      NO_ENCODING_FONTS = %w[Symbol ZapfDingbats].freeze
       DEFAULT_WIDTH = 500
 
       attr_reader :document
@@ -73,11 +74,11 @@ module Pdfrb
       def measure_text(text, font:, size:)
         return 0 unless text
 
-        _font = font # reserved for per-glyph metrics
+        _font = font
         text.to_s.length * (size || 0).to_f * 0.5
       end
 
-      def text_width(text, _resource, size)
+      def text_width(text, _resource, size:)
         return 0 unless text
 
         text.to_s.length * (size || 0).to_f * 0.5
@@ -128,29 +129,44 @@ module Pdfrb
         next nil unless opts[:embedded].nil?
 
         widths = Array.new(256, DEFAULT_WIDTH)
-
         tu_stream = build_tounicode(doc)
         tu_ref = Pdfrb::Model::Reference.new(tu_stream.oid, tu_stream.gen)
 
-        doc.add(
+        fd = doc.add(
           {
-            Type: :Font,
-            Subtype: :Type1,
-            BaseFont: name.to_sym,
-            Encoding: :WinAnsiEncoding,
-            FirstChar: 0,
-            LastChar: 255,
-            Widths: widths,
-            ToUnicode: tu_ref,
+            Type: :FontDescriptor,
+            FontName: name.to_sym,
+            Flags: 32,
+            FontBBox: [0, 0, 1000, 1000],
+            ItalicAngle: 0,
+            Ascent: 800,
+            Descent: -200,
+            CapHeight: 700,
+            StemV: 80,
           },
-          type: Pdfrb::Model::Type::FontType1
+          type: Pdfrb::Model::Cos::Dictionary
         )
+        fd_ref = Pdfrb::Model::Reference.new(fd.oid, fd.gen)
+
+        font_hash = {
+          Type: :Font,
+          Subtype: :Type1,
+          BaseFont: name.to_sym,
+          FirstChar: 0,
+          LastChar: 255,
+          Widths: widths,
+          FontDescriptor: fd_ref,
+          ToUnicode: tu_ref,
+        }
+        font_hash[:Encoding] = :WinAnsiEncoding unless NO_ENCODING_FONTS.include?(name.to_s)
+
+        doc.add(font_hash, type: Pdfrb::Model::Type::FontType1)
       }
 
       def self.build_tounicode(doc)
         cmap_body = build_tounicode_cmap
         stream = doc.add(
-          { Type: :CMap, Length: cmap_body.bytesize },
+          { Length: cmap_body.bytesize },
           type: Pdfrb::Model::Cos::Stream
         )
         stream.stream = cmap_body
@@ -169,7 +185,7 @@ module Pdfrb
         lines << "<00> <FF>"
         lines << "endcodespacerange"
 
-        table = ::Pdfrb::Font::Encoding::WinAnsiEncoding::TABLE
+        table = Pdfrb::Font::Encoding::WinAnsiEncoding::TABLE
         pairs = []
         table.each_with_index do |cp, byte|
           next unless cp
@@ -226,7 +242,7 @@ module Pdfrb
             FirstChar: 0,
             LastChar: 255,
             Widths: Array.new(256, DEFAULT_WIDTH),
-            ToUnicode: tu_ref
+            ToUnicode: tu_ref,
           },
           type: Pdfrb::Model::Type::FontType1
         )
