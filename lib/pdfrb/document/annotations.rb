@@ -27,6 +27,23 @@ module Pdfrb
         annot
       end
 
+      def add_text_note(page, rect:, contents:)
+        add(page, subtype: :Text, rect: rect, contents: contents)
+      end
+
+      def add_link(page, rect:, dest:)
+        annot = add(page, subtype: :Link, rect: rect)
+        annot.value[:Dest] = dest
+        annot
+      end
+
+      def count(page)
+        annots = page.value[:Annots]
+        return 0 unless annots
+
+        annots.is_a?(::Array) ? annots.length : 1
+      end
+
       def each(page)
         return enum_for(:each, page) unless block_given?
 
