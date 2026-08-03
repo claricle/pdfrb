@@ -17,7 +17,7 @@ module Pdfrb
         sig_dict = document.add(
           {
             Type: :Sig,
-            Filter: :Adobe.PPKLite,
+            Filter: :"Adobe.PPKLite",
             SubFilter: :adbe.pkcs7.detached
           },
           type: Pdfrb::Model::Cos::Dictionary
