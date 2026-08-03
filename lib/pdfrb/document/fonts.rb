@@ -1,14 +1,9 @@
 # frozen_string_literal: true
 
+require "stringio"
+
 module Pdfrb
   class Document
-    # Font facade. +add+ registers a font in the catalog /Resources
-    # (so the canvas can reference it via +Tf+) and returns the
-    # resource name to use with the canvas.
-    #
-    # Supports the 14 PDF standard Type1 fonts by name (Helvetica,
-    # Times-Roman, Courier, etc.) without embedding. Future TTF/OTF
-    # loaders (TODO 111/112) plug in via +register_loader+.
     class Fonts
       STANDARDS = %w[
         Helvetica Helvetica-Bold Helvetica-Oblique Helvetica-BoldOblique
@@ -17,31 +12,30 @@ module Pdfrb
         Symbol ZapfDingbats
       ].freeze
 
-      attr_reader :document
+      attr_reader :document, :used_codepoints
 
       def initialize(document)
         @document = document
         @next_id = 1
-        @registry = {} # name -> resource Symbol
+        @registry = {}
+        @encodings = {}
+        @font_dicts = {}
+        @used_codepoints = Hash.new { |h, k| h[k] = Set.new }
       end
 
-      # Register a font and return the resource name (e.g. :F1).
-      #
-      # For the 14 standard fonts: pass the font name; no embedding
-      # is required. For everything else, use the loader protocol
-      # (TODO 111).
       def add(name_or_io, **opts)
         name = font_name_for(name_or_io)
         cached = @registry[name]
         return cached if cached
 
         resource = next_resource_name
-        register_font(resource, name, **opts)
+        font_dict = register_font(resource, name, **opts)
+        @encodings[resource] = font_dict&.value&.[](:Encoding)
+        @font_dicts[resource] = font_dict
         @registry[name] = resource
         resource
       end
 
-      # Look up the resource name registered for a font name.
       def [](name)
         @registry[name]
       end
@@ -53,11 +47,65 @@ module Pdfrb
         self
       end
 
-      # ---- Extension point (TODOs 110-112) ----
-      #
-      # A loader is an object with `call(document, name_or_io, **opts)`
-      # that returns a Font dict + descriptor pair. Built-in loader
-      # handles the 14 standards; future loaders add TTF/OTF/CID.
+      def encoding_for(resource)
+        @encodings[resource]
+      end
+
+      def encode_text(text, resource)
+        enc = @encodings[resource]
+        return text.to_s.b unless enc
+
+        Pdfrb::Font::Encoding.encode(enc, text.to_s)
+      end
+
+      def encodable?(text, resource)
+        !encode_text(text, resource).include?("?")
+      end
+
+      def measure_text(text, font:, size:)
+        return 0 unless text
+
+        # TODO: use font metrics for per-glyph width lookup
+        _font = font
+        text.to_s.length * (size || 0).to_f * 0.5
+      end
+
+      def text_width(text, _resource, size)
+        return 0 unless text
+
+        text.to_s.length * (size || 0).to_f * 0.5
+      end
+
+      def glyph_width(_char, _resource)
+        500
+      end
+
+      def glyph_widths(text, resource)
+        text.to_s.each_char.map { glyph_width(_1, resource) }
+      end
+
+      def metrics_for(_resource)
+        nil
+      end
+
+      def valid_font_data?(data)
+        return false unless data.respond_to?(:bytesize) && data.bytesize >= 4
+
+        magic = data.byteslice(0, 4)
+        ["ttcf".b, "\x00\x01\x00\x00".b, "OTTO".b, "true".b, "typ1".b].include?(magic)
+      end
+
+      def embedded?(resource)
+        dict = @font_dicts[resource]
+        return false unless dict
+
+        desc = dict.value[:FontDescriptor]
+        return false unless desc
+
+        desc = document.object(desc) if desc.is_a?(Pdfrb::Model::Reference)
+        desc&.value&.key?(:FontFile2)
+      end
+
       class << self
         def loaders
           @loaders ||= []
@@ -70,7 +118,7 @@ module Pdfrb
 
       register_loader ->(doc, name, **opts) {
         next nil unless STANDARDS.include?(name.to_s)
-        next nil unless opts[:embedded].nil? # standards never embed
+        next nil unless opts[:embedded].nil?
 
         doc.add(
           { Type: :Font, Subtype: :Type1, BaseFont: name.to_sym },
@@ -83,9 +131,9 @@ module Pdfrb
       def font_name_for(name_or_io)
         case name_or_io
         when Symbol, String then name_or_io.to_s
+        when IO, StringIO then "EmbeddedFont-#{name_or_io.read.bytesize}"
         else
-          raise ArgumentError,
-                "font name must be a String or Symbol; TTF/OTF IO loading lands in TODO 111"
+          raise ArgumentError, "font name must be a String, Symbol, or IO"
         end
       end
 
@@ -97,9 +145,9 @@ module Pdfrb
 
       def register_font(resource, name, **opts)
         loader = self.class.loaders.find { |l| l.call(document, name, **opts) }
-        font_dict = loader ? loader.call(document, name, **opts) :
-                     default_font(name)
+        font_dict = loader ? loader.call(document, name, **opts) : default_font(name)
         attach_to_resources(resource, font_dict)
+        font_dict
       end
 
       def default_font(name)

@@ -8,7 +8,9 @@ module Pdfrb
     # must wrap link annotations.
     module PdfUA
       Result = Struct.new(:passed, :violations, keyword_init: true)
-      Violation = Struct.new(:rule, :message, :object, keyword_init: true)
+      Violation = Struct.new(:rule, :message, :object, keyword_init: true) do
+        def rule_id; rule; end
+      end
 
       module_function
 

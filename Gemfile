@@ -12,4 +12,5 @@ gem "rubocop-performance", "~> 1.23"
 gem "rubocop-rake", "~> 0.7"
 gem "rubocop-rspec", "~> 3.5"
 
+gem "lutaml-model", "~> 0.8"
 gem "simplecov", require: false, group: :test
