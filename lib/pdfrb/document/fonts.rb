@@ -12,7 +12,9 @@ module Pdfrb
         Symbol ZapfDingbats
       ].freeze
 
-      attr_reader :document, :used_codepoints
+      DEFAULT_WIDTH = 500
+
+      attr_reader :document
 
       def initialize(document)
         @document = document
@@ -47,11 +49,17 @@ module Pdfrb
         self
       end
 
+      def used_codepoints(resource)
+        @used_codepoints[resource]
+      end
+
       def encoding_for(resource)
         @encodings[resource]
       end
 
       def encode_text(text, resource)
+        text.to_s.each_codepoint { |cp| @used_codepoints[resource] << cp }
+
         enc = @encodings[resource]
         return text.to_s.b unless enc
 
@@ -65,8 +73,7 @@ module Pdfrb
       def measure_text(text, font:, size:)
         return 0 unless text
 
-        # TODO: use font metrics for per-glyph width lookup
-        _font = font
+        _font = font # reserved for per-glyph metrics
         text.to_s.length * (size || 0).to_f * 0.5
       end
 
@@ -77,7 +84,7 @@ module Pdfrb
       end
 
       def glyph_width(_char, _resource)
-        500
+        DEFAULT_WIDTH
       end
 
       def glyph_widths(text, resource)
@@ -120,11 +127,68 @@ module Pdfrb
         next nil unless STANDARDS.include?(name.to_s)
         next nil unless opts[:embedded].nil?
 
+        widths = Array.new(256, DEFAULT_WIDTH)
+
+        tu_stream = build_tounicode(doc)
+        tu_ref = Pdfrb::Model::Reference.new(tu_stream.oid, tu_stream.gen)
+
         doc.add(
-          { Type: :Font, Subtype: :Type1, BaseFont: name.to_sym },
+          {
+            Type: :Font,
+            Subtype: :Type1,
+            BaseFont: name.to_sym,
+            Encoding: :WinAnsiEncoding,
+            FirstChar: 0,
+            LastChar: 255,
+            Widths: widths,
+            ToUnicode: tu_ref,
+          },
           type: Pdfrb::Model::Type::FontType1
         )
       }
+
+      def self.build_tounicode(doc)
+        cmap_body = build_tounicode_cmap
+        stream = doc.add(
+          { Type: :CMap, Length: cmap_body.bytesize },
+          type: Pdfrb::Model::Cos::Stream
+        )
+        stream.stream = cmap_body
+        stream
+      end
+
+      def self.build_tounicode_cmap
+        lines = []
+        lines << "/CIDInit /ProcSet findresource begin"
+        lines << "12 dict begin"
+        lines << "begincmap"
+        lines << "/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def"
+        lines << "/CMapName /Adobe-Identity-UCS def"
+        lines << "/CMapType 2 def"
+        lines << "1 begincodespacerange"
+        lines << "<00> <FF>"
+        lines << "endcodespacerange"
+
+        table = ::Pdfrb::Font::Encoding::WinAnsiEncoding::TABLE
+        pairs = []
+        table.each_with_index do |cp, byte|
+          next unless cp
+
+          pairs << format("<%02X> <%04X>", byte, cp)
+        end
+
+        pairs.each_slice(100) do |chunk|
+          lines << "#{chunk.length} beginbfchar"
+          lines.concat(chunk)
+          lines << "endbfchar"
+        end
+
+        lines << "endcmap"
+        lines << "CMapName currentdict /CMap defineresource pop"
+        lines << "end"
+        lines << "end"
+        lines.join("\n") + "\n"
+      end
 
       private
 
@@ -151,8 +215,19 @@ module Pdfrb
       end
 
       def default_font(name)
+        tu_stream = self.class.build_tounicode(document)
+        tu_ref = Pdfrb::Model::Reference.new(tu_stream.oid, tu_stream.gen)
         document.add(
-          { Type: :Font, Subtype: :Type1, BaseFont: name.to_sym },
+          {
+            Type: :Font,
+            Subtype: :Type1,
+            BaseFont: name.to_sym,
+            Encoding: :WinAnsiEncoding,
+            FirstChar: 0,
+            LastChar: 255,
+            Widths: Array.new(256, DEFAULT_WIDTH),
+            ToUnicode: tu_ref
+          },
           type: Pdfrb::Model::Type::FontType1
         )
       end

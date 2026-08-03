@@ -2,75 +2,168 @@
 
 module Pdfrb
   module Conformance
-    # PDF/A-1/2/3 validation (ISO 19005). Checks a document against
-    # the subset constraints. Returns a +Result+ with per-rule verdicts.
     module PdfA
-      Result = Struct.new(:level, :passed, :violations, keyword_init: true)
-      Violation = Struct.new(:rule, :message, :object, keyword_init: true) do
-        def rule_id; rule; end
-      end
-
       module_function
 
-      def validate(document, level: :a2b)
-        violations = []
-        check_no_encryption(document, violations)
-        check_has_metadata(document, violations)
-        check_embedded_fonts(document, violations)
-        Result.new(
-          level: level,
-          passed: violations.empty?,
-          violations: violations
-        )
-      end
+      SHARED = RuleSet.new("PDF/A-shared").tap do |rs|
+        rs.register(Rule.new(
+          id: "6.1-1",
+          description: "Encryption is prohibited",
+          severity: :error,
+          spec_clause: "ISO 19005-1 6.1",
+          check: ->(doc) {
+            next nil unless doc.trailer && doc.trailer[:Encrypt]
 
-      def check_no_encryption(document, violations)
-        return unless document.trailer && document.trailer[:Encrypt]
+            Violation.new(
+              rule_id: "6.1-1",
+              message: "PDF/A prohibits encryption",
+              object: "trailer",
+              severity: :error,
+              spec_clause: "ISO 19005-1 6.1"
+            )
+          }
+        ))
 
-        violations << Violation.new(
-          rule: "no-encryption",
-          message: "PDF/A prohibits encryption",
-          object: "trailer"
-        )
-      end
-      private_class_method :check_no_encryption
+        rs.register(Rule.new(
+          id: "6.1-2",
+          description: "XMP Metadata stream required",
+          severity: :error,
+          spec_clause: "ISO 19005-1 6.1",
+          check: ->(doc) {
+            next nil if doc.catalog[:Metadata]
 
-      def check_has_metadata(document, violations)
-        return if document.catalog[:Metadata]
+            Violation.new(
+              rule_id: "6.1-2",
+              message: "PDF/A requires /Catalog/Metadata XMP stream",
+              object: "Catalog",
+              severity: :error,
+              spec_clause: "ISO 19005-1 6.1"
+            )
+          }
+        ))
 
-        violations << Violation.new(
-          rule: "metadata-required",
-          message: "PDF/A requires /Catalog/Metadata XMP stream",
-          object: "Catalog"
-        )
-      end
-      private_class_method :check_has_metadata
+        rs.register(Rule.new(
+          id: "6.1-4",
+          description: "JavaScript actions prohibited",
+          severity: :error,
+          spec_clause: "ISO 19005-1 6.1",
+          check: ->(doc) {
+            found = find_javascript(doc)
+            next nil unless found
 
-      def check_embedded_fonts(document, violations)
-        document.pages.each do |page|
-          resources = page.value[:Resources]
-          next unless resources
+            Violation.new(
+              rule_id: "6.1-4",
+              message: "PDF/A prohibits JavaScript actions",
+              object: found,
+              severity: :error,
+              spec_clause: "ISO 19005-1 6.1"
+            )
+          }
+        ))
 
-          fonts = resources.is_a?(Pdfrb::Model::Cos::Dictionary) ?
-                    resources.value[:Font] : resources[:Font]
-          next unless fonts
+        rs.register(Rule.new(
+          id: "6.1-7",
+          description: "Document language should be set",
+          severity: :warning,
+          spec_clause: "ISO 19005-1 6.1",
+          check: ->(doc) {
+            next nil if doc.catalog[:Lang]
 
-          fonts.each_value do |ref|
-            font = ref.is_a?(Pdfrb::Model::Reference) ?
-                     document.object(ref) : ref
-            next unless font
+            Violation.new(
+              rule_id: "6.1-7",
+              message: "PDF/A recommends setting /Catalog/Lang",
+              object: "Catalog",
+              severity: :warning,
+              spec_clause: "ISO 19005-1 6.1"
+            )
+          }
+        ))
 
-            unless font[:FontDescriptor]
-              violations << Violation.new(
-                rule: "embedded-fonts",
-                message: "Font /#{font[:BaseFont]} missing FontDescriptor",
-                object: font[:BaseFont]
-              )
+        rs.register(Rule.new(
+          id: "embedded-fonts",
+          description: "All fonts must be embedded",
+          severity: :error,
+          spec_clause: "ISO 19005-1 6.2",
+          check: ->(doc) {
+            violations = []
+            doc.pages.each do |page|
+              resources = page.value[:Resources]
+              next unless resources
+
+              fonts = resources.is_a?(Pdfrb::Model::Cos::Dictionary) ?
+                        resources.value[:Font] : resources[:Font]
+              next unless fonts
+
+              fonts.each_value do |ref|
+                font = ref.is_a?(Pdfrb::Model::Reference) ?
+                         doc.object(ref) : ref
+                next unless font
+                next if font[:FontDescriptor]
+
+                violations << Violation.new(
+                  rule_id: "embedded-fonts",
+                  message: "Font /#{font[:BaseFont]} missing FontDescriptor",
+                  object: font[:BaseFont]&.to_s,
+                  severity: :error,
+                  spec_clause: "ISO 19005-1 6.2"
+                )
+              end
             end
-          end
-        end
+            violations.empty? ? nil : violations
+          }
+        ))
       end
-      private_class_method :check_embedded_fonts
+
+      A1_SPECIFIC = RuleSet.new("PDF/A-1-specific").tap do |rs|
+        rs.register(Rule.new(
+          id: "a1-1",
+          description: "JPEG2000 not allowed in PDF/A-1",
+          severity: :error,
+          spec_clause: "ISO 19005-1 6.2.4",
+          check: ->(doc) {
+            violation = nil
+            doc.each_indirect_object do |obj|
+              next unless obj.is_a?(Pdfrb::Model::Cos::Stream)
+              next unless obj[:Filter] == :JPXDecode
+
+              violation = Violation.new(
+                rule_id: "a1-1",
+                message: "JPEG2000 (JPXDecode) not allowed in PDF/A-1",
+                object: "XObject",
+                severity: :error,
+                spec_clause: "ISO 19005-1 6.2.4"
+              )
+              break
+            end
+            violation
+          }
+        ))
+      end
+
+      A1 = RuleSet.new("PDF/A-1").tap do |rs|
+        SHARED.rules.each { |rule| rs.register(rule) }
+        A1_SPECIFIC.rules.each { |rule| rs.register(rule) }
+      end
+
+      LEVEL_RULESETS = {
+        a1b: A1, a1a: A1,
+        a2b: SHARED, a2a: SHARED,
+        a3b: SHARED, a3a: SHARED,
+      }.freeze
+
+      def validate(document, level: :a2b)
+        ruleset = LEVEL_RULESETS[level] || SHARED
+        ruleset.validate(document)
+      end
+
+      def find_javascript(document)
+        document.each_indirect_object do |obj|
+          next unless obj.respond_to?(:value)
+          return "JavaScript action" if obj.value[:S] == :JavaScript
+        end
+        nil
+      end
+      private_class_method :find_javascript
     end
   end
 end

@@ -28,6 +28,13 @@ module Pdfrb
           def decode(bytes)
             Pdfrb::Font::Encoding.decode(:WinAnsiEncoding, bytes)
           end
+
+          def encodable?(codepoint)
+            return true if codepoint < 0x80
+
+            reverse = Pdfrb::Font::Encoding.reverse_table_for(:WinAnsiEncoding)
+            !reverse[codepoint].nil?
+          end
         end
       end
     end
