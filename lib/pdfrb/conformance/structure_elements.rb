@@ -56,6 +56,105 @@ module Pdfrb
         def standard?(type)
           STANDARD_TYPES.include?(type.to_sym)
         end
+
+
+        def validate(document)
+          violations = []
+
+          root_ref = document.catalog[:StructTreeRoot]
+          return ValidationResult.new(profile: "structure-elements", violations: []) unless root_ref
+
+          root = root_ref.is_a?(Pdfrb::Model::Reference) ?
+                   document.object(root_ref) : root_ref
+          return ValidationResult.new(profile: "structure-elements", violations: []) unless root
+
+          check_structure(document, root, violations)
+
+          ValidationResult.new(profile: "structure-elements", violations: violations)
+        end
+
+        private
+
+        def check_structure(document, elem, violations, depth = 0)
+          return if depth > 20
+
+          s = elem[:S]
+          children = elem[:K]
+
+          if s && !standard?(s)
+            role_map = resolve_role_map(document, s)
+            unless role_map
+              violations << Violation.new(
+                rule_id: "ua-9",
+                message: "Non-standard structure type " + s.to_s + " without role mapping",
+                object: "StructElem/" + s.to_s,
+                severity: :error,
+                spec_clause: "ISO 14289-1 7.1"
+              )
+            end
+          end
+
+          if children
+            children = Array(children) unless children.is_a?(::Array)
+            expected = s ? expected_children(s.to_sym) : nil
+            if expected
+              children.each do |child_ref|
+                child = child_ref.is_a?(Pdfrb::Model::Reference) ?
+                          document.object(child_ref) : child_ref
+                next unless child
+
+                child_s = child[:S]
+                next unless child_s
+
+                if s == :L && child_s != :LI
+                  violations << Violation.new(
+                    rule_id: "ua-10",
+                    message: "List has non-LI child: " + child_s.to_s,
+                    object: "StructElem/" + child_s.to_s,
+                    severity: :error,
+                    spec_clause: "ISO 14289-1 7.2"
+                  )
+                end
+
+                if s.to_sym == :Table && ![:TR, :THead, :TBody, :TFoot].include?(child_s.to_sym)
+                  violations << Violation.new(
+                    rule_id: "ua-11",
+                    message: "Table has non-TR child: " + child_s.to_s,
+                    object: "StructElem/" + child_s.to_s,
+                    severity: :error,
+                    spec_clause: "ISO 14289-1 7.2"
+                  )
+                end
+
+                check_structure(document, child, violations, depth + 1)
+              end
+            else
+              children.each do |child_ref|
+                child = child_ref.is_a?(Pdfrb::Model::Reference) ?
+                          document.object(child_ref) : child_ref
+                next unless child
+
+                check_structure(document, child, violations, depth + 1)
+              end
+            end
+          end
+        end
+
+        def resolve_role_map(document, type)
+          root_ref = document.catalog[:StructTreeRoot]
+          return nil unless root_ref
+
+          root = root_ref.is_a?(Pdfrb::Model::Reference) ?
+                   document.object(root_ref) : root_ref
+          return nil unless root
+
+          rm = root[:RoleMap]
+          return nil unless rm
+
+          rm = document.object(rm) if rm.is_a?(Pdfrb::Model::Reference)
+          rm&.value&.key?(type.to_sym)
+        end
+
       end
     end
   end
