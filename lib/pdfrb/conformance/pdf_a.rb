@@ -138,6 +138,27 @@ module Pdfrb
             violation
           }
         ))
+      rs.register(Rule.new(
+          id: "a1-3",
+          description: "PDF version must not exceed 1.4",
+          severity: :error,
+          spec_clause: "ISO 19005-1 6.1",
+          check: ->(doc) {
+            ver = doc.version.to_s
+            parts = ver.split(".")
+            major = parts[0].to_i
+            minor = (parts[1] || "0").to_i
+            next nil if major < 1 || (major == 1 && minor <= 4)
+
+            Violation.new(
+              rule_id: "a1-3",
+              message: "PDF/A-1 requires PDF version <= 1.4, got " + ver,
+              object: "header",
+              severity: :error,
+              spec_clause: "ISO 19005-1 6.1"
+            )
+          }
+        ))
       end
 
       A1 = RuleSet.new("PDF/A-1").tap do |rs|
@@ -264,16 +285,101 @@ module Pdfrb
         A4_SPECIFIC.rules.each { |rule| rs.register(rule) }
       end
 
+
+      A2_SPECIFIC = RuleSet.new("PDF/A-2-specific").tap do |rs|
+        rs.register(Rule.new(
+          id: "a2-1",
+          description: "PostScript XObjects prohibited",
+          severity: :warning,
+          spec_clause: "ISO 19005-2 6.2.4",
+          check: ->(doc) {
+            violation = nil
+            doc.each_indirect_object do |obj|
+              next unless obj.is_a?(Pdfrb::Model::Cos::Stream)
+              next unless obj[:Subtype] == :PS || obj[:Subtype] == :PSXObject
+
+              violation = Violation.new(
+                rule_id: "a2-1",
+                message: "PostScript XObjects not allowed in PDF/A-2",
+                object: "XObject",
+                severity: :warning,
+                spec_clause: "ISO 19005-2 6.2.4"
+              )
+              break
+            end
+            violation
+          }
+        ))
+      rs.register(Rule.new(
+          id: "a2-3",
+          description: "PDF version must not be 2.0",
+          severity: :error,
+          spec_clause: "ISO 19005-2 6.1",
+          check: ->(doc) {
+            ver = doc.version.to_s
+            next nil unless ver.start_with?("2.")
+
+            Violation.new(
+              rule_id: "a2-3",
+              message: "PDF/A-2 does not allow PDF 2.0, got " + ver,
+              object: "header",
+              severity: :error,
+              spec_clause: "ISO 19005-2 6.1"
+            )
+          }
+        ))
+
+      end
+
+      A3_SPECIFIC = RuleSet.new("PDF/A-3-specific").tap do |rs|
+        rs.register(Rule.new(
+          id: "a3-1",
+          description: "Embedded files must have AFRelationship",
+          severity: :error,
+          spec_clause: "ISO 19005-3 6.2",
+          check: ->(doc) {
+            violations = []
+            doc.each_indirect_object do |obj|
+              next unless obj.respond_to?(:value)
+              next unless obj.value[:Type] == :Filespec
+
+              ef = obj.value[:EF]
+              next unless ef
+              next if obj.value[:AFRelationship]
+
+              violations << Violation.new(
+                rule_id: "a3-1",
+                message: "Embedded file missing /AFRelationship on Filespec",
+                object: "Filespec",
+                severity: :error,
+                spec_clause: "ISO 19005-3 6.2"
+              )
+            end
+            violations.empty? ? nil : violations
+          }
+        ))
+      end
+
+      A2 = RuleSet.new("PDF/A-2").tap do |rs|
+        SHARED.rules.each { |rule| rs.register(rule) }
+        A2_SPECIFIC.rules.each { |rule| rs.register(rule) }
+      end
+
+      A3 = RuleSet.new("PDF/A-3").tap do |rs|
+        SHARED.rules.each { |rule| rs.register(rule) }
+        A3_SPECIFIC.rules.each { |rule| rs.register(rule) }
+      end
+
       LEVEL_RULESETS = {
         a1b: A1, a1a: A1,
-        a2b: SHARED, a2a: SHARED,
-        a3b: SHARED, a3a: SHARED,
+        a2b: A2, a2a: A2,
+        a3b: A3, a3a: A3,
         a4: A4,
       }.freeze
 
       def profiles
-        { a1b: A1, a1a: A1, a2b: SHARED, a2a: SHARED,
-          a3b: SHARED, a3a: SHARED, a4: A4 }
+        { a1b: A1, a1a: A1, a2b: A2, a2a: A2,
+          a3b: A3, a3a: A3, a4: A4 }
       end
 
       def validate(document, level: :a2b)
