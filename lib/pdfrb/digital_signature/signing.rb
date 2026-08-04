@@ -31,7 +31,7 @@ module Pdfrb
         }
         hash[:Reason] = reason if reason
         hash[:Name] = name if name
-        hash[:M] = "D:" + Time.now.utc.strftime("%Y%m%d%H%M%S+00'00'")
+        hash[:M] = "D:#{Time.now.utc.strftime("%Y%m%d%H%M%S+00'00'")}"
         document.add(hash, type: Pdfrb::Model::Cos::Dictionary)
       end
 
@@ -68,7 +68,7 @@ module Pdfrb
         placeholder = "0" * PLACEHOLDER_HEX_LEN
         contents_str = "/Contents <#{placeholder}>"
 
-        pdf[0, dict_end + 2] + "\n" + contents_str + pdf[dict_end + 2..]
+        "#{pdf[0, dict_end + 2]}\n#{contents_str}#{pdf[(dict_end + 2)..]}"
       end
 
       def finalize_signature(pdf, cert, key)
@@ -110,7 +110,7 @@ module Pdfrb
         hex_len = hex_end - hex_start
 
         signed_data = pdf.bytes[0, part1_end].pack("C*") +
-                      pdf.bytes[part2_start, part2_len].pack("C*")
+          pdf.bytes[part2_start, part2_len].pack("C*")
 
         der = OpenSSL::PKCS7.sign(cert, key, signed_data, [],
                                   OpenSSL::PKCS7::DETACHED |

@@ -208,11 +208,11 @@ module Pdfrb
 
       def text_lines(lines, font:, size:, at:, leading: nil, char_spacing: nil,
                      word_spacing: nil)
-        lead = leading || size * 1.2
+        lead = leading || (size * 1.2)
         x, y = at
         lines.each do |line|
           text(line, at: [x, y], font: font, size: size,
-               char_spacing: char_spacing, word_spacing: word_spacing)
+                     char_spacing: char_spacing, word_spacing: word_spacing)
           y -= lead
         end
         self
