@@ -78,6 +78,7 @@ module Pdfrb
 
         private
 
+        # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metrics/BlockLength
         def check_structure(document, elem, violations, depth = 0)
           return if depth > 20
 
@@ -148,6 +149,7 @@ module Pdfrb
             end
           end
         end
+        # rubocop:enable Metrics/MethodLength, Metrics/AbcSize, Metrics/BlockLength
 
         def resolve_role_map(document, type)
           root_ref = document.catalog[:StructTreeRoot]
