@@ -10,6 +10,7 @@ module Pdfrb
     # (OCP: add a validator = register, no switch edits).
     module StructureElements
       # Standard PDF structure types (ISO 32000-2 §14.8.4).
+      TABLE_CHILDREN = %i[TR THead TBody TFoot].freeze
       STANDARD_TYPES = %i[
         Document Part Art Sect Div BlockQuote Caption
         TOC TOCI Index NonStruct Private
@@ -57,15 +58,17 @@ module Pdfrb
           STANDARD_TYPES.include?(type.to_sym)
         end
 
-
         def validate(document)
           violations = []
 
           root_ref = document.catalog[:StructTreeRoot]
           return ValidationResult.new(profile: "structure-elements", violations: []) unless root_ref
 
-          root = root_ref.is_a?(Pdfrb::Model::Reference) ?
-                   document.object(root_ref) : root_ref
+          root = if root_ref.is_a?(Pdfrb::Model::Reference)
+                   document.object(root_ref)
+                 else
+                   root_ref
+                 end
           return ValidationResult.new(profile: "structure-elements", violations: []) unless root
 
           check_structure(document, root, violations)
@@ -86,8 +89,8 @@ module Pdfrb
             unless role_map
               violations << Violation.new(
                 rule_id: "ua-9",
-                message: "Non-standard structure type " + s.to_s + " without role mapping",
-                object: "StructElem/" + s.to_s,
+                message: "Non-standard structure type #{s} without role mapping",
+                object: "StructElem/#{s}",
                 severity: :error,
                 spec_clause: "ISO 14289-1 7.1"
               )
@@ -99,8 +102,11 @@ module Pdfrb
             expected = s ? expected_children(s.to_sym) : nil
             if expected
               children.each do |child_ref|
-                child = child_ref.is_a?(Pdfrb::Model::Reference) ?
-                          document.object(child_ref) : child_ref
+                child = if child_ref.is_a?(Pdfrb::Model::Reference)
+                          document.object(child_ref)
+                        else
+                          child_ref
+                        end
                 next unless child
 
                 child_s = child[:S]
@@ -109,18 +115,18 @@ module Pdfrb
                 if s == :L && child_s != :LI
                   violations << Violation.new(
                     rule_id: "ua-10",
-                    message: "List has non-LI child: " + child_s.to_s,
-                    object: "StructElem/" + child_s.to_s,
+                    message: "List has non-LI child: #{child_s}",
+                    object: "StructElem/#{child_s}",
                     severity: :error,
                     spec_clause: "ISO 14289-1 7.2"
                   )
                 end
 
-                if s.to_sym == :Table && ![:TR, :THead, :TBody, :TFoot].include?(child_s.to_sym)
+                if s.to_sym == :Table && !TABLE_CHILDREN.include?(child_s.to_sym)
                   violations << Violation.new(
                     rule_id: "ua-11",
-                    message: "Table has non-TR child: " + child_s.to_s,
-                    object: "StructElem/" + child_s.to_s,
+                    message: "Table has non-TR child: #{child_s}",
+                    object: "StructElem/#{child_s}",
                     severity: :error,
                     spec_clause: "ISO 14289-1 7.2"
                   )
@@ -130,8 +136,11 @@ module Pdfrb
               end
             else
               children.each do |child_ref|
-                child = child_ref.is_a?(Pdfrb::Model::Reference) ?
-                          document.object(child_ref) : child_ref
+                child = if child_ref.is_a?(Pdfrb::Model::Reference)
+                          document.object(child_ref)
+                        else
+                          child_ref
+                        end
                 next unless child
 
                 check_structure(document, child, violations, depth + 1)
@@ -144,8 +153,11 @@ module Pdfrb
           root_ref = document.catalog[:StructTreeRoot]
           return nil unless root_ref
 
-          root = root_ref.is_a?(Pdfrb::Model::Reference) ?
-                   document.object(root_ref) : root_ref
+          root = if root_ref.is_a?(Pdfrb::Model::Reference)
+                   document.object(root_ref)
+                 else
+                   root_ref
+                 end
           return nil unless root
 
           rm = root[:RoleMap]
@@ -154,7 +166,6 @@ module Pdfrb
           rm = document.object(rm) if rm.is_a?(Pdfrb::Model::Reference)
           rm&.value&.key?(type.to_sym)
         end
-
       end
     end
   end

@@ -162,6 +162,7 @@ module Pdfrb
     def display; @display ||= Document::Display.new(self); end
 
     def xmp
+      # rubocop:disable Lint/ReturnInBeginEndBlocks
       return @xmp if @xmp
 
       packet = begin
@@ -176,7 +177,6 @@ module Pdfrb
       packet.author = author if author
       @xmp = packet
     end
-
 
     def version=(v); @version = v.to_s; end
 
@@ -222,9 +222,9 @@ module Pdfrb
     # first (they shadow loaded ones), then every loaded entry the
     # xref knows about.
     def each_indirect_object
-        return enum_for(:each_indirect_object) unless block_given?
+      return enum_for(:each_indirect_object) unless block_given?
 
-        seen = Set.new
+      seen = Set.new
       @objects.each_value do |obj|
         next unless obj.indirect?
 

@@ -73,7 +73,7 @@ module Pdfrb
         end
         register
       end
-class NonStrokeAlpha < Base
+      class NonStrokeAlpha < Base
         def self.name; "ca"; end
         def self.invoke(processor, alpha)
           processor.update_graphics_state(non_stroke_alpha: alpha.to_f)

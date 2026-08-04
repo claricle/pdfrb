@@ -302,43 +302,43 @@ module Pdfrb
       hash
     end
 
+    def detect_version_features(current)
+      catalog = document.catalog
+      return current unless catalog
 
-      def detect_version_features(current)
-        catalog = document.catalog
-        return current unless catalog
-
-        v = current
-        if catalog.value[:AF] || catalog.value[:Collection]
-          v = "2.0" if compare_versions(v, "2.0") < 0
-        end
-        if catalog.value[:OCProperties]
-          v = "1.5" if compare_versions(v, "1.5") < 0
-        end
-        document.version = v
-        v
+      v = current
+      if (catalog.value[:AF] || catalog.value[:Collection]) && compare_versions(v, "2.0").negative?
+        v = "2.0"
       end
-
-      def compare_versions(a, b)
-        aa = a.to_s.split(".").map(&:to_i)
-        bb = b.to_s.split(".").map(&:to_i)
-        (aa <=> bb) || 0
+      if catalog.value[:OCProperties] && compare_versions(v, "1.5").negative?
+        v = "1.5"
       end
+      document.version = v
+      v
+    end
 
-      def compress_content_streams
-        require "zlib"
-        document.each_indirect_object do |obj|
-          next unless obj.is_a?(Pdfrb::Model::Cos::Stream)
-          next if obj.value[:Filter]
-          next unless obj.stream
-          next if obj.value[:Type] == :Metadata
-          min = document.config["writer.compress_min_size"] || 50
-          next if obj.stream.bytesize < min
+    def compare_versions(a, b)
+      aa = a.to_s.split(".").map(&:to_i)
+      bb = b.to_s.split(".").map(&:to_i)
+      (aa <=> bb) || 0
+    end
 
-          compressed = ::Zlib::Deflate.deflate(obj.stream)
-          obj.stream = compressed
-          obj.value[:Filter] = :FlateDecode
-          obj.value[:Length] = compressed.bytesize
-        end
+    def compress_content_streams
+      require "zlib"
+      document.each_indirect_object do |obj|
+        next unless obj.is_a?(Pdfrb::Model::Cos::Stream)
+        next if obj.value[:Filter]
+        next unless obj.stream
+        next if obj.value[:Type] == :Metadata
+
+        min = document.config["writer.compress_min_size"] || 50
+        next if obj.stream.bytesize < min
+
+        compressed = ::Zlib::Deflate.deflate(obj.stream)
+        obj.stream = compressed
+        obj.value[:Filter] = :FlateDecode
+        obj.value[:Length] = compressed.bytesize
       end
+    end
   end
 end

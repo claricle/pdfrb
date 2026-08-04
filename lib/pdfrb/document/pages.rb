@@ -27,12 +27,12 @@ module Pdfrb
         root = pages_root
         contents = document.add({}, type: Pdfrb::Model::Cos::Stream)
         page_hash = {
-            Type: :Page,
-            Parent: Pdfrb::Model::Reference.new(root.oid, root.gen),
-            MediaBox: media_box,
-            Resources: {},
-            Contents: Pdfrb::Model::Reference.new(contents.oid, 0)
-          }
+          Type: :Page,
+          Parent: Pdfrb::Model::Reference.new(root.oid, root.gen),
+          MediaBox: media_box,
+          Resources: {},
+          Contents: Pdfrb::Model::Reference.new(contents.oid, 0)
+        }
         page_hash[:BleedBox] = bleed_box if bleed_box
         page_hash[:TrimBox] = trim_box if trim_box
         page_hash[:ArtBox] = art_box if art_box
