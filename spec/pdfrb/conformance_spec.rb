@@ -31,13 +31,3 @@ RSpec.describe "Content stream corpus round-trip" do
     raise "not yet implemented"
   end
 end
-
-  before(:all) do
-
-  end
-
-  it "parses the same Catalog and Page count" do
-
-    raise "not yet implemented"
-  end
-end
