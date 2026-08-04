@@ -64,6 +64,34 @@ module Pdfrb
         def media_box=(box)
           self.value[:MediaBox] = box
         end
+
+        def bleed_box=(box)
+          self.value[:BleedBox] = box
+        end
+
+        def trim_box=(box)
+          self.value[:TrimBox] = box
+        end
+
+        def art_box=(box)
+          self.value[:ArtBox] = box
+        end
+
+        def crop_box=(box)
+          self.value[:CropBox] = box
+        end
+
+        def bleed_box
+          self.value[:BleedBox]
+        end
+
+        def trim_box
+          self.value[:TrimBox]
+        end
+
+        def art_box
+          self.value[:ArtBox]
+        end
         def rotate
           inheritable(:Rotate) || 0
         end
