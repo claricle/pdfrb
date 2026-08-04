@@ -11,7 +11,7 @@ require "stringio"
 # The fixture corpus lives at spec/fixtures/pdf-core-examples/
 # (private fork of pdf-association/pdf-core-examples).
 ANNEX_H_FIXTURES_DIR = File.join(__dir__, "..", "fixtures", "pdf-core-examples",
-                         "AnnexH-Examples")
+                                 "AnnexH-Examples")
 
 RSpec.describe "ISO 32000-2 Annex H examples", unless: Dir.exist?(ANNEX_H_FIXTURES_DIR) do
   pending "run `git clone claricle/pdf-core-examples spec/fixtures/pdf-core-examples` to enable these tests"
