@@ -28,7 +28,7 @@ module Pdfrb
 
         def create_appearance
           rect = annotation[:Rect]
-          return nil unless rect && rect.is_a?(::Array) && rect.length == 4
+          return nil unless rect.is_a?(::Array) && rect.length == 4
 
           x0, y0, x1, y1 = rect
           width = (x1 - x0).abs

@@ -26,18 +26,18 @@ module Pdfrb
 
       def build_tsr_request(data)
         require "openssl"
-        hash = OpenSSL::Digest::SHA256.new
+        hash = OpenSSL::Digest.new("SHA256")
         req = OpenSSL::ASN1::Sequence.new([
-          OpenSSL::ASN1::Integer.new(1),
-          OpenSSL::ASN1::Sequence.new([
-            OpenSSL::ASN1::Sequence.new([
-              OpenSSL::ASN1::ObjectId.new("2.16.840.1.101.3.4.2.1"),
-              OpenSSL::ASN1::OctetString.new(hash.digest(data).force_encoding("BINARY")),
-            ]),
-          ]),
-          OpenSSL::ASN1::Integer.new(0),
-          OpenSSL::ASN1::Boolean.new(false),
-        ])
+                                            OpenSSL::ASN1::Integer.new(1),
+                                            OpenSSL::ASN1::Sequence.new([
+                                                                          OpenSSL::ASN1::Sequence.new([
+                                                                                                        OpenSSL::ASN1::ObjectId.new("2.16.840.1.101.3.4.2.1"),
+                                                                                                        OpenSSL::ASN1::OctetString.new(hash.digest(data).force_encoding("BINARY")),
+                                                                                                      ]),
+                                                                        ]),
+                                            OpenSSL::ASN1::Integer.new(0),
+                                            OpenSSL::ASN1::Boolean.new(false),
+                                          ])
         req.to_der
       end
     end

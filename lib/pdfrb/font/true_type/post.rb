@@ -29,8 +29,8 @@ module Pdfrb
 
         def parse_names(data)
           count = u16(data, 32)
-          indices = Array.new(count) { |i| u16(data, 34 + i * 2) }
-          offset = 34 + count * 2
+          indices = Array.new(count) { |i| u16(data, 34 + (i * 2)) }
+          offset = 34 + (count * 2)
           custom_names = {}
 
           indices.each do |idx|
@@ -43,7 +43,7 @@ module Pdfrb
             offset += len
           end
 
-          STANDARD_GLYPH_NAMES.map.with_index do |name, i|
+          STANDARD_GLYPH_NAMES.map.with_index do |_name, i|
             indices[i] && indices[i] < 258 ? STANDARD_GLYPH_NAMES[indices[i]] : custom_names[indices[i]]
           end
         rescue StandardError
@@ -51,7 +51,12 @@ module Pdfrb
         end
 
         def u16(data, off); (data.getbyte(off) << 8) | data.getbyte(off + 1); end
-        def s16(data, off); v = u16(data, off); v >= 32768 ? v - 65536 : v; end
+
+        def s16(data, off)
+          v = u16(data, off)
+          v >= 32768 ? v - 65536 : v
+        end
+
         def s32(data, off); (data.getbyte(off) << 24) | (data.getbyte(off + 1) << 16) | (data.getbyte(off + 2) << 8) | data.getbyte(off + 3); end
 
         STANDARD_GLYPH_NAMES = %w[

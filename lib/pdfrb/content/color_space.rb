@@ -3,7 +3,7 @@
 module Pdfrb
   module Content
     module ColorSpace
-      REGISTRY = {}
+      REGISTRY = {}.freeze
 
       class << self
         def register(name, klass)

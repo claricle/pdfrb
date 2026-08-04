@@ -29,7 +29,7 @@ module Pdfrb
       end
 
       def parse_header(data)
-        return {} unless data && data.is_a?(String) && data.bytesize >= 24
+        return {} unless data.is_a?(String) && data.bytesize >= 24
         return {} unless data.start_with?("\x89PNG\r\n\x1A\n".b)
         return {} unless data.bytes[12, 4].pack("C*") == "IHDR"
 

@@ -40,14 +40,14 @@ module Pdfrb
         def os2_table; table("OS/2"); end
         def glyf_table; table("glyf"); end
         def loca_table; table("loca"); end
-      def kern_table; table("kern"); end
+        def kern_table; table("kern"); end
 
         # Parsed-table accessors. Lazy and memoised on the instance.
         def head; @head ||= Head.new(head_table); end
 
         def maxp; @maxp ||= Maxp.new(maxp_table); end
         def post; @post ||= Post.new(post_table); end
-        def name_table_parsed; @name_parsed ||= Name.new(name_table); end
+        def name_table_parsed; @name_table_parsed ||= Name.new(name_table); end
         def loca_parsed; @loca_parsed ||= Loca.new(loca_table, long_format: head.long_loca?, num_glyphs: maxp.num_glyphs); end
         def glyf_parsed; @glyf_parsed ||= Glyf.new(glyf_table, loca_parsed); end
         def kern_parsed; @kern_parsed ||= Kern.new(kern_table); end

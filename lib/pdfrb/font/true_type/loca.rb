@@ -12,11 +12,11 @@ module Pdfrb
 
           count = num_glyphs + 1
           count.times do |i|
-            if long_format
-              @offsets << u32(data, i * 4)
-            else
-              @offsets << u16(data, i * 2) * 2
-            end
+            @offsets << if long_format
+                          u32(data, i * 4)
+                        else
+                          (u16(data, i * 2) * 2)
+                        end
           end
         end
 
