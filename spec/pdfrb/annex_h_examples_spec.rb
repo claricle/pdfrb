@@ -10,15 +10,15 @@ require "stringio"
 #
 # The fixture corpus lives at spec/fixtures/pdf-core-examples/
 # (private fork of pdf-association/pdf-core-examples).
-FIXTURES_DIR = File.join(__dir__, "..", "fixtures", "pdf-core-examples",
+ANNEX_H_FIXTURES_DIR = File.join(__dir__, "..", "fixtures", "pdf-core-examples",
                          "AnnexH-Examples")
 
-RSpec.describe "ISO 32000-2 Annex H examples", unless: Dir.exist?(FIXTURES_DIR) do
+RSpec.describe "ISO 32000-2 Annex H examples", unless: Dir.exist?(ANNEX_H_FIXTURES_DIR) do
   pending "run `git clone claricle/pdf-core-examples spec/fixtures/pdf-core-examples` to enable these tests"
 end
 
-RSpec.describe "ISO 32000-2 Annex H examples", if: Dir.exist?(FIXTURES_DIR) do
-  fixtures = Dir.glob(File.join(FIXTURES_DIR, "*.pdf")).sort
+RSpec.describe "ISO 32000-2 Annex H examples", if: Dir.exist?(ANNEX_H_FIXTURES_DIR) do
+  fixtures = Dir.glob(File.join(ANNEX_H_FIXTURES_DIR, "*.pdf")).sort
 
   it "has at least 10 fixture PDFs" do
     expect(fixtures.length).to be >= 10
@@ -93,14 +93,14 @@ RSpec.describe "ISO 32000-2 Annex H examples", if: Dir.exist?(FIXTURES_DIR) do
   # Specific feature tests per example PDF.
   describe "minimal-pdf-file" do
     it "has exactly 1 page" do
-      doc = Pdfrb::Document.open(File.join(FIXTURES_DIR, "minimal-pdf-file.pdf"))
+      doc = Pdfrb::Document.open(File.join(ANNEX_H_FIXTURES_DIR, "minimal-pdf-file.pdf"))
       expect(doc.pages.count).to eq(1)
     end
   end
 
   describe "simple-text-string" do
     it "contains text content" do
-      doc = Pdfrb::Document.open(File.join(FIXTURES_DIR, "simple-text-string.pdf"))
+      doc = Pdfrb::Document.open(File.join(ANNEX_H_FIXTURES_DIR, "simple-text-string.pdf"))
       text = Pdfrb::Task::ExtractText.call(doc).join
       expect(text).not_to be_empty
     end
@@ -108,7 +108,7 @@ RSpec.describe "ISO 32000-2 Annex H examples", if: Dir.exist?(FIXTURES_DIR) do
 
   describe "simple-graphics" do
     it "has graphics content in the content stream" do
-      doc = Pdfrb::Document.open(File.join(FIXTURES_DIR, "simple-graphics.pdf"))
+      doc = Pdfrb::Document.open(File.join(ANNEX_H_FIXTURES_DIR, "simple-graphics.pdf"))
       page = doc.pages[0]
       content = page.decoded_content
       expect(content).not_to be_empty
@@ -119,28 +119,28 @@ RSpec.describe "ISO 32000-2 Annex H examples", if: Dir.exist?(FIXTURES_DIR) do
 
   describe "page-tree" do
     it "has 17 pages in a nested page tree" do
-      doc = Pdfrb::Document.open(File.join(FIXTURES_DIR, "page-tree.pdf"))
+      doc = Pdfrb::Document.open(File.join(ANNEX_H_FIXTURES_DIR, "page-tree.pdf"))
       expect(doc.pages.count).to eq(17)
     end
   end
 
   describe "outline-hierarchy" do
     it "has an Outlines dict in the Catalog" do
-      doc = Pdfrb::Document.open(File.join(FIXTURES_DIR, "outline-hierarchy.pdf"))
+      doc = Pdfrb::Document.open(File.join(ANNEX_H_FIXTURES_DIR, "outline-hierarchy.pdf"))
       expect(doc.catalog[:Outlines]).not_to be_nil
     end
   end
 
   describe "table-of-contents" do
     it "has 3 pages" do
-      doc = Pdfrb::Document.open(File.join(FIXTURES_DIR, "table-of-contents.pdf"))
+      doc = Pdfrb::Document.open(File.join(ANNEX_H_FIXTURES_DIR, "table-of-contents.pdf"))
       expect(doc.pages.count).to eq(3)
     end
   end
 
   describe "add-four-text-annotations" do
     it "has annotations (via Catalog or page /Annots)" do
-      doc = Pdfrb::Document.open(File.join(FIXTURES_DIR, "add-four-text-annotations.pdf"))
+      doc = Pdfrb::Document.open(File.join(ANNEX_H_FIXTURES_DIR, "add-four-text-annotations.pdf"))
       # Annotations may be on the page or resolved through the
       # incremental update's xref. Check both locations.
       page = doc.pages[0]
@@ -153,21 +153,21 @@ RSpec.describe "ISO 32000-2 Annex H examples", if: Dir.exist?(FIXTURES_DIR) do
 
   describe "delete-two-annotations" do
     it "round-trips with 1 page (incremental update)" do
-      doc = Pdfrb::Document.open(File.join(FIXTURES_DIR, "delete-two-annotations.pdf"))
+      doc = Pdfrb::Document.open(File.join(ANNEX_H_FIXTURES_DIR, "delete-two-annotations.pdf"))
       expect(doc.pages.count).to eq(1)
     end
   end
 
   describe "hierarchical-lists" do
     it "has a structure tree" do
-      doc = Pdfrb::Document.open(File.join(FIXTURES_DIR, "hierarchical-lists.pdf"))
+      doc = Pdfrb::Document.open(File.join(ANNEX_H_FIXTURES_DIR, "hierarchical-lists.pdf"))
       expect(doc.catalog[:StructTreeRoot]).not_to be_nil
     end
   end
 
   describe "sub-standard-structure-type" do
     it "has a structure tree root" do
-      doc = Pdfrb::Document.open(File.join(FIXTURES_DIR, "sub-standard-structure-type.pdf"))
+      doc = Pdfrb::Document.open(File.join(ANNEX_H_FIXTURES_DIR, "sub-standard-structure-type.pdf"))
       expect(doc.catalog[:StructTreeRoot]).not_to be_nil
     end
   end
