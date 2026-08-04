@@ -203,7 +203,7 @@ module Pdfrb
         afm_path = Pdfrb::DataDir.resolve("afm", "#{name}.afm")
         return unless File.exist?(afm_path)
         begin
-          parser = Pdfrb::Font::AfmParser.from_file(afm_path)
+          parser = Pdfrb::Font::AFMParser.from_file(afm_path)
           widths = build_winansi_widths(parser)
           @afm_metrics[resource] = {
             widths: widths,
