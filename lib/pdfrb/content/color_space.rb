@@ -3,7 +3,7 @@
 module Pdfrb
   module Content
     module ColorSpace
-      REGISTRY = {}.freeze
+      REGISTRY = {} # rubocop:disable Style/MutableConstant
 
       class << self
         def register(name, klass)
