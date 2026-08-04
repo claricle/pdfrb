@@ -44,6 +44,9 @@ module Pdfrb
           @pending_io_data = nil
         end
         @pending_subtype = nil
+        if @afm_metrics[resource] && font_dict&.value&.[](:Widths)
+          font_dict.value[:Widths] = @afm_metrics[resource][:widths]
+        end
         @registry[name] = resource
         resource
       end
