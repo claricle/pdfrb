@@ -10,7 +10,7 @@ RSpec.describe "OIML FOP-generated PDF corpus", unless: Dir.exist?(OIML_FIXTURES
 end
 
 RSpec.describe "OIML FOP-generated PDF corpus", if: Dir.exist?(OIML_FIXTURES_DIR) do
-  fixtures = Dir.glob(File.join(OIML_FIXTURES_DIR, "*.pdf")).sort
+  fixtures = Dir.glob(File.join(OIML_FIXTURES_DIR, "*.pdf"))
 
   it "has at least 20 fixture PDFs" do
     expect(fixtures.length).to be >= 20
