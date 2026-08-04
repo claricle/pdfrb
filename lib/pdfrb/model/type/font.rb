@@ -35,15 +35,15 @@ module Pdfrb
         end
 
         def simple?
-          [:Type1, :TrueType, :MMType1].include?(subtype)
+          [:Type1, :TrueType, :MMType1].include?(subtype&.to_sym)
         end
 
         def cid?
-          subtype == :Type0
+          subtype&.to_sym == :Type0
         end
 
         def type3?
-          subtype == :Type3
+          subtype&.to_sym == :Type3
         end
 
         def descendant_font
