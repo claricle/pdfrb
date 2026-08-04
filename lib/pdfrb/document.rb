@@ -50,7 +50,7 @@ module Pdfrb
       end
     end
 
-    attr_reader :config, :io, :xref, :version
+    attr_reader :config, :io, :xref, :version, :next_oid
 
     def self.open(path, **opts)
       if block_given?
@@ -222,7 +222,9 @@ module Pdfrb
     # first (they shadow loaded ones), then every loaded entry the
     # xref knows about.
     def each_indirect_object
-      seen = Set.new
+        return enum_for(:each_indirect_object) unless block_given?
+
+        seen = Set.new
       @objects.each_value do |obj|
         next unless obj.indirect?
 
