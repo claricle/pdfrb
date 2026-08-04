@@ -84,11 +84,12 @@ module Pdfrb
         res = @afm_metrics[_resource] ? _resource : (@registry[_resource.to_s] || _resource)
         metrics = @afm_metrics[res]
         return text.to_s.length * size.to_f * 0.5 unless metrics
+        upem = metrics[:units_per_em] || 1000
         total = text.to_s.each_char.sum do |ch|
           byte = ch.bytes.first || 0
           metrics[:widths][byte] || DEFAULT_WIDTH
         end
-        total * size.to_f / 1000.0
+        total * size.to_f / upem.to_f
       end
 
       def glyph_width(resource, codepoint)
@@ -237,11 +238,15 @@ module Pdfrb
           table.each_with_index do |cp, byte|
             next unless cp
 
-            glyph_id = ttf.cmap.glyph_id_for(cp)
-            next unless glyph_id && glyph_id.positive?
+            begin
+              glyph_id = ttf.cmap.glyph_id_for(cp)
+              next unless glyph_id && glyph_id.positive?
 
-            w = ttf.hmtx.advance_width(glyph_id)
-            widths[byte] = w if w && w.positive?
+              w = ttf.hmtx.advance_width(glyph_id)
+              widths[byte] = w if w && w.positive?
+            rescue StandardError
+              next
+            end
           end
 
           head = ttf.head
