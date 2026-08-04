@@ -374,6 +374,16 @@ module Pdfrb
         }, type: Pdfrb::Model::Cos::Dictionary)
         fd_ref = Pdfrb::Model::Reference.new(fd.oid, fd.gen)
 
+        if @pending_io_data && valid_font_data?(@pending_io_data)
+          font_file = document.add(
+            { Length: @pending_io_data.bytesize },
+            type: Pdfrb::Model::Cos::Stream
+          )
+          font_file.stream = @pending_io_data
+          fd.value[:FontFile2] =
+            Pdfrb::Model::Reference.new(font_file.oid, font_file.gen)
+        end
+
         subtype = @pending_subtype || :Type1
         document.add({
           Type: :Font, Subtype: subtype, BaseFont: name.to_sym,

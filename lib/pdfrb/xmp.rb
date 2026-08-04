@@ -1,14 +1,44 @@
 # frozen_string_literal: true
 
 module Pdfrb
-  # XMP (Extensible Metadata Platform) metadata. XMP is XML-based
-  # metadata embedded in PDF as a /Metadata stream on the Catalog.
-  #
-  # Uses lutaml-model for declarative serialization — never hand-rolled.
-  # XMP schemas (Dublin Core, PDF, XMP basic) are lutaml-model classes
-  # with attribute declarations and XML mapping blocks.
   module XMP
     autoload :Packet, "pdfrb/xmp/packet"
     autoload :Schemas, "pdfrb/xmp/schemas"
   end
 end
+
+Pdfrb::Document.prepend(Module.new do
+  def write(path = nil, io: nil)
+    sync_xmp_metadata! unless self.io
+    super
+  end
+
+  private
+
+  def sync_xmp_metadata!
+    info = trailer&.[](:Info)
+    return unless info
+
+    info_obj = object(info)
+    return unless info_obj
+
+    title = info_obj.value[:Title]
+    return unless title
+
+    packet = begin
+      xmp
+    rescue StandardError
+      nil
+    end
+    return unless packet
+
+    xmp_data = packet.to_xmp
+    stream = add(
+      { Type: :Metadata, Subtype: :XML, Length: xmp_data.bytesize },
+      type: Pdfrb::Model::Cos::Stream
+    )
+    stream.stream = xmp_data
+    catalog.value[:Metadata] =
+      Pdfrb::Model::Reference.new(stream.oid, stream.gen)
+  end
+end)
