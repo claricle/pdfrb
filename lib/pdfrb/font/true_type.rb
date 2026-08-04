@@ -15,6 +15,7 @@ module Pdfrb
       autoload :Loca, "pdfrb/font/true_type/loca"
       autoload :Glyf, "pdfrb/font/true_type/glyf"
       autoload :Kern, "pdfrb/font/true_type/kern"
+      autoload :Wrapper, "pdfrb/font/true_type/wrapper"
     end
   end
 end
