@@ -2,89 +2,72 @@
 
 module Pdfrb
   module ImageLoader
-    # JPEG loader. Parses the SOI/SOFn marker stream to extract width,
-    # height, bits-per-component, and number of components. The raw
-    # JPEG bytes are stored verbatim with /Filter /DCTDecode — no
-    # re-encoding.
     module JPEG
-      SOI = "\xFF\xD8".b
-      SOFN_MARKERS = [
-        0xFFC0, 0xFFC1, 0xFFC2, 0xFFC3,
-        0xFFC5, 0xFFC6, 0xFFC7,
-        0xFFC9, 0xFFCA, 0xFFCB,
-        0xFFCD, 0xFFCE, 0xFFCF
-      ].freeze
-      private_constant :SOI, :SOFN_MARKERS
-
       module_function
 
-      def call(document, bytes, **_opts)
-        return nil unless bytes.is_a?(::String) && bytes.start_with?(SOI)
+      def load(document, path_or_io)
+        data = read_data(path_or_io)
+        info = parse_jpeg_header(data)
 
-        info = parse_header(bytes)
-        image = document.add(
+        stream = document.add(
           {
             Type: :XObject,
             Subtype: :Image,
             Width: info[:width],
             Height: info[:height],
-            BitsPerComponent: info[:precision],
             ColorSpace: info[:color_space],
-            Filter: :DCTDecode
+            BitsPerComponent: info[:bits],
+            Filter: :DCTDecode,
+            Length: data.bytesize,
           },
-          type: Pdfrb::Model::Type::XObjectImage
+          type: Pdfrb::Model::Cos::Stream
         )
-        image.stream = bytes.b
-        image
+        stream.stream = data
+        stream
       end
 
-      def parse_header(bytes)
-        i = 2 # skip SOI marker
-        while i + 1 < bytes.bytesize
-          marker = bytes.getbyte(i) * 256 + bytes.getbyte(i + 1)
-          i += 2
-          # Standalone markers (no length): RSTn, SOI, EOI, TEM.
-          standalone = (0xFFD0..0xFFD7).include?(marker) ||
-                       marker == 0xFF01 || marker == 0xFFD8 || marker == 0xFFD9
-          if SOFN_MARKERS.include?(marker)
-            return parse_sofn(bytes, i)
-          elsif standalone
-            next
+      def parse_jpeg_header(data)
+        return {} unless data && data.bytesize >= 4
+
+        i = 0
+        info = { bits: 8 }
+
+        while i < data.bytesize - 1
+          marker = (data.getbyte(i) << 8) | data.getbyte(i + 1)
+
+          case marker
+          when 0xFFD8
+            i += 2
+          when 0xFFC0..0xFFCF
+            break unless i + 9 < data.bytesize
+            info[:bits] = data.getbyte(i + 4)
+            info[:height] = (data.getbyte(i + 5) << 8) | data.getbyte(i + 6)
+            info[:width] = (data.getbyte(i + 7) << 8) | data.getbyte(i + 8)
+            components = data.getbyte(i + 9)
+            info[:color_space] = case components
+                                 when 1 then :DeviceGray
+                                 when 3 then :DeviceRGB
+                                 when 4 then :DeviceCMYK
+                                 else :DeviceRGB
+                                 end
+            break
           else
-            length = bytes.getbyte(i) * 256 + bytes.getbyte(i + 1)
-            i += length
+            i += 2
+            seg_len = (data.getbyte(i) << 8) | data.getbyte(i + 1) if i + 1 < data.bytesize
+            i += seg_len || 2
           end
         end
-        raise Pdfrb::Error, "JPEG: no SOFn marker found"
-      end
-      private_class_method :parse_header
 
-      def parse_sofn(bytes, i)
-        # SOFn layout: precision(1), height(2), width(2), components(1)
-        _length = bytes.getbyte(i) * 256 + bytes.getbyte(i + 1)
-        precision = bytes.getbyte(i + 2)
-        height = bytes.getbyte(i + 3) * 256 + bytes.getbyte(i + 4)
-        width = bytes.getbyte(i + 5) * 256 + bytes.getbyte(i + 6)
-        components = bytes.getbyte(i + 7)
-        {
-          precision: precision,
-          width: width,
-          height: height,
-          components: components,
-          color_space: color_space_for(components)
-        }
+        info
       end
-      private_class_method :parse_sofn
 
-      def color_space_for(n)
-        case n
-        when 1 then :DeviceGray
-        when 3 then :DeviceRGB
-        when 4 then :DeviceCMYK
-        else raise Pdfrb::Error, "JPEG: unsupported component count #{n}"
+      def read_data(path_or_io)
+        case path_or_io
+        when String then File.binread(path_or_io)
+        when IO, StringIO then path_or_io.read
+        else path_or_io.to_s
         end
       end
-      private_class_method :color_space_for
     end
   end
 end
