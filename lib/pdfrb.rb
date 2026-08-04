@@ -66,6 +66,7 @@ module Pdfrb
   require "pdfrb/model/type/document_security_store"
   require "pdfrb/model/type/measure"
   require "pdfrb/model/type/border_styling"
+  require "pdfrb/model/type/appearance_generator"
   require "pdfrb/model/type/action"
 
   autoload :Font, "pdfrb/font"
