@@ -3,14 +3,7 @@
 module Pdfrb
   module Model
     module Type
-      # Annotation base class (s12.5). The base dict shape is encoded
-      # across the per-subtype TSVs (AnnotLink, AnnotText, ...), not
-      # a single Annot.tsv — so the base class registers in the
-      # type_map and dispatches to a specific subtype class via
-      # /Subtype lookup.
       class Annotation < Pdfrb::Model::Cos::Dictionary
-        # Common annotation fields per s12.5.2 (hand-coded; base dict
-        # is shared across all subtypes before subtype-specific keys).
         define_field :Type, type: Symbol, default: :Annot
         define_field :Subtype, type: Symbol, required: true
         define_field :Rect, type: Pdfrb::Model::Rectangle
@@ -25,12 +18,59 @@ module Pdfrb
         define_field :C, type: Pdfrb::Model::PdfArray
         define_field :A, type: Pdfrb::Model::Cos::Dictionary
         define_field :AA, type: Pdfrb::Model::Cos::Dictionary
+        define_field :StructParent, type: Integer
+        define_field :OC, type: Pdfrb::Model::Cos::Dictionary
 
         register_type :Annot
 
+        # ---- Accessors ----
+        def subtype; self[:Subtype]; end
+        def rect; self[:Rect]; end
+        def contents; self[:Contents]; end
+        def name; self[:NM]; end
+        def modified_date; self[:M]; end
+        def flags; self[:F] || 0; end
+        def color; self[:C]; end
+        def border; self[:Border]; end
+        def appearance; self[:AP]; end
+        def appearance_state; self[:AS]; end
+        def action; self[:A]; end
+        def additional_actions; self[:AA]; end
+
+        # ---- Page reference ----
+        def page
+          ref = self[:P]
+          return nil unless ref && document
+
+          document.object(ref)
+        end
+
+        # ---- Flag predicates ----
+        def hidden?; flags & 1 != 0; end
+        def print?; flags & 2 != 0; end
+        def no_zoom?; flags & 4 != 0; end
+        def no_rotate?; flags & 8 != 0; end
+        def no_view?; flags & 16 != 0; end
+        def read_only?; flags & 32 != 0; end
+        def locked?; flags & 128 != 0; end
+        def toggle_no_view?; flags & 256 != 0; end
+        def locked_contents?; flags & 512 != 0; end
+
+        # ---- Appearance management ----
+        def normal_appearance
+          ap = appearance
+          return nil unless ap
+
+          ap = document.object(ap) if ap.is_a?(Pdfrb::Model::Reference) && document
+          ap && ap[:N]
+        end
+
+        def create_appearance_stream
+          AppearanceGenerator.for(self, document: document)&.create_appearance
+        end
+
+        # ---- Subtype dispatch ----
         class << self
-          # Dispatch by /Subtype. Subclasses register via
-          # `register_subtype :Link`.
           def subtype_map
             @subtype_map ||= {}
           end
@@ -47,4 +87,3 @@ module Pdfrb
     end
   end
 end
-

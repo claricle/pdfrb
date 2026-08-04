@@ -1,116 +1,184 @@
 # frozen_string_literal: true
 
-require "digest/md5"
+require "openssl"
 
 module Pdfrb
   module Encryption
-    # Standard security handler (s7.6.3). V1..V6 / R2..R6.
-    # Owns per-document key derivation + per-object (de)cryption.
-    #
-    # Supports:
-    #   V1, V2 + R2     : RC4 40-bit and 128-bit (PDF 1.4-1.5).
-    #   V4   + R4       : RC4 or AES-128 with crypt filters (PDF 1.5+).
-    #   V5   + R5       : AES-256 (PDF 1.7 Ext. 3).
-    #   V6   + R6       : AES-256 (PDF 2.0).
-    #
-    # AES uses the openssl stdlib. RC4 is pure Ruby (TODO 119).
-    class StandardSecurityHandler < SecurityHandler
-      register "Standard", self
+    class StandardSecurityHandler
+      PAD = String.new("\x28\xBF\x4E\x5E\x4E\x75\x8A\x41\x64\x00\x4E\x56\xFF\xFA\x01\x08" \
+                       "\x2E\x2E\x00\xB6\xD0\x68\x3E\x80\x2F\x0C\xA9\xFE\x64\x53\x69\x7A",
+                       encoding: Encoding::BINARY).freeze
 
-      attr_reader :file_key, :version, :revision
+      attr_reader :key, :key_length, :version, :revision, :permissions
 
-      def set_up_decryption(password: "")
-        @encrypt_dict = read_encrypt_dict
-        return unless @encrypt_dict
+      def initialize(trailer_dict)
+        @encrypt = trailer_dict[:Encrypt]
+        @id = trailer_dict[:ID]
+        @version = (@encrypt[:V] || 0).to_i
+        @revision = (@encrypt[:R] || 3).to_i
+        @key_length = (@encrypt[:Length] || 40).to_i / 8
+        @permissions = (@encrypt[:P] || -1).to_i
+        @key = nil
+      end
 
-        @version = @encrypt_dict[:V].to_i
-        @revision = @encrypt_dict[:R].to_i
-        id0 = document.trailer[:ID].to_a.first.b
-        unless verify_password(password)
-          raise Pdfrb::EncryptionError, "incorrect password"
+      def verify_user_password(password)
+        computed = compute_encryption_key(password)
+        @key = computed
+        verify_user_password_hash(computed)
+      end
+
+      def compute_encryption_key(password)
+        padded = pad_password(password)
+        owner_hash = @encrypt[:O] || String.new("", encoding: Encoding::BINARY)
+        perms = [@permissions].pack("V")
+        id_first = id_bytes
+
+        md5 = Digest::MD5.new
+        md5.update(padded)
+        md5.update(owner_hash)
+        md5.update(perms)
+        md5.update(id_first)
+
+        if @revision >= 4
+          md5.update(@encrypt[:UE] || "")
+          md5.update(@encrypt[:Perms] ? [@encrypt[:Perms]].pack("N") : "")
         end
-        derive_file_key(password, id0)
+
+        hash = md5.digest
+
+        if @revision >= 3
+          50.times { hash = Digest::MD5.digest(hash[0, @key_length]) }
+        end
+
+        hash[0, @key_length]
       end
 
-      # Verify the user (or owner) password. Returns true on match.
-      def verify_password(password)
-        PasswordVerification.verify_user_password(
-          password: password,
-          encrypt_dict: @encrypt_dict,
-          id0: document.trailer[:ID].to_a.first.b
-        )
+      def compute_object_key(oid, gen)
+        md5 = Digest::MD5.new
+        md5.update(@key)
+        md5.update([oid].pack("V"))
+        md5.update([gen].pack("v"))
+
+        if @version >= 4
+          md5.update("\xAA")
+        end
+
+        md5.digest[0, [@key_length + 5, 16].min]
       end
 
-      def decrypt(bytes, oid, gen)
-        return bytes if @file_key.nil?
+      def encrypt_data(data, oid, gen)
+        return data unless @key
 
-        case cipher_type
-        when :rc4 then RC4.new(object_key(oid, gen, 16)).process(bytes)
-        when :aes then AES.new(key_size: aes_key_bits, mode: :CBC).decrypt(bytes, object_key(oid, gen, aes_key_bits / 8 + 5).byteslice(0, aes_key_bits / 8))
-        else bytes
+        obj_key = compute_object_key(oid, gen)
+
+        if @version >= 4
+          encrypt_aes_cbc(data, obj_key)
+        else
+          encrypt_rc4(data, obj_key)
         end
       end
 
-      def encrypt(bytes, oid, gen)
-        return bytes if @file_key.nil?
+      def decrypt_data(data, oid, gen)
+        return data unless @key
 
-        case cipher_type
-        when :rc4 then RC4.new(object_key(oid, gen, 16)).process(bytes)
-        when :aes then AES.new(key_size: aes_key_bits, mode: :CBC).encrypt(bytes, object_key(oid, gen, aes_key_bits / 8 + 5).byteslice(0, aes_key_bits / 8), random_iv)
-        else bytes
+        obj_key = compute_object_key(oid, gen)
+
+        if @version >= 4
+          decrypt_aes_cbc(data, obj_key)
+        else
+          decrypt_rc4(data, obj_key)
         end
       end
 
       private
 
-      def read_encrypt_dict
-        ref = document.trailer[:Encrypt]
-        return nil unless ref
-
-        encrypt = ref.is_a?(Pdfrb::Model::Reference) ?
-                    document.object(ref) : ref
-        encrypt.is_a?(Pdfrb::Model::Cos::Dictionary) ? encrypt : nil
+      def pad_password(password)
+        pw = password.to_s.encode(Encoding::BINARY)[0, 32]
+        pw + PAD[pw.bytesize, 32 - pw.bytesize]
       end
 
-      def derive_file_key(password, id0)
-        @file_key = PasswordVerification.derive_key_rc4(
-          password: password,
-          o_entry: @encrypt_dict[:O].to_s.b,
-          p_flags: @encrypt_dict[:P].to_i,
-          id0: id0,
-          revision: @revision,
-          key_length_bits: (@encrypt_dict[:Length] || 40).to_i,
-          encrypt_metadata: @encrypt_dict.fetch(:EncryptMetadata, true)
-        )
+      def id_bytes
+        return String.new("", encoding: Encoding::BINARY) unless @id
+
+        first = @id.is_a?(Array) ? @id[0] : @id
+        first.to_s.encode(Encoding::BINARY)
       end
 
-      def cipher_type
-        return :rc4 if @version <= 2
-        return :aes if @version >= 4 && @version <= 5
+      def verify_user_password_hash(key)
+        return true if @revision < 3
 
-        # V6 (PDF 2.0) — AES-256 always.
-        :aes
+        hash = compute_user_password_hash(key)
+        stored = @encrypt[:U] || ""
+        hash[0, 16] == stored[0, 16]
       end
 
-      def aes_key_bits
-        @version >= 5 ? 256 : 128
-      end
-
-      # Per-object key per Algorithm 1: MD5(file_key + oid(LE) + gen(LE) + (sAlT for AES)).
-      def object_key(oid, gen, output_len)
+      def compute_user_password_hash(key)
         md5 = Digest::MD5.new
-        md5.update(@file_key)
-        md5.update([oid].pack("V"))
-        md5.update([gen].pack("V"))
-        md5.update("sAlT".b) if cipher_type == :aes
-        md5.digest.byteslice(0, output_len)
+        md5.update(PAD)
+        md5.update(id_bytes)
+        hash = md5.digest
+
+        rc4 = RC4Impl.new(key)
+        20.times { |i| hash = rc4.process(hash, key XOR i) }
+
+        hash[0, 16]
       end
 
-      def random_iv
-        OpenSSL::Random.random_bytes(16)
-      rescue StandardError
-        require "securerandom"
-        SecureRandom.random_bytes(16)
+      def encrypt_rc4(data, key)
+        RC4Impl.new(key).process(data)
+      end
+
+      def decrypt_rc4(data, key)
+        RC4Impl.new(key).process(data)
+      end
+
+      def encrypt_aes_cbc(data, key)
+        iv = OpenSSL::Random.random_bytes(16)
+        cipher = OpenSSL::Cipher::AES.new(128, :CBC)
+        cipher.encrypt
+        cipher.key = key[0, 16]
+        cipher.iv = iv
+        encrypted = cipher.update(data) + cipher.final
+        iv + encrypted
+      end
+
+      def decrypt_aes_cbc(data, key)
+        return data if data.bytesize < 16
+
+        iv = data[0, 16]
+        ciphertext = data[16..]
+        decipher = OpenSSL::Cipher::AES.new(128, :CBC)
+        decipher.decrypt
+        decipher.key = key[0, 16]
+        decipher.iv = iv
+        decipher.update(ciphertext) + decipher.final
+      rescue OpenSSL::Cipher::CipherError
+        data
+      end
+    end
+
+    # Minimal RC4 implementation
+    class RC4Impl
+      def initialize(key)
+        @s = (0..255).to_a
+        j = 0
+        key.bytes.each_with_index do |_b, i|
+          j = (j + @s[i] + key.getbyte(i % key.bytesize)) & 0xFF
+          @s[i], @s[j] = @s[j], @s[i]
+        end
+        @i = @j = 0
+      end
+
+      def process(data, _xor = nil)
+        result = data.dup.force_encoding(Encoding::BINARY)
+        result.bytes.each_with_index do |_b, idx|
+          @i = (@i + 1) & 0xFF
+          @j = (@j + @s[@i]) & 0xFF
+          @s[@i], @s[@j] = @s[@j], @s[@i]
+          k = @s[(@s[@i] + @s[@j]) & 0xFF]
+          result.setbyte(idx, result.getbyte(idx) ^ k)
+        end
+        result
       end
     end
   end
