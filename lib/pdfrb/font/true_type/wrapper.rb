@@ -18,7 +18,7 @@ module Pdfrb
 
           fd.value[:FontFile2] = Pdfrb::Model::Reference.new(font_file.oid, font_file.gen)
 
-          font = document.add(
+          document.add(
             {
               Type: :Font,
               Subtype: :TrueType,
@@ -32,7 +32,6 @@ module Pdfrb
             },
             type: Pdfrb::Model::Type::FontTrueType
           )
-          font
         end
 
         def create_font_descriptor(document, ttf, ps_name)
@@ -57,17 +56,17 @@ module Pdfrb
         def build_widths(ttf)
           widths = Array.new(256, 500)
           table = Pdfrb::Font::Encoding::WinAnsiEncoding::TABLE
-          maxp = Maxp.new(ttf.maxp_table)
+          Maxp.new(ttf.maxp_table)
 
           table.each_with_index do |cp, byte|
             next unless cp
 
             begin
               gid = ttf.cmap.glyph_id_for(cp)
-              next unless gid && gid.positive?
+              next unless gid&.positive?
 
               w = ttf.hmtx.advance_width(gid)
-              widths[byte] = w if w && w.positive?
+              widths[byte] = w if w&.positive?
             rescue StandardError
               next
             end
@@ -75,7 +74,7 @@ module Pdfrb
           widths
         end
 
-        def build_tounicode(document, ttf)
+        def build_tounicode(document, _ttf)
           table = Pdfrb::Font::Encoding::WinAnsiEncoding::TABLE
           mapping = {}
           table.each_with_index { |cp, byte| mapping[byte] = cp if cp }

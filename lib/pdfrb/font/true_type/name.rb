@@ -15,11 +15,11 @@ module Pdfrb
           @records = {}
 
           @count.times do |i|
-            offset = 6 + i * 12
+            offset = 6 + (i * 12)
             break if offset + 12 > data.bytesize
 
             platform_id = u16(data, offset)
-            encoding_id = u16(data, offset + 2)
+            u16(data, offset + 2)
             _lang_id = u16(data, offset + 4)
             name_id = u16(data, offset + 6)
             length = u16(data, offset + 8)

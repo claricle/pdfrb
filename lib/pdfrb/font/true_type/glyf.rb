@@ -37,7 +37,7 @@ module Pdfrb
 
         def composite?(glyph_id)
           h = glyph_header(glyph_id)
-          h && h[:number_of_contours] < 0
+          h && h[:number_of_contours].negative?
         end
 
         def empty?(glyph_id)
@@ -63,7 +63,7 @@ module Pdfrb
 
             offset += 4 if flags & 0x0001 != 0
             offset += 2 if flags & 0x0002 != 0
-            break if flags & 0x0020 == 0
+            break if flags.nobits?(0x0020)
           end
           components
         end
@@ -71,7 +71,11 @@ module Pdfrb
         private
 
         def u16(d, o); (d.getbyte(o) << 8) | d.getbyte(o + 1); end
-        def s16(d, o); v = u16(d, o); v >= 32768 ? v - 65536 : v; end
+
+        def s16(d, o)
+          v = u16(d, o)
+          v >= 32768 ? v - 65536 : v
+        end
       end
     end
   end

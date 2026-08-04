@@ -16,17 +16,17 @@ module Pdfrb
       end
 
       def identity?
-        @a == 1 && @b == 0 && @c == 0 && @d == 1 && @e == 0 && @f == 0
+        @a == 1 && @b.zero? && @c.zero? && @d == 1 && @e.zero? && @f.zero?
       end
 
       def multiply(other)
         self.class.new(
-          @a * other.a + @c * other.b,
-          @b * other.a + @d * other.b,
-          @a * other.c + @c * other.d,
-          @b * other.c + @d * other.d,
-          @a * other.e + @c * other.f + @e,
-          @b * other.e + @d * other.f + @f,
+          (@a * other.a) + (@c * other.b),
+          (@b * other.a) + (@d * other.b),
+          (@a * other.c) + (@c * other.d),
+          (@b * other.c) + (@d * other.d),
+          (@a * other.e) + (@c * other.f) + @e,
+          (@b * other.e) + (@d * other.f) + @f,
         )
       end
 

@@ -12,12 +12,15 @@ module Pdfrb
         doc.pages.each_with_index do |page, pn|
           res = page.value[:Resources]
           next unless res
+
           xo = res[:XObject] || res.value[:XObject]
           next unless xo
+
           xo = xo.value if xo.is_a?(Pdfrb::Model::Cos::Dictionary)
           xo&.each do |name, ref|
             obj = ref.is_a?(Pdfrb::Model::Reference) ? doc.object(ref) : ref
             next unless obj&.value&.[](:Subtype) == :Image
+
             count += 1
             data = obj.stream || ""
             File.binwrite(File.join(output_dir, "page#{pn + 1}_#{name}.raw"), data)

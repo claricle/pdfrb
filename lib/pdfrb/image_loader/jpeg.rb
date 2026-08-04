@@ -28,7 +28,7 @@ module Pdfrb
       end
 
       def parse_header(data)
-        return {} unless data && data.is_a?(String) && data.bytesize >= 6
+        return {} unless data.is_a?(String) && data.bytesize >= 6
         return {} unless data.getbyte(0) == 0xFF && data.getbyte(1) == 0xD8
 
         i = 2
@@ -38,13 +38,14 @@ module Pdfrb
           marker = data.getbyte(i + 1)
           i += 2
 
-          next if marker >= 0xD0 && marker <= 0xD9
+          next if marker.between?(0xD0, 0xD9)
           next if marker == 0x01
 
           break if i + 1 >= data.bytesize
+
           seg_len = (data.getbyte(i) << 8) | data.getbyte(i + 1)
 
-          if marker >= 0xC0 && marker <= 0xCF && marker != 0xC4 && marker != 0xC8 && marker != 0xCC
+          if marker.between?(0xC0, 0xCF) && marker != 0xC4 && marker != 0xC8 && marker != 0xCC
             return parse_sof(data, i)
           end
 
