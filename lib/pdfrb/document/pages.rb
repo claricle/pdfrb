@@ -20,19 +20,27 @@ module Pdfrb
       #   rotate: 0                     # degrees
       #
       # Returns the new +Model::Type::Page+.
-      def add(media_box: nil, rotate: 0, width: nil, height: nil)
+      def add(media_box: nil, rotate: 0, width: nil, height: nil,
+             bleed_box: nil, trim_box: nil, art_box: nil, crop_box: nil)
         media_box ||= (width && height ? [0, 0, width, height] : [0, 0, 612, 792])
         media_box ||= (width && height ? [0, 0, width, height] : [0, 0, 612, 792])
         root = pages_root
         contents = document.add({}, type: Pdfrb::Model::Cos::Stream)
         page = document.add(
-          {
+          page_hash = {
             Type: :Page,
             Parent: Pdfrb::Model::Reference.new(root.oid, root.gen),
             MediaBox: media_box,
             Resources: {},
             Contents: Pdfrb::Model::Reference.new(contents.oid, 0)
-          },
+          }
+          page_hash[:BleedBox] = bleed_box if bleed_box
+          page_hash[:TrimBox] = trim_box if trim_box
+          page_hash[:ArtBox] = art_box if art_box
+          page_hash[:CropBox] = crop_box if crop_box
+
+          page = document.add(
+            page_hash,
           type: Pdfrb::Model::Type::Page
         )
         page.value[:Rotate] = rotate if rotate.nonzero?
