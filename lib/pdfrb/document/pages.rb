@@ -26,23 +26,18 @@ module Pdfrb
         media_box ||= (width && height ? [0, 0, width, height] : [0, 0, 612, 792])
         root = pages_root
         contents = document.add({}, type: Pdfrb::Model::Cos::Stream)
-        page = document.add(
-          page_hash = {
+        page_hash = {
             Type: :Page,
             Parent: Pdfrb::Model::Reference.new(root.oid, root.gen),
             MediaBox: media_box,
             Resources: {},
             Contents: Pdfrb::Model::Reference.new(contents.oid, 0)
           }
-          page_hash[:BleedBox] = bleed_box if bleed_box
-          page_hash[:TrimBox] = trim_box if trim_box
-          page_hash[:ArtBox] = art_box if art_box
-          page_hash[:CropBox] = crop_box if crop_box
-
-          page = document.add(
-            page_hash,
-          type: Pdfrb::Model::Type::Page
-        )
+        page_hash[:BleedBox] = bleed_box if bleed_box
+        page_hash[:TrimBox] = trim_box if trim_box
+        page_hash[:ArtBox] = art_box if art_box
+        page_hash[:CropBox] = crop_box if crop_box
+        page = document.add(page_hash, type: Pdfrb::Model::Type::Page)
         page.value[:Rotate] = rotate if rotate.nonzero?
         kids = (root.value[:Kids] ||= [])
         kids << Pdfrb::Model::Reference.new(page.oid, page.gen)
