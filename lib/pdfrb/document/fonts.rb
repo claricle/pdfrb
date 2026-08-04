@@ -39,6 +39,7 @@ module Pdfrb
         @font_dicts[resource] = font_dict
         load_afm_metrics(resource, name)
         if @pending_io_data
+          load_ttf_metrics(resource, @pending_io_data) unless @afm_metrics[resource]
           @font_streams[resource] = @pending_io_data
           @pending_io_data = nil
         end
@@ -219,6 +220,39 @@ module Pdfrb
             cap_height: parser.cap_height || 700,
             bbox: parser.bbox || [0, 0, 1000, 1000],
             units_per_em: 1000,
+          }
+        rescue StandardError
+          nil
+        end
+      end
+
+      def load_ttf_metrics(resource, data)
+        return unless valid_font_data?(data)
+
+        begin
+          ttf = Pdfrb::Font::TrueType::File.new(data)
+          widths = Array.new(256, DEFAULT_WIDTH)
+
+          table = Pdfrb::Font::Encoding::WinAnsiEncoding::TABLE
+          table.each_with_index do |cp, byte|
+            next unless cp
+
+            glyph_id = ttf.cmap.glyph_id_for(cp)
+            next unless glyph_id && glyph_id.positive?
+
+            w = ttf.hmtx.advance_width(glyph_id)
+            widths[byte] = w if w && w.positive?
+          end
+
+          head = ttf.head
+          hhea = ttf.hhea
+          @afm_metrics[resource] = {
+            widths: widths,
+            ascent: hhea.ascender || 800,
+            descent: hhea.descender || -200,
+            cap_height: nil,
+            bbox: head.bbox || [0, 0, 1000, 1000],
+            units_per_em: head.units_per_em || 1000,
           }
         rescue StandardError
           nil
