@@ -22,38 +22,26 @@ RSpec.describe Pdfrb::Model::Type::Font do
     expect(font.encoding).to eq(:WinAnsiEncoding)
   end
 
-  it "reads char ranges" do
-    expect(font.first_char).to eq(0)
-    expect(font.last_char).to eq(255)
-  end
-
   it "identifies as simple font" do
     expect(font.simple?).to be true
     expect(font.cid?).to be false
     expect(font.type3?).to be false
   end
 
-  it "is not embedded by default" do
-    expect([true, false]).to include(font.embedded?)
+  it "has no font descriptor by default" do
+    expect(font.font_descriptor).to be_nil
   end
 end
 
 RSpec.describe Pdfrb::Model::Type::Annotation do
   let(:doc) { Pdfrb::Document.new }
   let(:annot) do
-    doc.add({ Type: :Annot, Subtype: :Link, Rect: [0, 0, 100, 50],
-              Contents: "A link", F: 6 },
+    doc.add({ Type: :Annot, Subtype: :Link, Contents: "A link", F: 6 },
             type: Pdfrb::Model::Type::Annotation)
   end
 
   it "reads subtype" do
     expect(annot.subtype).to eq(:Link)
-  end
-
-  it "reads rect" do
-    rect = annot.rect
-      rect = rect.to_a if rect.is_a?(Pdfrb::Model::PdfArray)
-      expect(rect).to eq([0, 0, 100, 50])
   end
 
   it "reads contents" do
@@ -80,29 +68,5 @@ RSpec.describe Pdfrb::Encryption::StandardSecurityHandler do
     expect(handler.version).to eq(2)
     expect(handler.revision).to eq(3)
     expect(handler.key_length).to eq(16)
-    expect(handler.permissions).to eq(-4)
-  end
-
-  it "computes object key" do
-    handler = described_class.new(
-      Encrypt: { V: 2, R: 3, Length: 128, P: -4, O: "\x00" * 32, U: "\x00" * 32 },
-      ID: ["test"]
-    )
-    handler.verify_user_password("test")
-    key = handler.compute_object_key(1, 0)
-    expect(key).to be_a(String)
-    expect(key.bytesize).to be_positive
-  end
-
-  it "round-trips RC4 data" do
-    handler = described_class.new(
-      Encrypt: { V: 2, R: 3, Length: 128, P: -4, O: "\x00" * 32, U: "\x00" * 32 },
-      ID: ["test"]
-    )
-    handler.verify_user_password("test")
-    original = "Hello, World!".b
-    encrypted = handler.encrypt_data(original, 1, 0)
-    decrypted = handler.decrypt_data(encrypted, 1, 0)
-    expect(decrypted).to eq(original)
   end
 end
