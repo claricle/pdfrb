@@ -324,10 +324,20 @@ module Pdfrb
       def default_font(name)
         tu_stream = self.class.build_tounicode(document)
         tu_ref = Pdfrb::Model::Reference.new(tu_stream.oid, tu_stream.gen)
+
+        fd = document.add({
+          Type: :FontDescriptor, FontName: name.to_sym, Flags: 32,
+          FontBBox: [0, 0, 1000, 1000], ItalicAngle: 0,
+          Ascent: 800, Descent: -200, CapHeight: 700, StemV: 80,
+        }, type: Pdfrb::Model::Cos::Dictionary)
+        fd_ref = Pdfrb::Model::Reference.new(fd.oid, fd.gen)
+
+        subtype = @pending_subtype || :Type1
         document.add({
-          Type: :Font, Subtype: :Type1, BaseFont: name.to_sym,
+          Type: :Font, Subtype: subtype, BaseFont: name.to_sym,
           Encoding: :WinAnsiEncoding, FirstChar: 0, LastChar: 255,
-          Widths: Array.new(256, DEFAULT_WIDTH), ToUnicode: tu_ref,
+          Widths: Array.new(256, DEFAULT_WIDTH),
+          FontDescriptor: fd_ref, ToUnicode: tu_ref,
         }, type: Pdfrb::Model::Type::FontType1)
       end
 
