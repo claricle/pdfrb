@@ -32,13 +32,12 @@ RSpec.describe "Content stream corpus round-trip" do
   end
 end
 
-RSpec.describe "Cross-impl diff vs HexaPDF" do
   before(:all) do
-    skip "HexaPDF gem not available" unless Gem.loaded_specs.key?("hexapdf")
+
   end
 
   it "parses the same Catalog and Page count" do
-    skip "needs HexaPDF gem + fixture corpus"
+
     raise "not yet implemented"
   end
 end
