@@ -3,7 +3,7 @@
 require "spec_helper"
 
 RSpec.describe Pdfrb::ImageLoader::PNG do
-  describe ".parse_png_header" do
+  describe ".parse_header" do
     it "parses a PNG IHDR chunk" do
       # PNG signature + IHDR chunk
       data = "\x89PNG\r\n\x1A\n".b  # PNG signature
@@ -15,7 +15,7 @@ RSpec.describe Pdfrb::ImageLoader::PNG do
       data += "\x02".b          # color type 2 = RGB
       data += "\x00\x00\x00".b  # compression, filter, interlace
 
-      info = described_class.parse_png_header(data)
+      info = described_class.parse_header(data)
       expect(info[:width]).to eq(100)
       expect(info[:height]).to eq(200)
       expect(info[:bits]).to eq(8)
@@ -23,7 +23,7 @@ RSpec.describe Pdfrb::ImageLoader::PNG do
     end
 
     it "returns empty hash for non-PNG data" do
-      expect(described_class.parse_png_header("not a png")).to eq({})
+      expect(described_class.parse_header("not a png")).to eq({})
     end
   end
 end
