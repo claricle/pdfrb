@@ -5,11 +5,12 @@ module Pdfrb
     module JPEG
       module_function
 
-      def load(document, path_or_io)
-        data = read_data(path_or_io)
-        info = parse_jpeg_header(data)
+      def call(document, data, **_opts)
+        data = data.read if data.is_a?(IO) || data.is_a?(StringIO)
+        info = parse_header(data)
+        return nil if info.empty?
 
-        stream = document.add(
+        image = document.add(
           {
             Type: :XObject,
             Subtype: :Image,
@@ -20,53 +21,50 @@ module Pdfrb
             Filter: :DCTDecode,
             Length: data.bytesize,
           },
-          type: Pdfrb::Model::Cos::Stream
+          type: Pdfrb::Model::Type::XObjectImage
         )
-        stream.stream = data
-        stream
+        image.stream = data
+        image
       end
 
-      def parse_jpeg_header(data)
-        return {} unless data && data.bytesize >= 4
+      def parse_header(data)
+        return {} unless data && data.is_a?(String) && data.bytesize >= 6
+        return {} unless data.getbyte(0) == 0xFF && data.getbyte(1) == 0xD8
 
-        i = 0
-        info = { bits: 8 }
-
+        i = 2
         while i < data.bytesize - 1
-          marker = (data.getbyte(i) << 8) | data.getbyte(i + 1)
+          break unless data.getbyte(i) == 0xFF
 
-          case marker
-          when 0xFFD8
-            i += 2
-          when 0xFFC0..0xFFCF
-            break unless i + 9 < data.bytesize
-            info[:bits] = data.getbyte(i + 4)
-            info[:height] = (data.getbyte(i + 5) << 8) | data.getbyte(i + 6)
-            info[:width] = (data.getbyte(i + 7) << 8) | data.getbyte(i + 8)
-            components = data.getbyte(i + 9)
-            info[:color_space] = case components
-                                 when 1 then :DeviceGray
-                                 when 3 then :DeviceRGB
-                                 when 4 then :DeviceCMYK
-                                 else :DeviceRGB
-                                 end
-            break
-          else
-            i += 2
-            seg_len = (data.getbyte(i) << 8) | data.getbyte(i + 1) if i + 1 < data.bytesize
-            i += seg_len || 2
+          marker = data.getbyte(i + 1)
+          i += 2
+
+          next if marker >= 0xD0 && marker <= 0xD9
+          next if marker == 0x01
+
+          break if i + 1 >= data.bytesize
+          seg_len = (data.getbyte(i) << 8) | data.getbyte(i + 1)
+
+          if marker >= 0xC0 && marker <= 0xCF && marker != 0xC4 && marker != 0xC8 && marker != 0xCC
+            return parse_sof(data, i)
           end
-        end
 
-        info
+          i += seg_len
+        end
+        {}
       end
 
-      def read_data(path_or_io)
-        case path_or_io
-        when String then File.binread(path_or_io)
-        when IO, StringIO then path_or_io.read
-        else path_or_io.to_s
-        end
+      def parse_sof(data, offset)
+        {
+          bits: data.getbyte(offset + 2),
+          height: (data.getbyte(offset + 3) << 8) | data.getbyte(offset + 4),
+          width: (data.getbyte(offset + 5) << 8) | data.getbyte(offset + 6),
+          color_space: case data.getbyte(offset + 7)
+                       when 1 then :DeviceGray
+                       when 3 then :DeviceRGB
+                       when 4 then :DeviceCMYK
+                       else :DeviceRGB
+                       end,
+        }
       end
     end
   end

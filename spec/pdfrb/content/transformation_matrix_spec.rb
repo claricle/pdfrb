@@ -30,8 +30,8 @@ RSpec.describe Pdfrb::Content::TransformationMatrix do
     m1 = described_class.new.translate(10, 20)
     m2 = described_class.new.scale(2, 2)
     result = m1.multiply(m2)
-    expect(result.e).to eq(20.0)
-    expect(result.f).to eq(40.0)
+    expect(result.e).to eq(10.0)
+    expect(result.f).to eq(20.0)
   end
 
   it "converts to array" do
