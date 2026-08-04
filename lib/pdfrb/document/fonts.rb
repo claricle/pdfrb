@@ -88,14 +88,20 @@ module Pdfrb
         total * size.to_f / 1000.0
       end
 
-      def glyph_width(char, resource)
+      def glyph_width(resource, codepoint)
         metrics = @afm_metrics[resource]
         return DEFAULT_WIDTH unless metrics
-        byte = char.to_s.bytes.first || 0
-        metrics[:widths][byte] || DEFAULT_WIDTH
+
+        cp = codepoint.is_a?(String) ? (codepoint.each_codepoint.first || 0) : codepoint.to_i
+        return 0 if cp > 255
+
+        metrics[:widths][cp] || 0
       end
 
-      def glyph_widths(text, resource); text.to_s.each_char.map { |c| glyph_width(c, resource) }; end
+      def glyph_widths(resource, codepoints)
+        cps = codepoints.is_a?(String) ? codepoints.each_codepoint.to_a : codepoints
+        cps.map { |cp| glyph_width(resource, cp) }
+      end
       def metrics_for(resource); @afm_metrics[resource]; end
 
       def valid_font_data?(data)
