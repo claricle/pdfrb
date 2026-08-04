@@ -20,7 +20,9 @@ module Pdfrb
       #   rotate: 0                     # degrees
       #
       # Returns the new +Model::Type::Page+.
-      def add(media_box: [0, 0, 612, 792], rotate: 0)
+      def add(media_box: nil, rotate: 0, width: nil, height: nil)
+        media_box ||= (width && height ? [0, 0, width, height] : [0, 0, 612, 792])
+        media_box ||= (width && height ? [0, 0, width, height] : [0, 0, 612, 792])
         root = pages_root
         contents = document.add({}, type: Pdfrb::Model::Cos::Stream)
         page = document.add(

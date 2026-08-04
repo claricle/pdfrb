@@ -211,6 +211,7 @@ module Pdfrb
             descent: parser.descender || -200,
             cap_height: parser.cap_height || 700,
             bbox: parser.bbox || [0, 0, 1000, 1000],
+            units_per_em: 1000,
           }
         rescue StandardError
           nil

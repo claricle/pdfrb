@@ -73,4 +73,8 @@ module Pdfrb
   def self.logger
     @logger ||= Logger.new($stderr, level: Logger::WARN)
   end
+
+  def self.logger=(log)
+    @logger = log
+  end
 end
