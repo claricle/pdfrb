@@ -24,6 +24,7 @@ module Pdfrb
         @encodings = {}
         @font_dicts = {}
         @used_codepoints = Hash.new { |h, k| h[k] = Set.new }
+        @font_streams = {}
       end
 
       def add(name_or_io, **opts)
@@ -35,6 +36,10 @@ module Pdfrb
         font_dict = register_font(resource, name, **opts)
         @encodings[resource] = font_dict&.value&.[](:Encoding)
         @font_dicts[resource] = font_dict
+        if @pending_io_data
+          @font_streams[resource] = @pending_io_data
+          @pending_io_data = nil
+        end
         @registry[name] = resource
         resource
       end
@@ -211,7 +216,7 @@ module Pdfrb
       def font_name_for(name_or_io)
         case name_or_io
         when Symbol, String then name_or_io.to_s
-        when IO, StringIO then "EmbeddedFont-#{name_or_io.read.bytesize}"
+        when IO, StringIO then @pending_io_data = name_or_io.read; "EmbeddedFont-#{@pending_io_data.bytesize}"
         else
           raise ArgumentError, "font name must be a String, Symbol, or IO"
         end

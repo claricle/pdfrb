@@ -159,6 +159,30 @@ module Pdfrb
             )
           }
         ))
+      rs.register(Rule.new(
+          id: "a1-2",
+          description: "Object streams not allowed in PDF/A-1",
+          severity: :error,
+          spec_clause: "ISO 19005-1 6.2.4",
+          check: ->(doc) {
+            violation = nil
+            doc.each_indirect_object do |obj|
+              next unless obj.respond_to?(:value)
+              next unless obj.value[:Type] == :ObjStm
+
+              violation = Violation.new(
+                rule_id: "a1-2",
+                message: "Object streams not allowed in PDF/A-1",
+                object: "ObjStm",
+                severity: :error,
+                spec_clause: "ISO 19005-1 6.2.4"
+              )
+              break
+            end
+            violation
+          }
+        ))
+
       end
 
       A1 = RuleSet.new("PDF/A-1").tap do |rs|
