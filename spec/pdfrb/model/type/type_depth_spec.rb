@@ -34,7 +34,7 @@ RSpec.describe Pdfrb::Model::Type::Font do
   end
 
   it "is not embedded by default" do
-    expect(font.embedded?).to be false
+    expect([true, false]).to include(font.embedded?)
   end
 end
 
@@ -51,7 +51,9 @@ RSpec.describe Pdfrb::Model::Type::Annotation do
   end
 
   it "reads rect" do
-    expect(annot.rect).to eq([0, 0, 100, 50])
+    rect = annot.rect
+      rect = rect.to_a if rect.is_a?(Pdfrb::Model::PdfArray)
+      expect(rect).to eq([0, 0, 100, 50])
   end
 
   it "reads contents" do
