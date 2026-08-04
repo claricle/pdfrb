@@ -2,8 +2,6 @@
 
 module Pdfrb
   module Content
-    # Color space registry and conversion. Follows OCP: adding a new
-    # color space = registering a class, no switch edits.
     module ColorSpace
       REGISTRY = {}
 
@@ -12,7 +10,7 @@ module Pdfrb
           REGISTRY[name.to_sym] = klass
         end
 
-        def resolve(name, document = nil)
+        def resolve(name, _document = nil)
           REGISTRY[name.to_sym]
         end
 
@@ -21,7 +19,6 @@ module Pdfrb
         end
       end
 
-      # DeviceGray: single-component gray (0=black, 1=white)
       class DeviceGray
         def self.family; :DeviceGray; end
         def self.components; 1; end
@@ -29,7 +26,6 @@ module Pdfrb
       end
       register :DeviceGray, DeviceGray
 
-      # DeviceRGB: three-component additive color
       class DeviceRGB
         def self.family; :DeviceRGB; end
         def self.components; 3; end
@@ -37,7 +33,6 @@ module Pdfrb
       end
       register :DeviceRGB, DeviceRGB
 
-      # DeviceCMYK: four-component subtractive color
       class DeviceCMYK
         def self.family; :DeviceCMYK; end
         def self.components; 4; end
@@ -45,7 +40,6 @@ module Pdfrb
       end
       register :DeviceCMYK, DeviceCMYK
 
-      # CalGray: calibrated gray with white point and gamma
       class CalGray
         attr_reader :white_point, :gamma
 
@@ -54,12 +48,11 @@ module Pdfrb
           @gamma = gamma
         end
 
-        def self.family; :CalGray; end
-        def self.components; 1; end
+        def family; :CalGray; end
+        def components; 1; end
       end
       register :CalGray, CalGray
 
-      # CalRGB: calibrated RGB with white/black point and gamma
       class CalRGB
         attr_reader :white_point, :black_point, :gamma
 
@@ -69,12 +62,11 @@ module Pdfrb
           @gamma = gamma
         end
 
-        def self.family; :CalRGB; end
-        def self.components; 3; end
+        def family; :CalRGB; end
+        def components; 3; end
       end
       register :CalRGB, CalRGB
 
-      # Lab: CIE L*a*b* color space
       class Lab
         attr_reader :white_point, :black_point, :range
 
@@ -84,12 +76,11 @@ module Pdfrb
           @range = range
         end
 
-        def self.family; :Lab; end
-        def self.components; 3; end
+        def family; :Lab; end
+        def components; 3; end
       end
       register :Lab, Lab
 
-      # ICCBased: ICC profile-based color space
       class ICCBased
         attr_reader :stream_ref, :alternate, :range, :n
 
@@ -100,13 +91,11 @@ module Pdfrb
           @range = range
         end
 
-        def self.family; :ICCBased; end
-
+        def family; :ICCBased; end
         def components; @n; end
       end
       register :ICCBased, ICCBased
 
-      # Indexed: lookup table maps byte index → color components
       class Indexed
         attr_reader :base, :hival, :lookup
 
@@ -116,12 +105,11 @@ module Pdfrb
           @lookup = lookup
         end
 
-        def self.family; :Indexed; end
-        def self.components; 1; end
+        def family; :Indexed; end
+        def components; 1; end
       end
       register :Indexed, Indexed
 
-      # Separation: single named ink (e.g., PANTONE 185)
       class Separation
         attr_reader :name, :alternate_space, :tint_transform
 
@@ -131,12 +119,11 @@ module Pdfrb
           @tint_transform = tint_transform
         end
 
-        def self.family; :Separation; end
-        def self.components; 1; end
+        def family; :Separation; end
+        def components; 1; end
       end
       register :Separation, Separation
 
-      # DeviceN: multiple named inks
       class DeviceN
         attr_reader :names, :alternate_space, :tint_transform
 
@@ -146,16 +133,14 @@ module Pdfrb
           @tint_transform = tint_transform
         end
 
-        def self.family; :DeviceN; end
-        def self.components; 0; end
+        def family; :DeviceN; end
 
         def components
-          @namesdef self.components; @names&.length || 0; end.length || 0
+          (@names || []).length
         end
       end
       register :DeviceN, DeviceN
 
-      # Pattern: pattern color space
       class Pattern
         attr_reader :base_space
 
@@ -163,8 +148,8 @@ module Pdfrb
           @base_space = base_space
         end
 
-        def self.family; :Pattern; end
-        def self.components; 0; end
+        def family; :Pattern; end
+        def components; 0; end
       end
       register :Pattern, Pattern
     end
