@@ -44,9 +44,9 @@ module Pdfrb
               Flags: 32,
               FontBBox: head&.bbox || [0, 0, 1000, 1000],
               ItalicAngle: 0,
-              Ascent: os2&.typo_ascender || ttf.hhea&.ascender || 800,
-              Descent: os2&.typo_descender || ttf.hhea&.descender || -200,
-              CapHeight: os2&.cap_height || 700,
+              Ascent: os2&.s_typo_ascender || ttf.hhea&.ascender || 800,
+              Descent: os2&.s_typo_descender || ttf.hhea&.descender || -200,
+              CapHeight: os2&.s_cap_height || 700,
               StemV: 80,
             },
             type: Pdfrb::Model::Cos::Dictionary
