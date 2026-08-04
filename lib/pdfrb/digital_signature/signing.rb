@@ -18,7 +18,7 @@ module Pdfrb
           {
             Type: :Sig,
             Filter: :"Adobe.PPKLite",
-            SubFilter: :adbe.pkcs7.detached
+            SubFilter: :"adbe.pkcs7.detached"
           },
           type: Pdfrb::Model::Cos::Dictionary
         )

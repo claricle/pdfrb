@@ -161,7 +161,22 @@ module Pdfrb
 
     def display; @display ||= Document::Display.new(self); end
 
-    def xmp; @xmp ||= Document::Metadata.new(self); end
+    def xmp
+      return @xmp if @xmp
+
+      packet = begin
+        require "pdfrb/xmp"
+        Pdfrb::XMP::Packet.new
+      rescue LoadError
+        return nil
+      end
+      title = metadata[:Title]
+      packet.title = title if title
+      author = metadata[:Author]
+      packet.author = author if author
+      @xmp = packet
+    end
+
 
     def version=(v); @version = v.to_s; end
 

@@ -27,6 +27,9 @@ module Pdfrb
       def title; @dc.title.first; end
       def creator=(value); @dc.creator = Array(value); end
       def creator; @dc.creator.first; end
+
+      def author=(value); @dc.creator = Array(value); end
+      def author; @dc.creator.first; end
       def description=(value); @dc.description = Array(value); end
       def description; @dc.description.first; end
       def subject=(value); @dc.subject = Array(value); end
