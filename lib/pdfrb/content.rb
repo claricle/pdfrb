@@ -6,6 +6,7 @@ module Pdfrb
     autoload :Operator, "pdfrb/content/operator"
     autoload :Parser, "pdfrb/content/parser"
     autoload :Processor, "pdfrb/content/processor"
+    autoload :ColorSpace, "pdfrb/content/color_space"
     autoload :Canvas, "pdfrb/content/canvas"
     autoload :GraphicObject, "pdfrb/content/graphic_object"
     autoload :TilingPattern, "pdfrb/content/tiling_pattern"
