@@ -167,6 +167,17 @@ module Pdfrb
       autoload :AppearanceCharacteristics, "pdfrb/model/type/appearance"
       autoload :MediaClip, "pdfrb/model/type/appearance"
       autoload :Rendition, "pdfrb/model/type/appearance"
+
+      # Page box color info (s7.7.3.3).
+      autoload :BoxColorInfo, "pdfrb/model/type/box_color_info"
+      autoload :BoxStyle, "pdfrb/model/type/box_color_info"
+
+      # Collection / Portfolio (s7.11.5).
+      autoload :Collection, "pdfrb/model/type/collection"
+      autoload :CollectionSchema, "pdfrb/model/type/collection"
+      autoload :CollectionSort, "pdfrb/model/type/collection"
+      autoload :CollectionField, "pdfrb/model/type/collection"
+      autoload :CollectionItem, "pdfrb/model/type/collection"
     end
   end
 end
