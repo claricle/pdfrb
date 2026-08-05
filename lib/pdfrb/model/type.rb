@@ -80,6 +80,17 @@ module Pdfrb
       autoload :Movie, "pdfrb/model/type/movie"
       autoload :Sound, "pdfrb/model/type/sound"
 
+      # Color space dicts (s8.6).
+      autoload :CalGray, "pdfrb/model/type/color_space_dict"
+      autoload :CalRGB, "pdfrb/model/type/color_space_dict"
+      autoload :Lab, "pdfrb/model/type/color_space_dict"
+      autoload :Indexed, "pdfrb/model/type/color_space_dict"
+
+      # Pattern family (s8.7).
+      autoload :Pattern, "pdfrb/model/type/pattern"
+      autoload :PatternTiling, "pdfrb/model/type/pattern"
+      autoload :PatternShading, "pdfrb/model/type/pattern"
+
       # Font family.
       autoload :Font, "pdfrb/model/type/font"
       autoload :FontType1, "pdfrb/model/type/font_type1"
