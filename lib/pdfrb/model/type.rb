@@ -147,6 +147,9 @@ module Pdfrb
       autoload :ActionSetState, "pdfrb/model/type/action_media"
       autoload :ActionThread, "pdfrb/model/type/action_media"
       autoload :ActionGoTo3DView, "pdfrb/model/type/action_media"
+      autoload :ActionGoToDp, "pdfrb/model/type/action_pdf20"
+      autoload :ActionRichMediaExecute, "pdfrb/model/type/action_pdf20"
+      autoload :ActionNOP, "pdfrb/model/type/action_pdf20"
     end
   end
 end
