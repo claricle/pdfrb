@@ -28,7 +28,7 @@ module Pdfrb
         end
       end
 
-      # Base semantic types (one file per TSV cluster).
+      # Base semantic types.
       autoload :FileTrailer, "pdfrb/model/type/file_trailer"
       autoload :Catalog, "pdfrb/model/type/catalog"
       autoload :Info, "pdfrb/model/type/info"
@@ -70,28 +70,28 @@ module Pdfrb
 
       # Halftone family (s8.7.4).
       autoload :Halftone, "pdfrb/model/type/halftone"
-      autoload :HalftoneType1, "pdfrb/model/type/halftone"
-      autoload :HalftoneType5, "pdfrb/model/type/halftone"
-      autoload :HalftoneType6, "pdfrb/model/type/halftone"
-      autoload :HalftoneType10, "pdfrb/model/type/halftone"
-      autoload :HalftoneType16, "pdfrb/model/type/halftone"
+      autoload :HalftoneType1, "pdfrb/model/type/halftone_type1"
+      autoload :HalftoneType5, "pdfrb/model/type/halftone_type5"
+      autoload :HalftoneType6, "pdfrb/model/type/halftone_type6"
+      autoload :HalftoneType10, "pdfrb/model/type/halftone_type10"
+      autoload :HalftoneType16, "pdfrb/model/type/halftone_type16"
 
       # Media (s13.3-4). Legacy media types retained for round-trip.
       autoload :Movie, "pdfrb/model/type/movie"
       autoload :Sound, "pdfrb/model/type/sound"
 
       # Color space dicts (s8.6).
-      autoload :CalGray, "pdfrb/model/type/color_space_dict"
-      autoload :CalRGB, "pdfrb/model/type/color_space_dict"
-      autoload :Lab, "pdfrb/model/type/color_space_dict"
-      autoload :Indexed, "pdfrb/model/type/color_space_dict"
-      autoload :Separation, "pdfrb/model/type/color_space_dict"
-      autoload :DeviceN, "pdfrb/model/type/color_space_dict"
+      autoload :CalGray, "pdfrb/model/type/cal_gray"
+      autoload :CalRGB, "pdfrb/model/type/cal_rgb"
+      autoload :Lab, "pdfrb/model/type/lab"
+      autoload :Indexed, "pdfrb/model/type/indexed"
+      autoload :Separation, "pdfrb/model/type/separation"
+      autoload :DeviceN, "pdfrb/model/type/device_n"
 
       # Pattern family (s8.7).
       autoload :Pattern, "pdfrb/model/type/pattern"
-      autoload :PatternTiling, "pdfrb/model/type/pattern"
-      autoload :PatternShading, "pdfrb/model/type/pattern"
+      autoload :PatternTiling, "pdfrb/model/type/pattern_tiling"
+      autoload :PatternShading, "pdfrb/model/type/pattern_shading"
 
       # Font family.
       autoload :Font, "pdfrb/model/type/font"
@@ -103,10 +103,10 @@ module Pdfrb
       autoload :CIDSystemInfo, "pdfrb/model/type/cid_system_info"
       autoload :FontDescriptor, "pdfrb/model/type/font_descriptor"
       autoload :FontFile, "pdfrb/model/type/font_file"
-      autoload :FontFile2, "pdfrb/model/type/font_file"
-      autoload :FontFile3, "pdfrb/model/type/font_file"
+      autoload :FontFile2, "pdfrb/model/type/font_file2"
+      autoload :FontFile3, "pdfrb/model/type/font_file3"
 
-      # Annotation + Action families (with subtype dispatch).
+      # Annotation family.
       autoload :Annotation, "pdfrb/model/type/annotation"
       autoload :MarkupAnnotation, "pdfrb/model/type/markup_annotation"
       autoload :WidgetAnnotation, "pdfrb/model/type/widget_annotation"
@@ -121,10 +121,10 @@ module Pdfrb
       autoload :PolylineAnnotation, "pdfrb/model/type/polyline_annotation"
       autoload :InkAnnotation, "pdfrb/model/type/ink_annotation"
       autoload :TextMarkupAnnotation, "pdfrb/model/type/text_markup_annotation"
-      autoload :HighlightAnnotation, "pdfrb/model/type/text_markup_annotation"
-      autoload :UnderlineAnnotation, "pdfrb/model/type/text_markup_annotation"
-      autoload :SquigglyAnnotation, "pdfrb/model/type/text_markup_annotation"
-      autoload :StrikeOutAnnotation, "pdfrb/model/type/text_markup_annotation"
+      autoload :HighlightAnnotation, "pdfrb/model/type/highlight_annotation"
+      autoload :UnderlineAnnotation, "pdfrb/model/type/underline_annotation"
+      autoload :SquigglyAnnotation, "pdfrb/model/type/squiggly_annotation"
+      autoload :StrikeOutAnnotation, "pdfrb/model/type/strikeout_annotation"
       autoload :PopupAnnotation, "pdfrb/model/type/popup_annotation"
       autoload :FileAttachmentAnnotation, "pdfrb/model/type/file_attachment_annotation"
       autoload :CaretAnnotation, "pdfrb/model/type/caret_annotation"
@@ -133,6 +133,8 @@ module Pdfrb
       autoload :PrinterMarkAnnotation, "pdfrb/model/type/printer_mark_annotation"
       autoload :ScreenAnnotation, "pdfrb/model/type/screen_annotation"
       autoload :SoundAnnotation, "pdfrb/model/type/sound_annotation"
+
+      # Action family (s12.6.4).
       autoload :Action, "pdfrb/model/type/action"
       autoload :ActionGoTo, "pdfrb/model/type/action_goto"
       autoload :ActionGoToR, "pdfrb/model/type/action_go_to_r"
@@ -146,53 +148,53 @@ module Pdfrb
       autoload :ActionImportData, "pdfrb/model/type/action_import_data"
       autoload :ActionTrans, "pdfrb/model/type/action_trans"
       autoload :ActionNamed, "pdfrb/model/type/action_named"
-      autoload :ActionRendition, "pdfrb/model/type/action_media"
-      autoload :ActionMovie, "pdfrb/model/type/action_media"
-      autoload :ActionSoundAction, "pdfrb/model/type/action_media"
-      autoload :ActionSetState, "pdfrb/model/type/action_media"
-      autoload :ActionThread, "pdfrb/model/type/action_media"
-      autoload :ActionGoTo3DView, "pdfrb/model/type/action_media"
-      autoload :ActionGoToDp, "pdfrb/model/type/action_pdf20"
-      autoload :ActionRichMediaExecute, "pdfrb/model/type/action_pdf20"
-      autoload :ActionNOP, "pdfrb/model/type/action_pdf20"
+      autoload :ActionRendition, "pdfrb/model/type/action_rendition"
+      autoload :ActionMovie, "pdfrb/model/type/action_movie"
+      autoload :ActionSoundAction, "pdfrb/model/type/action_sound_action"
+      autoload :ActionSetState, "pdfrb/model/type/action_set_state"
+      autoload :ActionThread, "pdfrb/model/type/action_thread"
+      autoload :ActionGoTo3DView, "pdfrb/model/type/action_go_to_3d_view"
+      autoload :ActionGoToDp, "pdfrb/model/type/action_go_to_dp"
+      autoload :ActionRichMediaExecute, "pdfrb/model/type/action_rich_media_execute"
+      autoload :ActionNOP, "pdfrb/model/type/action_nop"
 
       # Signature family (s12.8).
       autoload :Signature, "pdfrb/model/type/signature"
-      autoload :SigFieldLock, "pdfrb/model/type/signature"
-      autoload :SigFieldSeedValue, "pdfrb/model/type/signature"
-      autoload :DocMDPTransformParameters, "pdfrb/model/type/signature"
+      autoload :SigFieldLock, "pdfrb/model/type/sig_field_lock"
+      autoload :SigFieldSeedValue, "pdfrb/model/type/sig_field_seed_value"
+      autoload :DocMDPTransformParameters, "pdfrb/model/type/doc_mdp_transform_parameters"
 
       # Appearance + Media (s12.5.5, s13.3).
       autoload :Appearance, "pdfrb/model/type/appearance"
-      autoload :AppearanceCharacteristics, "pdfrb/model/type/appearance"
-      autoload :MediaClip, "pdfrb/model/type/appearance"
-      autoload :Rendition, "pdfrb/model/type/appearance"
+      autoload :AppearanceCharacteristics, "pdfrb/model/type/appearance_characteristics"
+      autoload :MediaClip, "pdfrb/model/type/media_clip"
+      autoload :Rendition, "pdfrb/model/type/rendition"
 
       # Page box color info (s7.7.3.3).
       autoload :BoxColorInfo, "pdfrb/model/type/box_color_info"
-      autoload :BoxStyle, "pdfrb/model/type/box_color_info"
+      autoload :BoxStyle, "pdfrb/model/type/box_style"
 
       # Collection / Portfolio (s7.11.5).
       autoload :Collection, "pdfrb/model/type/collection"
-      autoload :CollectionSchema, "pdfrb/model/type/collection"
-      autoload :CollectionSort, "pdfrb/model/type/collection"
-      autoload :CollectionField, "pdfrb/model/type/collection"
-      autoload :CollectionItem, "pdfrb/model/type/collection"
+      autoload :CollectionSchema, "pdfrb/model/type/collection_schema"
+      autoload :CollectionSort, "pdfrb/model/type/collection_sort"
+      autoload :CollectionField, "pdfrb/model/type/collection_field"
+      autoload :CollectionItem, "pdfrb/model/type/collection_item"
 
       # Signature transform parameters (s12.8.2).
-      autoload :MDPDict, "pdfrb/model/type/transform_params"
-      autoload :FieldMDPTransformParameters, "pdfrb/model/type/transform_params"
-      autoload :URTransformParameters, "pdfrb/model/type/transform_params"
+      autoload :MDPDict, "pdfrb/model/type/mdp_dict"
+      autoload :FieldMDPTransformParameters, "pdfrb/model/type/field_mdp_transform_parameters"
+      autoload :URTransformParameters, "pdfrb/model/type/ur_transform_parameters"
 
       # Embedded file params + misc globals.
-      autoload :EmbeddedFileParameter, "pdfrb/model/type/embedded_file_param"
-      autoload :JBIG2Globals, "pdfrb/model/type/embedded_file_param"
-      autoload :URLAlias, "pdfrb/model/type/embedded_file_param"
-      autoload :URIDict, "pdfrb/model/type/embedded_file_param"
+      autoload :EmbeddedFileParameter, "pdfrb/model/type/embedded_file_parameter"
+      autoload :JBIG2Globals, "pdfrb/model/type/jbig2_globals"
+      autoload :URLAlias, "pdfrb/model/type/url_alias"
+      autoload :URIDict, "pdfrb/model/type/uri_dict"
 
       # Structure types (s14.7).
       autoload :StructureAttributes, "pdfrb/model/type/structure_attributes"
-      autoload :StructureElementKid, "pdfrb/model/type/structure_attributes"
+      autoload :StructureElementKid, "pdfrb/model/type/structure_element_kid"
     end
   end
 end

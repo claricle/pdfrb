@@ -60,56 +60,6 @@ module Pdfrb
           nil
         end
       end
-
-      # Signature field lock (s12.7.6.5). Specifies which fields are
-      # locked after signing.
-      class SigFieldLock < Pdfrb::Model::Cos::Dictionary
-        def action; self[:Action]&.to_sym; end
-        def fields; self[:Fields]; end
-
-        def all_locked?; action == :All; end
-        def include_locked?; action == :Include; end
-        def exclude_locked?; action == :Exclude; end
-
-        def locked_field_names
-          return [] unless include_locked? && fields
-
-          arr = fields.is_a?(Pdfrb::Model::PdfArray) ? fields.to_a : fields
-          arr.is_a?(Array) ? arr : []
-        end
-      end
-
-      # Signature field seed value (s12.7.6.6). Constraints the signer
-      # must obey when signing (cert issuers, hash algorithms, etc.).
-      class SigFieldSeedValue < Pdfrb::Model::Cos::Dictionary
-        def filter; self[:Filter]; end
-        def sub_filter; self[:SubFilter]; end
-        def digest_method; self[:DigestMethod]; end
-        def cert; self[:Cert]; end
-        def flags; self[:F] || 0; end
-        def legal_attestation; self[:LegalAttestation]; end
-        def add_rev_info?; flags & 1 != 0; end
-        def add_doc_mdp?; flags & 2 != 0; end
-        def add_field_mdp?; flags & 4 != 0; end
-        def required_filter?; filter && flags.anybits?(0x100); end
-        def required_subfilter?; sub_filter && flags.anybits?(0x200); end
-        def required_digest?; digest_method && flags.anybits?(0x400); end
-        def required_cert?; cert && flags.anybits?(0x800); end
-      end
-
-      # Document Modification Detection and Prevention (DocMDP) —
-      # s12.8.2.2. Restricts what edits are allowed after signing.
-      class DocMDPTransformParameters < Pdfrb::Model::Cos::Dictionary
-        def type; self[:Type]; end
-        def p; self[:P]; end
-        def v; self[:V]; end
-
-        # P=1: no changes allowed; P=2: minimal changes (form fill);
-        # P=3: annotations + form fill.
-        def no_changes_allowed?; p == 1; end
-        def minimal_changes_allowed?; p == 2; end
-        def annotations_allowed?; p == 3; end
-      end
     end
   end
 end

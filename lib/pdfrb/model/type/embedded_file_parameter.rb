@@ -43,37 +43,6 @@ module Pdfrb
           nil
         end
       end
-
-      # JBIG2 Globals stream (s7.4.7). Holds shared JBIG2 segment
-      # data referenced by /DecodeParms /JBIG2Globals.
-      class JBIG2Globals < Pdfrb::Model::Cos::Stream
-        def globals_data
-          decoded_stream&.force_encoding(Encoding::BINARY)
-        end
-      end
-
-      # URL Alias (s7.9.6). Names dictionary entry mapping friendly
-      # URLs to actual URLs for collection sub-items.
-      class URLAlias < Pdfrb::Model::Cos::Dictionary
-        def type; self[:Type]; end
-        def alias_value; self[:U]; end
-        def url; self[:URL]; end
-
-        def has_alias?
-          !!alias_value
-        end
-      end
-
-      # URI dict (s12.5.6.5). Catalog /URI dict for base URI and
-      # retriever map.
-      class URIDict < Pdfrb::Model::Cos::Dictionary
-        def base; self[:Base]; end
-        def retriever_map; self[:Map]; end
-
-        def has_base?
-          !!base
-        end
-      end
     end
   end
 end
