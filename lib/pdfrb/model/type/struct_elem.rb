@@ -51,7 +51,7 @@ module Pdfrb
         end
 
         def heading?
-          [:H, :H1, :H2, :H3, :H4, :H5, :H6].include?(structure_type&.to_sym)
+          %i[H H1 H2 H3 H4 H5 H6].include?(structure_type&.to_sym)
         end
 
         def table?
@@ -61,12 +61,14 @@ module Pdfrb
         def resolved_parent
           ref = parent
           return nil unless ref && document
+
           document.object(ref)
         end
 
         def resolved_page
           ref = page
           return nil unless ref && document
+
           document.object(ref)
         end
 

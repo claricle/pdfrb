@@ -19,11 +19,13 @@ module Pdfrb
 
         def target_page_number
           return nil unless page_index_destination?
+
           destination.first
         end
 
         def display_option
           return nil unless page_index_destination?
+
           destination[1..]
         end
       end

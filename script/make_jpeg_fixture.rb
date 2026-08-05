@@ -16,10 +16,10 @@ bytes << "\x00".b               # table id 0, precision 0 (8-bit)
 # SOF0 (Start Of Frame, baseline) — 2x1 RGB
 bytes << "\xFF\xC0".b          # marker
 bytes << "\x00\x0B".b          # length = 11
-bytes << "\x08".b               # precision 8-bit
+bytes << "\x08".b # precision 8-bit
 bytes << "\x00\x01".b          # height = 1
 bytes << "\x00\x02".b          # width = 2
-bytes << "\x03".b               # num components = 3 (YCbCr)
+bytes << "\x03".b # num components = 3 (YCbCr)
 bytes << "\x01\x11\x00".b      # Y component (id=1, sampling 1x1, quant table 0)
 bytes << "\x02\x11\x00".b      # Cb component (id=2, sampling 1x1, quant table 0)
 bytes << "\x03\x11\x00".b      # Cr component (id=3, sampling 1x1, quant table 0)
@@ -28,11 +28,11 @@ def huffman_table(bytes, table_class, table_id)
   bytes << "\xFF\xC4".b
   # 16 bytes of bit-length counts (all zero for simplicity except code 0)
   lengths = [0] * 16
-  lengths[0] = 1  # one code of length 1
-  payload = [table_class << 4 | table_id].pack("C") + lengths.pack("C16")
+  lengths[0] = 1 # one code of length 1
+  payload = [(table_class << 4) | table_id].pack("C") + lengths.pack("C16")
   body = payload
-  body << "\x00".b  # one symbol value = 0
-  bytes << [body.bytesize + 2].pack("n") + body.b
+  body << "\x00".b # one symbol value = 0
+  bytes << ([body.bytesize + 2].pack("n") + body.b)
 end
 huffman_table(bytes, 0, 0)  # DC table 0
 huffman_table(bytes, 1, 0)  # AC table 0

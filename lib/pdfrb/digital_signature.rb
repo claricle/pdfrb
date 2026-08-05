@@ -13,9 +13,9 @@ module Pdfrb
     autoload :TimestampHandler, "pdfrb/digital_signature/timestamp_handler"
 
     HANDLERS = {
-      :"adbe.pkcs7.detached" => CmsHandler,
-      :"adbe.pkcs7.sha1" => CmsHandler,
-      :"adbe.revision" => TimestampHandler,
+      "adbe.pkcs7.detached": CmsHandler,
+      "adbe.pkcs7.sha1": CmsHandler,
+      "adbe.revision": TimestampHandler,
     }.freeze
 
     module_function
@@ -24,8 +24,8 @@ module Pdfrb
       HANDLERS[sub_filter.to_sym]
     end
 
-    def sign(document, cert:, key:, **opts)
-      Handler.sign(document, cert: cert, key: key, **opts)
+    def sign(document, cert:, key:, **)
+      Handler.sign(document, cert: cert, key: key, **)
     end
 
     def verify(document, trusted_certs: [])

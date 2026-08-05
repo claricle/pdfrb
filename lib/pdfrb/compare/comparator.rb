@@ -1,5 +1,3 @@
-require "set"
-
 # frozen_string_literal: true
 
 module Pdfrb
@@ -155,7 +153,7 @@ module Pdfrb
         []
       end
 
-      def walk_outline(outlines, doc, &block)
+      def walk_outline(outlines, doc, &)
         current = outlines[:First]
         while current
           entry = doc.object(current)
@@ -166,7 +164,7 @@ module Pdfrb
 
           if entry[:First]
             child = doc.object(entry[:First])
-            walk_outline(child, doc, &block) if child
+            walk_outline(child, doc, &) if child
           end
 
           current = entry[:Next]

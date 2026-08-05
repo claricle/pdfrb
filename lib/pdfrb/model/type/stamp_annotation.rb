@@ -9,6 +9,7 @@ module Pdfrb
         def interior_color; self[:IC]; end
         def rotation; self[:Rotate] || 0; end
         def intent; self[:IT]; end
+
         def rubber_stamp?
           intent.nil? || intent&.to_sym == :Stamp
         end

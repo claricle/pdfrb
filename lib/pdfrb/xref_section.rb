@@ -38,8 +38,8 @@ module Pdfrb
       @entries[oid]
     end
 
-    def each_entry(&block)
-      @entries.each(&block)
+    def each_entry(&)
+      @entries.each(&)
     end
 
     def merge!(other)

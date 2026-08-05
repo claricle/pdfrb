@@ -15,11 +15,13 @@ module Pdfrb
 
         def transition_style
           return nil unless transition
+
           transition[:S]&.to_sym
         end
 
         def duration
           return nil unless transition
+
           transition[:D]
         end
       end

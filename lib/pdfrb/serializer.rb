@@ -19,8 +19,8 @@ module Pdfrb
     end
 
     class << self
-      def serialize(value, encrypter: nil, **opts)
-        new(encrypter: encrypter, **opts).serialize(value)
+      def serialize(value, encrypter: nil, **)
+        new(encrypter: encrypter, **).serialize(value)
       end
     end
 

@@ -20,12 +20,14 @@ module Pdfrb
         def it; self[:IT]; end
 
         def start_point
-          return nil unless line && line.is_a?(Array) && line.size >= 2
+          return nil unless line.is_a?(Array) && line.size >= 2
+
           line[0..1]
         end
 
         def end_point
-          return nil unless line && line.is_a?(Array) && line.size >= 4
+          return nil unless line.is_a?(Array) && line.size >= 4
+
           line[2..3]
         end
 

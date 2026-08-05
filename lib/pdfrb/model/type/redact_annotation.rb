@@ -13,7 +13,6 @@ module Pdfrb
 
         def alignment
           case quadding
-          when 0 then :left
           when 1 then :center
           when 2 then :right
           else :left

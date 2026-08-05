@@ -13,8 +13,8 @@ module Pdfrb
         super(Array(arr), oid: oid, gen: gen, document: document)
       end
 
-      def each(&block)
-        @value.each(&block)
+      def each(&)
+        @value.each(&)
         self
       end
 

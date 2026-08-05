@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "set"
-
 module Pdfrb
   # Top-level PDF document facade. Owns:
   #   * The IO it was read from (or nil for in-memory).

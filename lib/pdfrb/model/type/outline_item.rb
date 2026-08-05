@@ -26,11 +26,11 @@ module Pdfrb
         end
 
         def bold?
-          f && (f & 1) != 0
+          f&.anybits?(1)
         end
 
         def italic?
-          f && (f & 2) != 0
+          f&.anybits?(2)
         end
 
         def has_children?
@@ -39,11 +39,13 @@ module Pdfrb
 
         def open?
           return true unless count
-          count > 0
+
+          count.positive?
         end
 
         def child_count
           return 0 unless count
+
           count.abs
         end
 

@@ -31,11 +31,11 @@ module Pdfrb
         def components
           cs = color_space
           return 0 unless cs
+
           case cs.to_sym
           when :DeviceGray, :CalGray, :Indexed then 1
           when :DeviceRGB, :CalRGB, :Lab then 3
           when :DeviceCMYK then 4
-          else nil
           end
         rescue StandardError
           nil
@@ -46,7 +46,7 @@ module Pdfrb
         end
 
         def has_soft_mask?
-          !!smask || smask_in_data.to_i > 0
+          !!smask || smask_in_data.to_i.positive?
         end
 
         def inline_soft_mask?
@@ -60,7 +60,8 @@ module Pdfrb
 
         def bytes_per_row
           return nil unless width && bits_per_component && components
-          (width * components * bits_per_component + 7) / 8
+
+          ((width * components * bits_per_component) + 7) / 8
         end
       end
     end

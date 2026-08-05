@@ -10,7 +10,7 @@ RSpec.describe "Type depth — comprehensive coverage" do
       doc.add({ Type: :Catalog, PageLayout: :TwoColumnLeft,
                 PageMode: :UseOutlines, MarkInfo: { Marked: true },
                 Lang: "en-US" },
-              type: Pdfrb::Model::Type::Catalog)
+              type: described_class)
     end
 
     it "exposes page-layout and page-mode predicates" do
@@ -51,7 +51,7 @@ RSpec.describe "Type depth — comprehensive coverage" do
       doc.add({ Font: { F1: :Helvetica },
                 ColorSpace: { CS1: :DeviceRGB },
                 ProcSet: [:PDF, :Text] },
-              type: Pdfrb::Model::Type::Resources)
+              type: described_class)
     end
 
     it "lists names per resource category" do
@@ -74,7 +74,7 @@ RSpec.describe "Type depth — comprehensive coverage" do
       doc.add({ Type: :XObject, Subtype: :Image,
                 Width: 2, Height: 2, BitsPerComponent: 8,
                 ColorSpace: :DeviceRGB },
-              type: Pdfrb::Model::Type::XObjectImage)
+              type: described_class)
     end
 
     it "exposes geometry" do
@@ -102,7 +102,7 @@ RSpec.describe "Type depth — comprehensive coverage" do
       doc.add({ Type: :XObject, Subtype: :Form,
                 BBox: [0, 0, 100, 100],
                 Matrix: [1, 0, 0, 1, 0, 0] },
-              type: Pdfrb::Model::Type::XObjectForm)
+              type: described_class)
     end
 
     it "exposes bbox and matrix" do
@@ -124,7 +124,7 @@ RSpec.describe "Type depth — comprehensive coverage" do
     let(:intent) do
       doc.add({ Type: :OutputIntent, S: :GTS_PDFA1,
                 OutputConditionIdentifier: "sRGB" },
-              type: Pdfrb::Model::Type::OutputIntent)
+              type: described_class)
     end
 
     it "classifies as PDF/A" do
@@ -140,7 +140,7 @@ RSpec.describe "Type depth — comprehensive coverage" do
   describe Pdfrb::Model::Type::OptionalContentGroup do
     let(:ocg) do
       doc.add({ Type: :OCG, Name: "Layer 1", Intent: [:View, :Print] },
-              type: Pdfrb::Model::Type::OptionalContentGroup)
+              type: described_class)
     end
 
     it "decodes intent flags" do
@@ -153,7 +153,7 @@ RSpec.describe "Type depth — comprehensive coverage" do
   describe Pdfrb::Model::Type::GraphicsStateParameter do
     let(:gsp) do
       doc.add({ Type: :ExtGState, LW: 2.0, LC: 1, Font: [:F1, 12] },
-              type: Pdfrb::Model::Type::GraphicsStateParameter)
+              type: described_class)
     end
 
     it "exposes graphics state fields" do
@@ -174,7 +174,7 @@ RSpec.describe "Type depth — comprehensive coverage" do
   describe Pdfrb::Model::Type::OutlineItem do
     let(:item) do
       doc.add({ Title: "Chapter 1", F: 3, Count: 2 },
-              type: Pdfrb::Model::Type::OutlineItem)
+              type: described_class)
     end
 
     it "decodes style flags" do
@@ -191,7 +191,7 @@ RSpec.describe "Type depth — comprehensive coverage" do
   describe Pdfrb::Model::Type::StructElem do
     let(:elem) do
       doc.add({ Type: :StructElem, S: :H1, Alt: "Heading text" },
-              type: Pdfrb::Model::Type::StructElem)
+              type: described_class)
     end
 
     it "classifies as heading" do
@@ -209,7 +209,7 @@ RSpec.describe "Type depth — comprehensive coverage" do
     let(:enc) do
       doc.add({ Filter: :Standard, V: 5, R: 6, Length: 256, P: -1,
                 O: "\x00" * 48, U: "\x00" * 48, EncryptMetadata: false },
-              type: Pdfrb::Model::Type::EncryptionStandard)
+              type: described_class)
     end
 
     it "detects AES-256" do
@@ -230,7 +230,7 @@ RSpec.describe "Type depth — comprehensive coverage" do
     let(:info) do
       doc.add({ Title: "Report", Author: "Alice",
                 CreationDate: "D:20260101120000+00'00'" },
-              type: Pdfrb::Model::Type::Info)
+              type: described_class)
     end
 
     it "exposes bibliographic fields" do
@@ -247,7 +247,7 @@ RSpec.describe "Type depth — comprehensive coverage" do
     let(:action) do
       doc.add({ Type: :Action, S: :SubmitForm, F: "https://example.com",
                 Flags: 4 },
-              type: Pdfrb::Model::Type::ActionSubmitForm)
+              type: described_class)
     end
 
     it "decodes submit-format flags" do
@@ -260,7 +260,7 @@ RSpec.describe "Type depth — comprehensive coverage" do
   describe Pdfrb::Model::Type::AFFileSpecification do
     let(:spec) do
       doc.add({ Type: :Filespec, F: "data.xml", AFRelationship: :Data },
-              type: Pdfrb::Model::Type::AFFileSpecification)
+              type: described_class)
     end
 
     it "exposes AF relationship" do

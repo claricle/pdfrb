@@ -36,12 +36,17 @@ module Pdfrb
 
         def effective_embedded_file
           return nil unless embedded_file
-          mapping = embedded_file.is_a?(Pdfrb::Model::Reference) && document ?
-                       document.object(embedded_file) : embedded_file
+
+          mapping = if embedded_file.is_a?(Pdfrb::Model::Reference) && document
+                      document.object(embedded_file)
+                    else
+                      embedded_file
+                    end
           return nil unless mapping.respond_to?(:[])
 
           ref = mapping[:UF] || mapping[:F]
           return nil unless ref && document
+
           document.object(ref)
         end
       end

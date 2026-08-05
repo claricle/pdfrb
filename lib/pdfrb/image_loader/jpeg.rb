@@ -61,7 +61,6 @@ module Pdfrb
           width: (data.getbyte(offset + 5) << 8) | data.getbyte(offset + 6),
           color_space: case data.getbyte(offset + 7)
                        when 1 then :DeviceGray
-                       when 3 then :DeviceRGB
                        when 4 then :DeviceCMYK
                        else :DeviceRGB
                        end,

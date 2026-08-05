@@ -6,7 +6,7 @@ module Pdfrb
       module Wrapper
         module_function
 
-        def embed(document, ttf_data, resource_name:)
+        def embed(document, ttf_data, **)
           ttf = File.new(ttf_data)
           name = ttf.name_table_parsed
           ps_name = name&.ps_name || "EmbeddedFont"

@@ -43,15 +43,15 @@ RSpec.describe Pdfrb::Content::ColorSpace do
 
     it "creates Separation" do
       cs = described_class::Separation.new(name: "PANTONE#20185",
-                                            alternate_space: :DeviceCMYK,
-                                            tint_transform: nil)
+                                           alternate_space: :DeviceCMYK,
+                                           tint_transform: nil)
       expect(cs.name).to eq("PANTONE#20185")
     end
 
     it "creates DeviceN" do
       cs = described_class::DeviceN.new(names: %w[Cyan Magenta],
-                                         alternate_space: :DeviceCMYK,
-                                         tint_transform: nil)
+                                        alternate_space: :DeviceCMYK,
+                                        tint_transform: nil)
       expect(cs.components).to eq(2)
     end
 

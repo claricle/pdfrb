@@ -18,6 +18,7 @@ module Pdfrb
 
         def open?
           return false unless popup
+
           obj = popup.is_a?(Pdfrb::Model::Reference) && document ? document.object(popup) : popup
           obj && obj[:Open]
         end

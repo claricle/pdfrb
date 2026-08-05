@@ -51,6 +51,7 @@ module Pdfrb
 
         def has_procset?(name)
           return false unless proc_set
+
           arr = proc_set.is_a?(Pdfrb::Model::PdfArray) ? proc_set.to_a : proc_set
           arr.is_a?(Array) && arr.include?(name)
         end
@@ -65,6 +66,7 @@ module Pdfrb
 
         def dict_keys(dict)
           return [] unless dict
+
           obj = dict.is_a?(Pdfrb::Model::Reference) && document ? document.object(dict) : dict
           case obj
           when Hash then obj.keys

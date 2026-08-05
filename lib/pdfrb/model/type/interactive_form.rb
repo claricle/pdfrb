@@ -22,16 +22,17 @@ module Pdfrb
 
         def field_count
           return 0 unless fields
+
           arr = fields.is_a?(Pdfrb::Model::PdfArray) ? fields.to_a : fields
           arr.is_a?(Array) ? arr.size : 0
         end
 
         def append_only_signatures?
-          sig_flags && (sig_flags & 1) != 0
+          sig_flags&.anybits?(1)
         end
 
         def contains_signature_dr_usage?
-          sig_flags && (sig_flags & 2) != 0
+          sig_flags&.anybits?(2)
         end
 
         def text_alignment
@@ -39,7 +40,6 @@ module Pdfrb
           when 0 then :left
           when 1 then :center
           when 2 then :right
-          else nil
           end
         end
       end

@@ -24,23 +24,26 @@ module Pdfrb
         def resolved_first
           ref = first
           return nil unless ref && document
+
           document.object(ref)
         end
 
         def resolved_last
           ref = last
           return nil unless ref && document
+
           document.object(ref)
         end
 
         def each_item(&block)
-          return enum_for(:each_item) unless block_given?
+          return enum_for(:each_item) unless block
           return unless first && document
 
           cur_ref = first
           while cur_ref
             item = document.object(cur_ref)
             break unless item
+
             yield item
             cur_ref = item[:Next]
           end

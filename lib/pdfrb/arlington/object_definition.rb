@@ -20,8 +20,8 @@ module Pdfrb
         new(name: name, version: version, fields: fields)
       end
 
-      def each_field(&block)
-        @fields.each(&block)
+      def each_field(&)
+        @fields.each(&)
       end
 
       def field_for(key)

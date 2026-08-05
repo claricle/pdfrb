@@ -40,39 +40,39 @@ module Pdfrb
 
         def metadata_encrypted?
           value = encrypt_metadata?
-          value.nil? ? true : !!value
+          value.nil? || !!value
         end
 
         def allow_print?
-          permissions && (permissions & 4) != 0
+          permissions&.anybits?(4)
         end
 
         def allow_modify_contents?
-          permissions && (permissions & 8) != 0
+          permissions&.anybits?(8)
         end
 
         def allow_copy?
-          permissions && (permissions & 16) != 0
+          permissions&.anybits?(16)
         end
 
         def allow_annotations?
-          permissions && (permissions & 32) != 0
+          permissions&.anybits?(32)
         end
 
         def allow_fill_in?
-          permissions && (permissions & 256) != 0
+          permissions&.anybits?(256)
         end
 
         def allow_extract?
-          permissions && (permissions & 512) != 0
+          permissions&.anybits?(512)
         end
 
         def allow_assemble?
-          permissions && (permissions & 1024) != 0
+          permissions&.anybits?(1024)
         end
 
         def allow_print_high_res?
-          permissions && (permissions & 2048) != 0
+          permissions&.anybits?(2048)
         end
       end
     end

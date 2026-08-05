@@ -76,7 +76,7 @@ module Pdfrb
         nil
       end
 
-      def detect_in_stream(stream_obj, page, &block)
+      def detect_in_stream(stream_obj, page, &)
         bytes = stream_obj.stream
         return unless bytes && !bytes.empty?
 
@@ -104,7 +104,7 @@ module Pdfrb
           end
         end
 
-        collector.items.each(&block)
+        collector.items.each(&)
       rescue StandardError
         nil
       end

@@ -8,8 +8,9 @@ module Pdfrb
         register_subtype :ResetForm
 
         def fields; self[:Fields]; end
+
         def include_exclude?
-          !!self[:Flags] && (self[:Flags] & 1) != 0
+          !!self[:Flags] && self[:Flags].anybits?(1)
         end
 
         def has_field_list?

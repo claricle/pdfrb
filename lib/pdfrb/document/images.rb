@@ -18,8 +18,8 @@ module Pdfrb
       # Build an Image XObject from +io+ (path, IO, or bytes) and
       # register it in the document's /Resources/XObject. Returns the
       # resource name (e.g. :Im1).
-      def add(io, **opts)
-        image = Pdfrb::ImageLoader.load(document, io, **opts)
+      def add(io, **)
+        image = Pdfrb::ImageLoader.load(document, io, **)
         name = next_resource_name
         attach_to_resources(name, image)
         registry[name] = image
@@ -30,10 +30,10 @@ module Pdfrb
         registry[name]
       end
 
-      def each(&block)
+      def each(&)
         return enum_for(:each) unless block_given?
 
-        registry.each(&block)
+        registry.each(&)
         self
       end
 

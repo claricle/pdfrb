@@ -28,13 +28,13 @@ module Pdfrb
         @font_streams = {}
       end
 
-      def add(name_or_io, **opts)
+      def add(name_or_io, **)
         name = font_name_for(name_or_io)
         cached = @registry[name]
         return cached if cached
 
         resource = next_resource_name
-        font_dict = register_font(resource, name, **opts)
+        font_dict = register_font(resource, name, **)
         @encodings[resource] = font_dict&.value&.[](:Encoding)
         @font_dicts[resource] = font_dict
         load_afm_metrics(resource, name)
@@ -53,10 +53,10 @@ module Pdfrb
 
       def [](name); @registry[name]; end
 
-      def each(&block)
+      def each(&)
         return enum_for(:each) unless block_given?
 
-        @registry.each(&block)
+        @registry.each(&)
         self
       end
 

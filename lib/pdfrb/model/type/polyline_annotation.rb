@@ -15,6 +15,7 @@ module Pdfrb
 
         def vertex_count
           return 0 unless vertices
+
           arr = vertices.is_a?(Pdfrb::Model::PdfArray) ? vertices.to_a : vertices
           arr.is_a?(Array) ? arr.size : 0
         end

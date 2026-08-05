@@ -37,7 +37,7 @@ RSpec.describe Pdfrb::Model::Type::Annotation do
   let(:doc) { Pdfrb::Document.new }
   let(:annot) do
     doc.add({ Type: :Annot, Subtype: :Link, Contents: "A link", F: 6 },
-            type: Pdfrb::Model::Type::Annotation)
+            type: described_class)
   end
 
   it "reads subtype" do
@@ -78,14 +78,14 @@ RSpec.describe Pdfrb::Model::Type::FontDescriptor do
       {
         Type: :FontDescriptor,
         FontName: :HelveticaBold,
-        Flags: 0x60,        # italic (0x40) + nonsymbolic (0x20)
+        Flags: 0x60, # italic (0x40) + nonsymbolic (0x20)
         Ascent: 718,
         Descent: -207,
         ItalicAngle: -12,
         CapHeight: 718,
-        StemV: 165
+        StemV: 165,
       },
-      type: Pdfrb::Model::Type::FontDescriptor
+      type: described_class
     )
   end
 
@@ -116,7 +116,7 @@ RSpec.describe Pdfrb::Model::Type::Action do
 
   it "exposes subtype predicates for URI actions" do
     action = doc.add({ Type: :Action, S: :URI, URI: "https://example.com" },
-                     type: Pdfrb::Model::Type::Action)
+                     type: described_class)
     expect(action.uri?).to be true
     expect(action.goto?).to be false
     expect(action.uri).to eq("https://example.com")
@@ -124,7 +124,7 @@ RSpec.describe Pdfrb::Model::Type::Action do
 
   it "exposes destination for GoTo actions" do
     action = doc.add({ Type: :Action, S: :GoTo, D: [1, :Fit] },
-                     type: Pdfrb::Model::Type::Action)
+                     type: described_class)
     expect(action.goto?).to be true
     expect(action.d).to eq([1, :Fit])
   end
@@ -135,7 +135,7 @@ RSpec.describe Pdfrb::Model::Type::EncryptionStandard do
   let(:enc) do
     doc.add({ Filter: :Standard, V: 4, R: 4, Length: 128, P: -1,
               O: "\x00" * 32, U: "\x00" * 32, EncryptMetadata: true },
-            type: Pdfrb::Model::Type::EncryptionStandard)
+            type: described_class)
   end
 
   it "exposes encryption parameters" do
@@ -164,7 +164,7 @@ RSpec.describe Pdfrb::Model::Type::FileSpecification do
   let(:spec) do
     doc.add({ Type: :Filespec, F: "report.pdf", UF: "report.pdf",
               Desc: "Annual report" },
-            type: Pdfrb::Model::Type::FileSpecification)
+            type: described_class)
   end
 
   it "exposes name fields" do
@@ -188,7 +188,7 @@ RSpec.describe Pdfrb::Model::Type::OutlineItem do
   let(:doc) { Pdfrb::Document.new }
   let(:item) do
     doc.add({ Title: "Chapter 1", Count: -3, F: 1, C: [1.0, 0.0, 0.0] },
-            type: Pdfrb::Model::Type::OutlineItem)
+            type: described_class)
   end
 
   it "exposes title and style" do
@@ -201,7 +201,7 @@ RSpec.describe Pdfrb::Model::Type::OutlineItem do
   it "reports child count and open state" do
     expect(item.has_children?).to be true
     expect(item.child_count).to eq(3)
-    expect(item.open?).to be false  # negative count = closed
+    expect(item.open?).to be false # negative count = closed
   end
 end
 
@@ -209,7 +209,7 @@ RSpec.describe Pdfrb::Model::Type::InteractiveForm do
   let(:doc) { Pdfrb::Document.new }
   let(:form) do
     doc.add({ Fields: [{}, {}, {}], NeedAppearances: true, SigFlags: 3 },
-            type: Pdfrb::Model::Type::InteractiveForm)
+            type: described_class)
   end
 
   it "counts fields and reports appearance needs" do
@@ -230,7 +230,7 @@ RSpec.describe Pdfrb::Model::Type::HighlightAnnotation do
               QuadPoints: [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0,
                            9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0],
               Contents: "highlighted" },
-            type: Pdfrb::Model::Type::HighlightAnnotation)
+            type: described_class)
   end
 
   it "inherits markup contents from parent" do
@@ -254,7 +254,7 @@ RSpec.describe Pdfrb::Model::Type::LineAnnotation do
     doc.add({ Type: :Annot, Subtype: :Line,
               L: [10.0, 20.0, 110.0, 120.0], Cap: true,
               Contents: "ruler" },
-            type: Pdfrb::Model::Type::LineAnnotation)
+            type: described_class)
   end
 
   it "exposes line endpoints" do
@@ -271,7 +271,7 @@ RSpec.describe Pdfrb::Model::Type::TextField do
   let(:doc) { Pdfrb::Document.new }
   let(:field) do
     doc.add({ T: "first_name", FT: :Tx, V: "Alice", Ff: 0x1000 },
-            type: Pdfrb::Model::Type::TextField)
+            type: described_class)
   end
 
   it "exposes type, name, value" do

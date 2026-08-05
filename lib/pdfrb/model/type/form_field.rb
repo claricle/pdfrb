@@ -4,7 +4,7 @@ module Pdfrb
   module Model
     module Type
       class Field < Cos::Dictionary
-        register_type :Annot
+        register_type :Field
 
         def field_type; self[:FT]; end
         def field_name; self[:T]; end
@@ -38,15 +38,19 @@ module Pdfrb
         def resolved_parent
           ref = parent
           return nil unless ref && document
+
           document.object(ref)
         end
 
         def root_field
           cur = self
-          while cur && cur.parent
+          while cur&.parent
             parent_ref = cur.parent
-            cur = parent_ref.is_a?(Pdfrb::Model::Reference) && document ?
-                    document.object(parent_ref) : parent_ref
+            cur = if parent_ref.is_a?(Pdfrb::Model::Reference) && document
+                    document.object(parent_ref)
+                  else
+                    parent_ref
+                  end
           end
           cur
         end
@@ -58,6 +62,7 @@ module Pdfrb
             parts << cur.field_name if cur.field_name
             parent_ref = cur.parent
             break unless parent_ref && document
+
             cur = document.object(parent_ref)
           end
           parts.reverse.join(".")

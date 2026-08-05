@@ -28,33 +28,38 @@ module Pdfrb
         end
 
         def has_id?
-          id && id.is_a?(Array) && id.size == 2
+          id.is_a?(Array) && id.size == 2
         end
 
         def original_id
           return nil unless has_id?
+
           arr = id.is_a?(Pdfrb::Model::PdfArray) ? id.to_a : id
           arr[0]
         end
 
         def current_id
           return nil unless has_id?
+
           arr = id.is_a?(Pdfrb::Model::PdfArray) ? id.to_a : id
           arr[1] || arr[0]
         end
 
         def resolved_root
           return nil unless root && document
+
           document.object(root)
         end
 
         def resolved_info
           return nil unless info && document
+
           document.object(info)
         end
 
         def resolved_encrypt
           return nil unless encrypt && document
+
           document.object(encrypt)
         end
       end

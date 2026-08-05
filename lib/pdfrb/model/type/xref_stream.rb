@@ -30,15 +30,19 @@ module Pdfrb
 
         def field_widths
           return [0, 0, 0] unless w
+
           arr = w.is_a?(Pdfrb::Model::PdfArray) ? w.to_a : w
           return [0, 0, 0] unless arr.is_a?(Array) && arr.size == 3
+
           arr
         end
 
         def subsection_index
           return [[0, size || 0]] unless index
+
           arr = index.is_a?(Pdfrb::Model::PdfArray) ? index.to_a : index
           return [[0, size || 0]] unless arr.is_a?(Array)
+
           arr.each_slice(2).to_a
         end
       end

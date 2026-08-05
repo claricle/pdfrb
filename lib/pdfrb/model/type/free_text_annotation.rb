@@ -17,7 +17,6 @@ module Pdfrb
 
         def text_alignment
           case q
-          when 0 then :left
           when 1 then :center
           when 2 then :right
           when 3 then :justify
