@@ -189,6 +189,10 @@ module Pdfrb
       autoload :JBIG2Globals, "pdfrb/model/type/embedded_file_param"
       autoload :URLAlias, "pdfrb/model/type/embedded_file_param"
       autoload :URIDict, "pdfrb/model/type/embedded_file_param"
+
+      # Structure types (s14.7).
+      autoload :StructureAttributes, "pdfrb/model/type/structure_attributes"
+      autoload :StructureElementKid, "pdfrb/model/type/structure_attributes"
     end
   end
 end
