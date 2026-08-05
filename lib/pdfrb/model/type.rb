@@ -93,6 +93,10 @@ module Pdfrb
       autoload :FileAttachmentAnnotation, "pdfrb/model/type/file_attachment_annotation"
       autoload :CaretAnnotation, "pdfrb/model/type/caret_annotation"
       autoload :RedactAnnotation, "pdfrb/model/type/redact_annotation"
+      autoload :WatermarkAnnotation, "pdfrb/model/type/watermark_annotation"
+      autoload :PrinterMarkAnnotation, "pdfrb/model/type/printer_mark_annotation"
+      autoload :ScreenAnnotation, "pdfrb/model/type/screen_annotation"
+      autoload :SoundAnnotation, "pdfrb/model/type/sound_annotation"
       autoload :Action, "pdfrb/model/type/action"
     end
   end
