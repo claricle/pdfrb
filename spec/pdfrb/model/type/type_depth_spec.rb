@@ -222,3 +222,70 @@ RSpec.describe Pdfrb::Model::Type::InteractiveForm do
     expect(form.contains_signature_dr_usage?).to be true
   end
 end
+
+RSpec.describe Pdfrb::Model::Type::HighlightAnnotation do
+  let(:doc) { Pdfrb::Document.new }
+  let(:annot) do
+    doc.add({ Type: :Annot, Subtype: :Highlight,
+              QuadPoints: [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0,
+                           9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0],
+              Contents: "highlighted" },
+            type: Pdfrb::Model::Type::HighlightAnnotation)
+  end
+
+  it "inherits markup contents from parent" do
+    expect(annot.contents).to eq("highlighted")
+  end
+
+  it "counts quad-point groups (8 numbers per quad)" do
+    expect(annot.quad_point_count).to eq(2)
+  end
+
+  it "iterates each quad as 8-element slice" do
+    quads = annot.each_quad.to_a
+    expect(quads.size).to eq(2)
+    expect(quads[0].size).to eq(8)
+  end
+end
+
+RSpec.describe Pdfrb::Model::Type::LineAnnotation do
+  let(:doc) { Pdfrb::Document.new }
+  let(:annot) do
+    doc.add({ Type: :Annot, Subtype: :Line,
+              L: [10.0, 20.0, 110.0, 120.0], Cap: true,
+              Contents: "ruler" },
+            type: Pdfrb::Model::Type::LineAnnotation)
+  end
+
+  it "exposes line endpoints" do
+    expect(annot.start_point).to eq([10.0, 20.0])
+    expect(annot.end_point).to eq([110.0, 120.0])
+  end
+
+  it "reports caption state" do
+    expect(annot.has_caption?).to be true
+  end
+end
+
+RSpec.describe Pdfrb::Model::Type::TextField do
+  let(:doc) { Pdfrb::Document.new }
+  let(:field) do
+    doc.add({ T: "first_name", FT: :Tx, V: "Alice", Ff: 0x1000 },
+            type: Pdfrb::Model::Type::TextField)
+  end
+
+  it "exposes type, name, value" do
+    expect(field.text?).to be true
+    expect(field.field_name).to eq("first_name")
+    expect(field.field_value).to eq("Alice")
+  end
+
+  it "decodes field flags" do
+    expect(field.multiline?).to be true
+    expect(field.password?).to be false
+  end
+
+  it "computes fully qualified name" do
+    expect(field.fully_qualified_name).to eq("first_name")
+  end
+end

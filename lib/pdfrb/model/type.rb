@@ -72,6 +72,27 @@ module Pdfrb
 
       # Annotation + Action families (with subtype dispatch).
       autoload :Annotation, "pdfrb/model/type/annotation"
+      autoload :MarkupAnnotation, "pdfrb/model/type/markup_annotation"
+      autoload :WidgetAnnotation, "pdfrb/model/type/widget_annotation"
+      autoload :LinkAnnotation, "pdfrb/model/type/link_annotation"
+      autoload :TextAnnotation, "pdfrb/model/type/text_annotation"
+      autoload :FreeTextAnnotation, "pdfrb/model/type/free_text_annotation"
+      autoload :StampAnnotation, "pdfrb/model/type/stamp_annotation"
+      autoload :SquareAnnotation, "pdfrb/model/type/square_annotation"
+      autoload :CircleAnnotation, "pdfrb/model/type/circle_annotation"
+      autoload :LineAnnotation, "pdfrb/model/type/line_annotation"
+      autoload :PolygonAnnotation, "pdfrb/model/type/polygon_annotation"
+      autoload :PolylineAnnotation, "pdfrb/model/type/polyline_annotation"
+      autoload :InkAnnotation, "pdfrb/model/type/ink_annotation"
+      autoload :TextMarkupAnnotation, "pdfrb/model/type/text_markup_annotation"
+      autoload :HighlightAnnotation, "pdfrb/model/type/text_markup_annotation"
+      autoload :UnderlineAnnotation, "pdfrb/model/type/text_markup_annotation"
+      autoload :SquigglyAnnotation, "pdfrb/model/type/text_markup_annotation"
+      autoload :StrikeOutAnnotation, "pdfrb/model/type/text_markup_annotation"
+      autoload :PopupAnnotation, "pdfrb/model/type/popup_annotation"
+      autoload :FileAttachmentAnnotation, "pdfrb/model/type/file_attachment_annotation"
+      autoload :CaretAnnotation, "pdfrb/model/type/caret_annotation"
+      autoload :RedactAnnotation, "pdfrb/model/type/redact_annotation"
       autoload :Action, "pdfrb/model/type/action"
     end
   end
