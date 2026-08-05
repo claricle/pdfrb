@@ -3,19 +3,19 @@
 module Pdfrb
   module Model
     module Type
+      # MarkInformation (s14.7.1). Catalog /MarkInfo — flags whether
+      # the document is tagged and structural metadata is reliable.
       class MarkInformation < Cos::Dictionary
         register_type :MarkInfo
 
-        def marked?
-          self[:Marked] == true
-        end
+        def type; self[:Type]; end
 
-        def user_properties?
-          self[:UserProperties] == true
-        end
+        def marked?; truthy?(self[:Marked]); end
+        def user_properties?; truthy?(self[:UserProperties]); end
+        def suspects?; truthy?(self[:Suspects]); end
 
-        def suspects?
-          self[:Suspects] == true
+        def tagged?
+          marked? && !suspects?
         end
       end
     end
