@@ -22,7 +22,7 @@ module Pdfrb
         def piece_info; self[:PieceInfo]; end
         def struct_parent; self[:StructParent]; end
         def associated_files; self[:AF]; end
-        def mark_stream_data?; !!self[:MS]; end
+        def mark_stream_data?; truthy?(self[:MS]); end
 
         def transparency_group?
           !!group

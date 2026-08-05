@@ -18,15 +18,15 @@ module Pdfrb
         def miter_limit; self[:ML]; end
         def dash_pattern; self[:D]; end
         def rendering_intent; self[:RI]; end
-        def stroke_adjustment?; !!self[:SA]; end
+        def stroke_adjustment?; truthy?(self[:SA]); end
         def blend_mode; self[:BM]; end
         def stroking_alpha; self[:CA]; end
         def nonstroking_alpha; self[:ca]; end
-        def alpha_source?; !!self[:AIS]; end
-        def overprint?; !!self[:OP]; end
-        def nonstroking_overprint?; !!self[:op]; end
+        def alpha_source?; truthy?(self[:AIS]); end
+        def overprint?; truthy?(self[:OP]); end
+        def nonstroking_overprint?; truthy?(self[:op]); end
         def overprint_mode; self[:OPM]; end
-        def text_knockout?; !!self[:TK]; end
+        def text_knockout?; truthy?(self[:TK]); end
         def font; self[:Font]; end
         def transfer_function; self[:TR]; end
         def transfer_function2; self[:TR2]; end
