@@ -68,6 +68,18 @@ module Pdfrb
       autoload :FunctionSampled, "pdfrb/model/type/function_sampled"
       autoload :FunctionPostScript, "pdfrb/model/type/function_postscript"
 
+      # Halftone family (s8.7.4).
+      autoload :Halftone, "pdfrb/model/type/halftone"
+      autoload :HalftoneType1, "pdfrb/model/type/halftone"
+      autoload :HalftoneType5, "pdfrb/model/type/halftone"
+      autoload :HalftoneType6, "pdfrb/model/type/halftone"
+      autoload :HalftoneType10, "pdfrb/model/type/halftone"
+      autoload :HalftoneType16, "pdfrb/model/type/halftone"
+
+      # Media (s13.3-4). Legacy media types retained for round-trip.
+      autoload :Movie, "pdfrb/model/type/movie"
+      autoload :Sound, "pdfrb/model/type/sound"
+
       # Font family.
       autoload :Font, "pdfrb/model/type/font"
       autoload :FontType1, "pdfrb/model/type/font_type1"
@@ -75,6 +87,7 @@ module Pdfrb
       autoload :FontType0, "pdfrb/model/type/font_type0"
       autoload :FontType3, "pdfrb/model/type/font_type3"
       autoload :CIDFont, "pdfrb/model/type/cid_font"
+      autoload :CIDSystemInfo, "pdfrb/model/type/cid_system_info"
       autoload :FontDescriptor, "pdfrb/model/type/font_descriptor"
 
       # Annotation + Action families (with subtype dispatch).
