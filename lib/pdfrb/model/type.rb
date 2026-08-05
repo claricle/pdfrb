@@ -102,6 +102,9 @@ module Pdfrb
       autoload :CIDFont, "pdfrb/model/type/cid_font"
       autoload :CIDSystemInfo, "pdfrb/model/type/cid_system_info"
       autoload :FontDescriptor, "pdfrb/model/type/font_descriptor"
+      autoload :FontFile, "pdfrb/model/type/font_file"
+      autoload :FontFile2, "pdfrb/model/type/font_file"
+      autoload :FontFile3, "pdfrb/model/type/font_file"
 
       # Annotation + Action families (with subtype dispatch).
       autoload :Annotation, "pdfrb/model/type/annotation"
