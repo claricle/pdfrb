@@ -68,54 +68,6 @@ module Pdfrb
           parts.reverse.join(".")
         end
       end
-
-      class TextField < Field
-        def max_len; self[:MaxLen]; end
-        def value; self[:V]; end
-        def rich_text_value; self[:RV]; end
-
-        def multiline?; flags & 0x1000 != 0; end
-        def password?; flags & 0x2000 != 0; end
-        def file_select?; flags & 0x100000 != 0; end
-        def do_not_spell_check?; flags & 0x400000 != 0; end
-        def do_not_scroll?; flags & 0x800000 != 0; end
-        def comb?; flags & 0x1000000 != 0; end
-        def rich_text?; flags & 0x2000000 != 0; end
-      end
-
-      class Button < Field
-        def value; self[:V]; end
-        def opt; self[:Opt]; end
-
-        def push_button?; flags & 0x10000 != 0; end
-        def radio?; flags & 0x8000 != 0; end
-        def no_toggle_to_off?; flags & 0x4000 != 0; end
-        def radios_in_unison?; flags & 0x2000000 != 0; end
-      end
-
-      class Choice < Field
-        def value; self[:V]; end
-        def opt; self[:Opt]; end
-        def top_index; self[:TI]; end
-        def indices; self[:I]; end
-
-        def combo?; flags & 0x20000 != 0; end
-        def list?; !combo?; end
-        def edit?; flags & 0x40000 != 0; end
-        def multi_select?; flags & 0x200000 != 0; end
-        def sort?; flags & 0x80000 != 0; end
-        def commit_on_change?; flags & 0x4000000 != 0; end
-      end
-
-      class SignatureField < Field
-        def value; self[:V]; end
-        def lock; self[:Lock]; end
-        def seed_value; self[:SV]; end
-
-        def signed?
-          value && value[:Contents]
-        end
-      end
     end
   end
 end
