@@ -7,13 +7,44 @@ module Pdfrb
       class Outline < Pdfrb::Model::Cos::Dictionary
         arlington_object "Outline"
         register_type :Outlines
-      end
 
-      # One bookmark entry (s12.3.3). Forms a doubly-linked list with
-      # /Next, /Prev, /First, /Last, /Parent; carries /Title, /A or
-      # /Dest for the navigation target.
-      class OutlineItem < Pdfrb::Model::Cos::Dictionary
-        arlington_object "OutlineItem"
+        def type; self[:Type]; end
+        def first; self[:First]; end
+        def last; self[:Last]; end
+        def count; self[:Count]; end
+
+        def empty?
+          !first
+        end
+
+        def has_items?
+          !!first
+        end
+
+        def resolved_first
+          ref = first
+          return nil unless ref && document
+          document.object(ref)
+        end
+
+        def resolved_last
+          ref = last
+          return nil unless ref && document
+          document.object(ref)
+        end
+
+        def each_item(&block)
+          return enum_for(:each_item) unless block_given?
+          return unless first && document
+
+          cur_ref = first
+          while cur_ref
+            item = document.object(cur_ref)
+            break unless item
+            yield item
+            cur_ref = item[:Next]
+          end
+        end
       end
     end
   end

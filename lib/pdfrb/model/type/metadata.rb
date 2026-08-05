@@ -9,9 +9,30 @@ module Pdfrb
         arlington_object "Metadata"
         register_type :Metadata
 
-        # Per PDF 2.0 App Note 003, /Metadata must NOT appear on
-        # Document Part Metadata (DPM) dicts. Validate callers don't
-        # try to attach one there.
+        def type; self[:Type]; end
+        def subtype; self[:Subtype]; end
+        def filter; self[:Filter]; end
+        def associated_files; self[:AF]; end
+
+        def xml?
+          subtype&.to_sym == :XML
+        end
+
+        def xmp?
+          return false unless xml? && stream
+          data = stream.to_s
+          data.include?("<x:xmpmeta") || data.include?("xmlns:x=")
+        end
+
+        def xmp_packet?
+          return false unless stream
+          stream.to_s.include?("<?xpacket")
+        end
+
+        def xmp_string
+          return nil unless stream
+          stream.to_s.force_encoding(Encoding::UTF_8)
+        end
       end
     end
   end
