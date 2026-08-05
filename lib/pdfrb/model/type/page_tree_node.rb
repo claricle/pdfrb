@@ -12,16 +12,40 @@ module Pdfrb
         arlington_object "PageTreeNode"
         register_type :Pages
 
+        def kids; self[:Kids]; end
+        def count; self[:Count] || 0; end
+        def parent; self[:Parent]; end
+        def media_box; self[:MediaBox]; end
+        def crop_box; self[:CropBox]; end
+        def resources; self[:Resources]; end
+        def rotate; self[:Rotate]; end
+
+        def root?
+          parent.nil?
+        end
+
+        def leaf?
+          false
+        end
+
+        def each_child
+          return enum_for(:each_child) unless block_given?
+          return unless kids && document
+
+          arr = kids.is_a?(Pdfrb::Model::Reference) ? document.object(kids) : kids
+          return unless arr.is_a?(Array) || arr.is_a?(Pdfrb::Model::PdfArray)
+
+          arr.each do |kid_ref|
+            obj = kid_ref.is_a?(Pdfrb::Model::Reference) ? document.object(kid_ref) : kid_ref
+            yield obj if obj
+          end
+        end
+
         # Walk all leaf PageObjects under this node.
         def each_page(&block)
           return enum_for(:each_page) unless block_given?
 
-          kids = self[:Kids] || []
-          kids.each do |kid_ref|
-            kid = kid_ref.is_a?(Pdfrb::Model::Reference) ?
-                    document&.object(kid_ref) : kid_ref
-            next unless kid
-
+          each_child do |kid|
             case kid[:Type]
             when :Pages then kid.each_page(&block)
             when :Page then yield kid
@@ -29,8 +53,27 @@ module Pdfrb
           end
         end
 
+        def pages
+          each_page.to_a
+        end
+
         def page_count
           self[:Count] || 0
+        end
+
+        def first_page
+          each_page.first
+        end
+
+        def last_page
+          each_page.to_a.last
+        end
+
+        def page_at(index)
+          return nil if index < 0 || index >= page_count
+          each_page.each_with_index do |page, i|
+            return page if i == index
+          end
         end
       end
 
