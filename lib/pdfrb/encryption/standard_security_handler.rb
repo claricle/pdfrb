@@ -119,7 +119,7 @@ module Pdfrb
         hash = md5.digest
 
         rc4 = RC4Impl.new(key)
-        20.times { |i| hash = rc4.process(hash, key XOR i) }
+        20.times { |i| hash = rc4.process(hash, key ^ i) }
 
         hash[0, 16]
       end
