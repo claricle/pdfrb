@@ -178,6 +178,17 @@ module Pdfrb
       autoload :CollectionSort, "pdfrb/model/type/collection"
       autoload :CollectionField, "pdfrb/model/type/collection"
       autoload :CollectionItem, "pdfrb/model/type/collection"
+
+      # Signature transform parameters (s12.8.2).
+      autoload :MDPDict, "pdfrb/model/type/transform_params"
+      autoload :FieldMDPTransformParameters, "pdfrb/model/type/transform_params"
+      autoload :URTransformParameters, "pdfrb/model/type/transform_params"
+
+      # Embedded file params + misc globals.
+      autoload :EmbeddedFileParameter, "pdfrb/model/type/embedded_file_param"
+      autoload :JBIG2Globals, "pdfrb/model/type/embedded_file_param"
+      autoload :URLAlias, "pdfrb/model/type/embedded_file_param"
+      autoload :URIDict, "pdfrb/model/type/embedded_file_param"
     end
   end
 end
