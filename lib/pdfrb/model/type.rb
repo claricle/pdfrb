@@ -33,7 +33,7 @@ module Pdfrb
       autoload :Catalog, "pdfrb/model/type/catalog"
       autoload :Info, "pdfrb/model/type/info"
       autoload :PageTreeNode, "pdfrb/model/type/page_tree_node"
-      autoload :PageTreeNodeRoot, "pdfrb/model/type/page_tree_node"
+      autoload :PageTreeNodeRoot, "pdfrb/model/type/page_tree_node_root"
       autoload :Page, "pdfrb/model/type/page"
       autoload :Resources, "pdfrb/model/type/resources"
       autoload :Metadata, "pdfrb/model/type/metadata"
