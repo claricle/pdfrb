@@ -70,3 +70,62 @@ RSpec.describe Pdfrb::Encryption::StandardSecurityHandler do
     expect(handler.key_length).to eq(16)
   end
 end
+
+RSpec.describe Pdfrb::Model::Type::FontDescriptor do
+  let(:doc) { Pdfrb::Document.new }
+  let(:descriptor) do
+    doc.add(
+      {
+        Type: :FontDescriptor,
+        FontName: :HelveticaBold,
+        Flags: 0x60,        # italic (0x40) + nonsymbolic (0x20)
+        Ascent: 718,
+        Descent: -207,
+        ItalicAngle: -12,
+        CapHeight: 718,
+        StemV: 165
+      },
+      type: Pdfrb::Model::Type::FontDescriptor
+    )
+  end
+
+  it "reads basic metrics" do
+    expect(descriptor.font_name).to eq(:HelveticaBold)
+    expect(descriptor.ascent).to eq(718)
+    expect(descriptor.descent).to eq(-207)
+    expect(descriptor.italic_angle).to eq(-12)
+    expect(descriptor.cap_height).to eq(718)
+    expect(descriptor.stem_v).to eq(165)
+  end
+
+  it "checks flag predicates" do
+    expect(descriptor.italic?).to be true
+    expect(descriptor.nonsymbolic?).to be true
+    expect(descriptor.symbolic?).to be false
+    expect(descriptor.fixed_pitch?).to be false
+  end
+
+  it "is not embedded by default" do
+    expect(descriptor.embedded?).to be false
+    expect(descriptor.font_file_reference).to be_nil
+  end
+end
+
+RSpec.describe Pdfrb::Model::Type::Action do
+  let(:doc) { Pdfrb::Document.new }
+
+  it "exposes subtype predicates for URI actions" do
+    action = doc.add({ Type: :Action, S: :URI, URI: "https://example.com" },
+                     type: Pdfrb::Model::Type::Action)
+    expect(action.uri?).to be true
+    expect(action.goto?).to be false
+    expect(action.uri).to eq("https://example.com")
+  end
+
+  it "exposes destination for GoTo actions" do
+    action = doc.add({ Type: :Action, S: :GoTo, D: [1, :Fit] },
+                     type: Pdfrb::Model::Type::Action)
+    expect(action.goto?).to be true
+    expect(action.d).to eq([1, :Fit])
+  end
+end
