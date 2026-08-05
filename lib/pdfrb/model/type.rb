@@ -154,6 +154,16 @@ module Pdfrb
       autoload :ScreenAnnotation, "pdfrb/model/type/screen_annotation"
       autoload :SoundAnnotation, "pdfrb/model/type/sound_annotation"
 
+      # Rich Media annotation family (s13.6).
+      autoload :RichMediaAnnotation, "pdfrb/model/type/rich_media_annotation"
+      autoload :RichMediaActivation, "pdfrb/model/type/rich_media_activation"
+      autoload :RichMediaDeactivation, "pdfrb/model/type/rich_media_deactivation"
+      autoload :RichMediaConfiguration, "pdfrb/model/type/rich_media_configuration"
+      autoload :RichMediaInstance, "pdfrb/model/type/rich_media_instance"
+      autoload :RichMediaCommand, "pdfrb/model/type/rich_media_command"
+      autoload :RichMediaContent, "pdfrb/model/type/rich_media_content"
+      autoload :RichMediaCuePoint, "pdfrb/model/type/rich_media_cue_point"
+
       # Transition + 3D markup + geolocation.
       autoload :Transition, "pdfrb/model/type/transition"
       autoload :ExData3DMarkup, "pdfrb/model/type/transition"
