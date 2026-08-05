@@ -129,3 +129,96 @@ RSpec.describe Pdfrb::Model::Type::Action do
     expect(action.d).to eq([1, :Fit])
   end
 end
+
+RSpec.describe Pdfrb::Model::Type::EncryptionStandard do
+  let(:doc) { Pdfrb::Document.new }
+  let(:enc) do
+    doc.add({ Filter: :Standard, V: 4, R: 4, Length: 128, P: -1,
+              O: "\x00" * 32, U: "\x00" * 32, EncryptMetadata: true },
+            type: Pdfrb::Model::Type::EncryptionStandard)
+  end
+
+  it "exposes encryption parameters" do
+    expect(enc.filter).to eq(:Standard)
+    expect(enc.version).to eq(4)
+    expect(enc.revision).to eq(4)
+    expect(enc.key_length_bytes).to eq(16)
+  end
+
+  it "detects AES vs RC4" do
+    expect(enc.aes?).to be true
+    expect(enc.rc4?).to be false
+  end
+
+  it "decodes permission bits" do
+    # P = -1 = 0xFFFFFFFF means all bits set → all permissions granted.
+    expect(enc.allow_print?).to be true
+    expect(enc.allow_modify_contents?).to be true
+    expect(enc.allow_copy?).to be true
+    expect(enc.allow_extract?).to be true
+  end
+end
+
+RSpec.describe Pdfrb::Model::Type::FileSpecification do
+  let(:doc) { Pdfrb::Document.new }
+  let(:spec) do
+    doc.add({ Type: :Filespec, F: "report.pdf", UF: "report.pdf",
+              Desc: "Annual report" },
+            type: Pdfrb::Model::Type::FileSpecification)
+  end
+
+  it "exposes name fields" do
+    expect(spec.file).to eq("report.pdf")
+    expect(spec.unicode_file).to eq("report.pdf")
+    expect(spec.description).to eq("Annual report")
+  end
+
+  it "picks the effective filename" do
+    expect(spec.effective_filename).to eq("report.pdf")
+  end
+
+  it "is a simple file (no EF)" do
+    expect(spec.simple?).to be true
+    expect(spec.url?).to be false
+    expect(spec.effective_embedded_file).to be_nil
+  end
+end
+
+RSpec.describe Pdfrb::Model::Type::OutlineItem do
+  let(:doc) { Pdfrb::Document.new }
+  let(:item) do
+    doc.add({ Title: "Chapter 1", Count: -3, F: 1, C: [1.0, 0.0, 0.0] },
+            type: Pdfrb::Model::Type::OutlineItem)
+  end
+
+  it "exposes title and style" do
+    expect(item.title).to eq("Chapter 1")
+    expect(item.bold?).to be true
+    expect(item.italic?).to be false
+    expect(item.color).to eq([1.0, 0.0, 0.0])
+  end
+
+  it "reports child count and open state" do
+    expect(item.has_children?).to be true
+    expect(item.child_count).to eq(3)
+    expect(item.open?).to be false  # negative count = closed
+  end
+end
+
+RSpec.describe Pdfrb::Model::Type::InteractiveForm do
+  let(:doc) { Pdfrb::Document.new }
+  let(:form) do
+    doc.add({ Fields: [{}, {}, {}], NeedAppearances: true, SigFlags: 3 },
+            type: Pdfrb::Model::Type::InteractiveForm)
+  end
+
+  it "counts fields and reports appearance needs" do
+    expect(form.field_count).to eq(3)
+    expect(form.need_appearances?).to be true
+  end
+
+  it "decodes signature flags" do
+    expect(form.append_only_signatures?).to be true
+    expect(form.contains_signature_dr_usage?).to be true
+  end
+end
