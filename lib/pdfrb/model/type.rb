@@ -134,6 +134,12 @@ module Pdfrb
       autoload :ScreenAnnotation, "pdfrb/model/type/screen_annotation"
       autoload :SoundAnnotation, "pdfrb/model/type/sound_annotation"
 
+      # Appearance generators (one per file).
+      autoload :GenericAppearance, "pdfrb/model/type/generic_appearance"
+      autoload :WidgetAppearance, "pdfrb/model/type/widget_appearance"
+      autoload :TextAppearance, "pdfrb/model/type/text_appearance"
+      autoload :LinkAppearance, "pdfrb/model/type/link_appearance"
+
       # Action family (s12.6.4).
       autoload :Action, "pdfrb/model/type/action"
       autoload :ActionGoTo, "pdfrb/model/type/action_goto"
