@@ -4,7 +4,7 @@ module Pdfrb
   module Model
     module Type
       # TrueType font (s9.6.3). /Subtype /TrueType.
-      class FontTrueType < Pdfrb::Model::Cos::Dictionary
+      class FontTrueType < Pdfrb::Model::Type::Font
         arlington_object "FontTrueType"
       end
     end
