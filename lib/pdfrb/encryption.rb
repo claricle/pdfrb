@@ -16,5 +16,22 @@ module Pdfrb
     autoload :RC4, "pdfrb/encryption/rc4"
     autoload :AES, "pdfrb/encryption/aes"
     autoload :PasswordVerification, "pdfrb/encryption/password_verification"
+    autoload :Identity, "pdfrb/encryption/identity"
+
+    module_function
+
+    # Look up a registered security-handler subclass by /Filter name.
+    def handler_for(filter_name)
+      SecurityHandler.lookup(filter_name)
+    end
+
+    # Build a security handler for +document+ by inspecting its /Encrypt.
+    # Returns nil if the document is not encrypted.
+    def handler_for_document(document, **opts)
+      SecurityHandler.for(document, decryption_opts: opts)
+    end
   end
 end
+
+# Register built-in handlers after the module is fully defined.
+Pdfrb::Encryption::SecurityHandler.register("Standard", Pdfrb::Encryption::StandardSecurityHandler)

@@ -119,5 +119,60 @@ module Pdfrb
       end
       register_as
     end
+
+    # ImportData — import FDF/XFDF form data. §12.7.6.4
+    class ImportData < Base
+      class << self
+        def action_type; :ImportData; end
+
+        def to_pdf(file_spec:)
+          { S: :ImportData, F: file_spec }
+        end
+      end
+      register_as
+    end
+
+    # SetOCGState — toggle optional-content groups. §12.6.4.13
+    class SetOCGState < Base
+      class << self
+        def action_type; :SetOCGState; end
+
+        def to_pdf(state:, preserve_rb: false)
+          payload = { S: :SetOCGState, State: state }
+          payload[:PreserveRB] = preserve_rb unless preserve_rb == false
+          payload
+        end
+      end
+      register_as
+    end
+
+    # Trans — page transition for slide-show mode. §12.4.3
+    class Trans < Base
+      class << self
+        def action_type; :Trans; end
+
+        def to_pdf(style:, duration: nil, direction: nil)
+          trans = { S: style }
+          trans[:D] = duration if duration
+          trans[:Di] = direction if direction
+          { S: :Trans, Trans: trans }
+        end
+      end
+      register_as
+    end
+
+    # GoToE — go to a destination in an embedded file. §12.6.4.4 (PDF 1.6+)
+    class GoToE < Base
+      class << self
+        def action_type; :GoToE; end
+
+        def to_pdf(file_spec:, dest:, new_window: nil)
+          payload = { S: :GoToE, F: file_spec, D: dest }
+          payload[:NewWindow] = new_window unless new_window.nil?
+          payload
+        end
+      end
+      register_as
+    end
   end
 end

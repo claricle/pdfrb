@@ -26,7 +26,7 @@ module Pdfrb
         return nil unless encrypt
 
         filter = encrypt[:Filter] || :Standard
-        klass = HANDLERS[filter.to_s] ||
+        klass = registry[filter.to_s] ||
                 raise(Pdfrb::EncryptionError, "unsupported /Filter #{filter.inspect}")
         handler = klass.new(document)
         handler.set_up_decryption(**decryption_opts)
@@ -50,14 +50,17 @@ module Pdfrb
         !@encrypt_dict.nil?
       end
 
-      HANDLERS = {}.freeze
-      private_constant :HANDLERS
-
       class << self
-        def registry; @registry ||= {}; end
+        def registry
+          @registry ||= {}
+        end
 
         def register(filter_name, klass)
           registry[filter_name.to_s] = klass
+        end
+
+        def lookup(filter_name)
+          registry[filter_name.to_s]
         end
       end
     end
