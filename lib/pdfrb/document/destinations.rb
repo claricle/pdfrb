@@ -2,7 +2,8 @@
 
 module Pdfrb
   class Document
-    # Named-destinations facade (stub). Full implementation in TODO 129.
+    # Named-destinations facade. Manages both name-tree destinations
+    # (Catalog /Names /Dests) and the explicit /Dests dictionary.
     class Destinations
       attr_reader :document
 
@@ -10,12 +11,134 @@ module Pdfrb
         @document = document
       end
 
+      # Look up a named destination by name. Returns the destination
+      # array or nil.
       def [](name)
-        names = document.catalog.value[:Names]
-        return nil unless names.is_a?(::Hash) || names.is_a?(Pdfrb::Model::Cos::Dictionary)
+        dests_dict = resolved_explicit_dict
+        return dests_dict[name] if dests_dict && dests_dict[name]
 
-        dests = names.is_a?(Pdfrb::Model::Cos::Dictionary) ? names.value[:Dests] : names[:Dests]
-        dests ? dests[name] : nil
+        name_tree = resolved_name_tree
+        lookup_in_name_tree(name_tree, name)
+      end
+
+      # Add an explicit destination under +name+. Creates the /Dests
+      # dictionary if absent.
+      def add(name, destination)
+        ensure_dictionaries
+        catalog = document.catalog
+        catalog.value[:Dests] ||= {}
+        dests = catalog.value[:Dests]
+        dests[name.to_sym] = destination
+        document.add(destination, type: Pdfrb::Model::Cos::Dictionary) unless destination.is_a?(Pdfrb::Model::Reference)
+        name.to_sym
+      end
+
+      # Enumerate all destination names (from both /Dests and /Names/Dests).
+      def each_name(&)
+        return enum_for(:each_name) unless block_given?
+
+        seen = Set.new
+        explicit = resolved_explicit_dict
+        explicit&.each_key do |k|
+          next if seen.include?(k)
+
+          seen << k
+          yield k
+        end
+
+        name_tree = resolved_name_tree
+        each_name_tree_key(name_tree) do |k|
+          next if seen.include?(k)
+
+          seen << k
+          yield k
+        end
+      end
+
+      def names
+        each_name.to_a
+      end
+
+      def empty?
+        names.empty?
+      end
+
+      def count
+        names.size
+      end
+
+      private
+
+      def ensure_dictionaries
+        catalog = document.catalog
+        catalog.value[:Names] ||= {}
+        catalog.value[:Names][:Dests] ||= {}
+      end
+
+      def resolved_explicit_dict
+        catalog = document.catalog
+        d = catalog.value[:Dests]
+        return nil unless d
+
+        d.is_a?(Pdfrb::Model::Reference) ? document.object(d) : d
+      end
+
+      def resolved_name_tree
+        catalog = document.catalog
+        names = catalog.value[:Names]
+        return nil unless names
+
+        names = document.object(names) if names.is_a?(Pdfrb::Model::Reference)
+        return nil unless names
+
+        d = names.respond_to?(:value) ? names.value[:Dests] : names[:Dests]
+        return nil unless d
+
+        d.is_a?(Pdfrb::Model::Reference) ? document.object(d) : d
+      end
+
+      def lookup_in_name_tree(node, name)
+        return nil unless node
+
+        if node.respond_to?(:value) && node.value[:Names]
+          arr = node.value[:Names]
+          arr = arr.to_a if arr.is_a?(Pdfrb::Model::PdfArray)
+          arr.each_slice(2) { |k, v| return v if k == name }
+        elsif node.respond_to?(:value) && node.value[:Kids]
+          arr = node.value[:Kids]
+          arr = arr.to_a if arr.is_a?(Pdfrb::Model::PdfArray)
+          arr.each do |kid_ref|
+            kid = kid_ref.is_a?(Pdfrb::Model::Reference) ? document.object(kid_ref) : kid_ref
+            result = lookup_in_name_tree(kid, name)
+            return result if result
+          end
+        elsif node.respond_to?(:[]) && node[:Names]
+          arr = node[:Names]
+          arr = arr.to_a if arr.is_a?(Pdfrb::Model::PdfArray)
+          arr.each_slice(2) { |k, v| return v if k == name }
+        end
+        nil
+      end
+
+      def each_name_tree_key(node, &block)
+        return unless node
+
+        if node.respond_to?(:value) && node.value[:Names]
+          arr = node.value[:Names]
+          arr = arr.to_a if arr.is_a?(Pdfrb::Model::PdfArray)
+          arr.each_slice(2) { |k, _v| yield k }
+        elsif node.respond_to?(:value) && node.value[:Kids]
+          arr = node.value[:Kids]
+          arr = arr.to_a if arr.is_a?(Pdfrb::Model::PdfArray)
+          arr.each do |kid_ref|
+            kid = kid_ref.is_a?(Pdfrb::Model::Reference) ? document.object(kid_ref) : kid_ref
+            each_name_tree_key(kid, &block)
+          end
+        elsif node.respond_to?(:[]) && node[:Names]
+          arr = node[:Names]
+          arr = arr.to_a if arr.is_a?(Pdfrb::Model::PdfArray)
+          arr.each_slice(2) { |k, _v| yield k }
+        end
       end
     end
   end
