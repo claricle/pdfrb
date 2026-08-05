@@ -143,8 +143,14 @@ module Pdfrb
       autoload :RedactAnnotation, "pdfrb/model/type/redact_annotation"
       autoload :WatermarkAnnotation, "pdfrb/model/type/watermark_annotation"
       autoload :PrinterMarkAnnotation, "pdfrb/model/type/printer_mark_annotation"
+      autoload :PrinterMarkSubDict, "pdfrb/model/type/transition"
       autoload :ScreenAnnotation, "pdfrb/model/type/screen_annotation"
       autoload :SoundAnnotation, "pdfrb/model/type/sound_annotation"
+
+      # Transition + 3D markup + geolocation.
+      autoload :Transition, "pdfrb/model/type/transition"
+      autoload :ExData3DMarkup, "pdfrb/model/type/transition"
+      autoload :ExDataMarkupGeo, "pdfrb/model/type/transition"
 
       # Appearance generators (one per file).
       autoload :GenericAppearance, "pdfrb/model/type/generic_appearance"
