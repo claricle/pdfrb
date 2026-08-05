@@ -50,6 +50,16 @@ module Pdfrb
       autoload :OptionalContentGroup, "pdfrb/model/type/optional_content_group"
       autoload :OptionalContentMembership, "pdfrb/model/type/optional_content_membership"
       autoload :OptionalContentProperties, "pdfrb/model/type/optional_content_properties"
+
+      # Additional OCG / opt-content subclass dicts (one per file).
+      autoload :OptContentCreatorInfo, "pdfrb/model/type/opt_content_ext"
+      autoload :OptContentExport, "pdfrb/model/type/opt_content_ext"
+      autoload :OptContentPrint, "pdfrb/model/type/opt_content_ext"
+      autoload :OptContentView, "pdfrb/model/type/opt_content_ext"
+      autoload :OptContentLanguage, "pdfrb/model/type/opt_content_ext"
+      autoload :OptContentUsage, "pdfrb/model/type/opt_content_ext"
+      autoload :OptContentUsageApplication, "pdfrb/model/type/opt_content_ext"
+
       autoload :FileSpecification, "pdfrb/model/type/file_specification"
       autoload :EmbeddedFile, "pdfrb/model/type/embedded_file"
       autoload :AFFileSpecification, "pdfrb/model/type/af_file_specification"
@@ -173,8 +183,16 @@ module Pdfrb
       # Appearance + Media (s12.5.5, s13.3).
       autoload :Appearance, "pdfrb/model/type/appearance"
       autoload :AppearanceCharacteristics, "pdfrb/model/type/appearance_characteristics"
+      autoload :AppearanceTrapNet, "pdfrb/model/type/appearance_trap_net"
+      autoload :AppearanceTrapNetSubDict, "pdfrb/model/type/appearance_trap_net"
+      autoload :AppearanceSubDict, "pdfrb/model/type/appearance_trap_net"
       autoload :MediaClip, "pdfrb/model/type/media_clip"
       autoload :Rendition, "pdfrb/model/type/rendition"
+      autoload :ExDataProjection, "pdfrb/model/type/appearance_trap_net"
+      autoload :AnnotationProjectionDict, "pdfrb/model/type/appearance_trap_net"
+
+      # Signature build data.
+      autoload :SignatureBuildPropDict, "pdfrb/model/type/appearance_trap_net"
 
       # Page box color info (s7.7.3.3).
       autoload :BoxColorInfo, "pdfrb/model/type/box_color_info"
