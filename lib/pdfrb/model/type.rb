@@ -191,6 +191,15 @@ module Pdfrb
       autoload :ExDataProjection, "pdfrb/model/type/appearance_trap_net"
       autoload :AnnotationProjectionDict, "pdfrb/model/type/appearance_trap_net"
 
+      # Media offset / player / screen types.
+      autoload :MediaOffsetTime, "pdfrb/model/type/media_offset"
+      autoload :MediaOffsetFrame, "pdfrb/model/type/media_offset"
+      autoload :MediaOffsetMarker, "pdfrb/model/type/media_offset"
+      autoload :MediaPlayerInfo, "pdfrb/model/type/media_offset"
+      autoload :MediaPlayers, "pdfrb/model/type/media_offset"
+      autoload :MediaScreenParameters, "pdfrb/model/type/media_offset"
+      autoload :MediaCriteria, "pdfrb/model/type/media_offset"
+
       # Signature build data.
       autoload :SignatureBuildPropDict, "pdfrb/model/type/appearance_trap_net"
 
