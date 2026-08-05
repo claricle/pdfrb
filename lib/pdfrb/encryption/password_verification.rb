@@ -2,6 +2,7 @@
 
 require "digest/md5"
 require "digest/sha2"
+require "openssl"
 
 module Pdfrb
   module Encryption
@@ -20,8 +21,8 @@ module Pdfrb
 
       module_function
 
-      # Algorithm 2: derive the encryption key from a user password
-      # for revisions 2..4 (RC4 and AES-128).
+      # Algorithm 2 (revision 2..4, RC4 and AES-128 V4): derive the
+      # encryption key from a user password.
       def derive_key_rc4(password:, o_entry:, p_flags:, id0:,
                          revision:, key_length_bits:, encrypt_metadata: true)
         padded = pad_password(password)
@@ -40,12 +41,56 @@ module Pdfrb
         hash.byteslice(0, key_length_bits / 8)
       end
 
-      # Algorithm 5: derive the encryption key for revision 6
-      # (AES-256, PDF 2.0).
-      def derive_key_v6(password:, u_entry:, o_entry:,
-                        p_flags:, oe_entry:)
-        # PDF 2.0 uses SHA-256 with password + validation salt.
-        raise NotImplementedError, "V6 key derivation TBD"
+      # Algorithm 2.B / 8 (revision >= 5, AES-256, PDF 2.0): verify a
+      # user password by hashing password + 8-byte validation salt from
+      # /U[32..40]. Returns the 32-byte key on success, nil on mismatch.
+      def verify_user_password_v5(password:, u_entry:, validation_salt:)
+        hash = sha256_password_rounds(password: password.b, salt: validation_salt.b,
+                                      u_entry: u_entry.b)
+        hash.byteslice(0, 32) == u_entry.byteslice(0, 32) ? hash : nil
+      end
+
+      # Algorithm 2.B / 9: same for owner password. Owner password
+      # validation uses /O[0..32] + /U[0..48] in the hash chain.
+      def verify_owner_password_v5(password:, o_entry:, u_entry:,
+                                   validation_salt:)
+        hash = sha256_password_rounds(password: password.b, salt: validation_salt.b,
+                                      u_entry: u_entry.b, o_entry: o_entry.b)
+        hash.byteslice(0, 32) == o_entry.byteslice(0, 32) ? hash : nil
+      end
+
+      # Algorithm 2.B: the iterative SHA-256 hash loop (sha256 + 64 bytes
+      # of last output, XORed with input, repeated until the MSB of byte
+      # 0 is 0). Used for V5 password verification and key extraction.
+      def sha256_password_rounds(password:, salt:, u_entry: "", o_entry: nil)
+        input = password + salt + (o_entry ? o_entry.byteslice(0, 48) : u_entry.byteslice(0, 48))
+        hash = Digest::SHA256.digest(input)
+        round = 0
+        while hash.getbyte(0).nobits?(0x80)
+          round += 1
+          key = hash.byteslice(0, 16)
+          iv = hash.byteslice(16, 16)
+          cipher = OpenSSL::Cipher.new("aes-128-cbc")
+          cipher.encrypt
+          cipher.key = key
+          cipher.iv = iv
+          cipher.padding = 0
+          encrypted = cipher.update(input) + cipher.final
+          input = encrypted.bytes.zip(input.bytes).map { |a, b| a ^ b }.pack("C*")
+          hash = Digest::SHA256.digest(input)
+        end
+        hash
+      end
+      private_class_method :sha256_password_rounds
+
+      # Extract the validation salt (bytes 32..40) and key salt (40..48)
+      # from a /U or /O entry for V5.
+      def extract_v5_salts(entry)
+        bytes = entry.b
+        {
+          validation_salt: bytes.byteslice(32, 8) || "".b,
+          key_salt: bytes.byteslice(40, 8) || "".b,
+        }
       end
 
       # Algorithm 4 (R=2): build the /U entry.
