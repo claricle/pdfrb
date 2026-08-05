@@ -25,22 +25,6 @@ module Pdfrb
           arr.each_slice(8, &block)
         end
       end
-
-      # Highlight annotation. /Subtype /Highlight.
-      class HighlightAnnotation < TextMarkupAnnotation
-      end
-
-      # Underline annotation. /Subtype /Underline.
-      class UnderlineAnnotation < TextMarkupAnnotation
-      end
-
-      # Squiggly annotation. /Subtype /Squiggly.
-      class SquigglyAnnotation < TextMarkupAnnotation
-      end
-
-      # StrikeOut annotation. /Subtype /StrikeOut.
-      class StrikeOutAnnotation < TextMarkupAnnotation
-      end
     end
   end
 end
