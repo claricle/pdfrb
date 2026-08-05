@@ -59,7 +59,7 @@ module Pdfrb
       end
     end
 
-    desc "optimize INPUT OUTPUT", "Optimize (stub — TODO 31)"
+    desc "optimize INPUT OUTPUT", "Optimize: dedup objects, pack into ObjStm, rewrite xref stream"
     def optimize(input, output)
       doc = open_doc(input)
       Pdfrb::Task::Optimize.call(doc)
