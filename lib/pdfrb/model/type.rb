@@ -158,6 +158,12 @@ module Pdfrb
       autoload :SigFieldLock, "pdfrb/model/type/signature"
       autoload :SigFieldSeedValue, "pdfrb/model/type/signature"
       autoload :DocMDPTransformParameters, "pdfrb/model/type/signature"
+
+      # Appearance + Media (s12.5.5, s13.3).
+      autoload :Appearance, "pdfrb/model/type/appearance"
+      autoload :AppearanceCharacteristics, "pdfrb/model/type/appearance"
+      autoload :MediaClip, "pdfrb/model/type/appearance"
+      autoload :Rendition, "pdfrb/model/type/appearance"
     end
   end
 end
