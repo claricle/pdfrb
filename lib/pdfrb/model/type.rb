@@ -85,6 +85,8 @@ module Pdfrb
       autoload :CalRGB, "pdfrb/model/type/color_space_dict"
       autoload :Lab, "pdfrb/model/type/color_space_dict"
       autoload :Indexed, "pdfrb/model/type/color_space_dict"
+      autoload :Separation, "pdfrb/model/type/color_space_dict"
+      autoload :DeviceN, "pdfrb/model/type/color_space_dict"
 
       # Pattern family (s8.7).
       autoload :Pattern, "pdfrb/model/type/pattern"
