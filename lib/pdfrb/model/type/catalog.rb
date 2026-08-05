@@ -40,7 +40,7 @@ module Pdfrb
         def legal; self[:Legal]; end
         def requirements; self[:Requirements]; end
         def collection; self[:Collection]; end
-        def needs_rendering?; !!self[:NeedsRendering]; end
+        def needs_rendering?; truthy?(self[:NeedsRendering]); end
         def dss; self[:DSS]; end
         def associated_files; self[:AF]; end
         def dpart_root; self[:DPartRoot]; end

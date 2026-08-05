@@ -39,7 +39,8 @@ module Pdfrb
         end
 
         def metadata_encrypted?
-          encrypt_metadata.nil? ? true : !!encrypt_metadata
+          value = encrypt_metadata?
+          value.nil? ? true : !!value
         end
 
         def allow_print?

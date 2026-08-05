@@ -6,7 +6,7 @@ module Pdfrb
       # Redaction annotation (s12.5.6.16). Marks content for removal.
       class RedactAnnotation < MarkupAnnotation
         def overlay_text; self[:OverlayText]; end
-        def repeat_overlay?; !!self[:Repeat]; end
+        def repeat_overlay?; truthy?(self[:Repeat]); end
         def quadding; self[:Q]; end
         def interior_color; self[:IC]; end
         def da; self[:DA]; end

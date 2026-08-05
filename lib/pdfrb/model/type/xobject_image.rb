@@ -16,12 +16,12 @@ module Pdfrb
         def filter; self[:Filter]; end
         def decode; self[:Decode]; end
         def intent; self[:Intent]; end
-        def image_mask?; !!self[:ImageMask]; end
+        def image_mask?; truthy?(self[:ImageMask]); end
         def mask; self[:Mask]; end
         def smask; self[:SMask]; end
         def smask_in_data; self[:SMaskInData]; end
         def decode_parms; self[:DecodeParms]; end
-        def interpolate?; !!self[:Interpolate]; end
+        def interpolate?; truthy?(self[:Interpolate]); end
         def alternates; self[:Alternates]; end
         def oc; self[:OC]; end
         def name; self[:Name]; end

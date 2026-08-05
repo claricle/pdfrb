@@ -271,6 +271,18 @@ module Pdfrb
           data.deref(document)
         end
 
+        # PDF Boolean values can come back as Ruby +true+/+false+, as the
+        # strings +"true"+/+"false"+ (from arlington defaults), or as
+        # +nil+ when absent. Normalise to a Ruby boolean.
+        def truthy?(value)
+          return false if value.nil? || value == false
+          return true if value == true
+          return false if value.to_s.downcase == "false"
+          return false if value.to_s.downcase == "no"
+
+          !!value
+        end
+
         private
 
         def unbox_object?(obj)
