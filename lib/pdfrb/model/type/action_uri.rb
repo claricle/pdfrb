@@ -12,12 +12,13 @@ module Pdfrb
 
         def scheme
           return nil unless uri
+
           match = uri.to_s.match(%r{^([a-zA-Z][a-zA-Z0-9+.-]*):})
           match && match[1].downcase
         end
 
         def http?
-          scheme == "http" || scheme == "https"
+          ["http", "https"].include?(scheme)
         end
 
         def mailto?

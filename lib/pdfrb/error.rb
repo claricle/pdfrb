@@ -29,9 +29,9 @@ module Pdfrb
   class MalformedPdfError < ParseError
     attr_reader :recovered
 
-    def initialize(message, recovered: false, **opts)
+    def initialize(message, recovered: false, **)
       @recovered = recovered
-      super(message, **opts)
+      super(message, **)
     end
 
     def recovered? = @recovered

@@ -32,27 +32,30 @@ module Pdfrb
           !!destinations
         end
 
-        def each_embedded_file
-          return enum_for(:each_embedded_file) unless block_given?
+        def each_embedded_file(&block)
+          return enum_for(:each_embedded_file) unless block
           return unless embedded_files && document
 
-          walk_name_tree(embedded_files) { |name, ref| yield name, ref }
+          walk_name_tree(embedded_files, &block)
         end
 
         private
 
         def walk_name_tree(node_ref, &block)
-          node = node_ref.is_a?(Pdfrb::Model::Reference) && document ?
-                   document.object(node_ref) : node_ref
+          node = if node_ref.is_a?(Pdfrb::Model::Reference) && document
+                   document.object(node_ref)
+                 else
+                   node_ref
+                 end
           return unless node
 
           if node[:Names]
             arr = node[:Names]
-            arr = arr.is_a?(Pdfrb::Model::PdfArray) ? arr.to_a : arr
-            arr.each_slice(2) { |name, ref| yield name, ref }
+            arr = arr.to_a if arr.is_a?(Pdfrb::Model::PdfArray)
+            arr.each_slice(2, &block)
           elsif node[:Kids]
             arr = node[:Kids]
-            arr = arr.is_a?(Pdfrb::Model::PdfArray) ? arr.to_a : arr
+            arr = arr.to_a if arr.is_a?(Pdfrb::Model::PdfArray)
             arr.each { |kid| walk_name_tree(kid, &block) }
           end
         end

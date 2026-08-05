@@ -12,7 +12,7 @@ RSpec.describe "Model::Type::* registry completeness" do
   end
 
   it "registers Annotation" do
-    expect(Pdfrb::Model::Cos::Dictionary.type_map[:Page]).to eq(Pdfrb::Model::Type::Page)
+    expect(Pdfrb::Model::Cos::Dictionary.type_map[:Annot]).to eq(Pdfrb::Model::Type::Annotation)
   end
 
   it "registers Font" do

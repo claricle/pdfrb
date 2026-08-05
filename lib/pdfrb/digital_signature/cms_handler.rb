@@ -7,8 +7,8 @@ module Pdfrb
 
       def type; :"adbe.pkcs7.detached"; end
 
-      def sign(document, cert:, key:, **opts)
-        Pdfrb::DigitalSignature::Signing.sign(document, cert: cert, key: key, **opts)
+      def sign(document, cert:, key:, **)
+        Pdfrb::DigitalSignature::Signing.sign(document, cert: cert, key: key, **)
       end
 
       def verify(signature_data, signed_data, trusted_certs: [])

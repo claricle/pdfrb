@@ -61,21 +61,22 @@ RSpec.describe "TrueType table parsers" do
   end
 
   describe Pdfrb::Font::TrueType::Glyf do
+    subject(:glyf) { described_class.new(ttf.glyf_table, loca) }
+
     let(:maxp) { Pdfrb::Font::TrueType::Maxp.new(ttf.maxp_table) }
     let(:loca) { Pdfrb::Font::TrueType::Loca.new(ttf.loca_table, long_format: ttf.head.long_loca?, num_glyphs: maxp.num_glyphs) }
-    subject { described_class.new(ttf.glyf_table, loca) }
 
     it "parses glyph header for glyph 65 (A)" do
-      hdr = subject.glyph_header(65)
+      hdr = glyf.glyph_header(65)
       expect(hdr[:number_of_contours]).to eq(1)
       expect(hdr[:x_min]).to be < hdr[:x_max]
     end
 
     it "detects composite glyphs" do
       maxp.num_glyphs.times do |i|
-        next unless subject.composite?(i)
+        next unless glyf.composite?(i)
 
-        components = subject.component_glyphs(i)
+        components = glyf.component_glyphs(i)
         expect(components).to be_an(Array)
         break
       end

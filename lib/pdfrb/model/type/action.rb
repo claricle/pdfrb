@@ -15,9 +15,11 @@ module Pdfrb
 
         def subtype; self[:S]; end
         def next_action; self[:Next]; end
+
         def next_actions
           value = self[:Next]
           return [] unless value
+
           value.is_a?(Pdfrb::Model::PdfArray) ? value.to_a : value
         end
 
@@ -43,11 +45,13 @@ module Pdfrb
 
         def uri
           return nil unless uri?
+
           self[:URI]
         end
 
         def d
           return nil unless goto?
+
           self[:D]
         end
 

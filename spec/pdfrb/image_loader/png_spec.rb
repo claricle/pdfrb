@@ -6,8 +6,8 @@ RSpec.describe Pdfrb::ImageLoader::PNG do
   describe ".parse_header" do
     it "parses a PNG IHDR chunk" do
       # PNG signature + IHDR chunk
-      data = "\x89PNG\r\n\x1A\n".b  # PNG signature
-      data += "\x00\x00\x00\x0D".b   # chunk length = 13
+      data = "\x89PNG\r\n\x1A\n".b # PNG signature
+      data += "\x00\x00\x00\x0D".b # chunk length = 13
       data += "IHDR"
       data += [100].pack("N")  # width = 100
       data += [200].pack("N")  # height = 200

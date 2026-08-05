@@ -1,5 +1,3 @@
-require "set"
-
 # frozen_string_literal: true
 
 module Pdfrb

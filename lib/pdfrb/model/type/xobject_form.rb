@@ -42,9 +42,11 @@ module Pdfrb
 
         def identity_matrix?
           return true unless matrix
+
           arr = matrix.is_a?(Pdfrb::Model::PdfArray) ? matrix.to_a : matrix
           return true unless arr.is_a?(Array) && arr.size == 6
-          arr[0] == 1 && arr[1] == 0 && arr[2] == 0 && arr[3] == 1 && arr[4] == 0 && arr[5] == 0
+
+          arr[0] == 1 && arr[1].zero? && arr[2].zero? && arr[3] == 1 && arr[4].zero? && arr[5].zero?
         end
       end
     end

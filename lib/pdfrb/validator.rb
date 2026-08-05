@@ -80,5 +80,3 @@ module Pdfrb
     end
   end
 end
-
-require "set"

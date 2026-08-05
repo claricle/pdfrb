@@ -34,11 +34,13 @@ module Pdfrb
           number_of_objects.times do
             space_idx = stream_data.index(" ", offset)
             return if space_idx.nil?
+
             oid = stream_data[offset...space_idx].to_i
 
             newline_idx = stream_data.index(/\s/, space_idx + 1)
             return if newline_idx.nil?
-            byte_offset = stream_data[space_idx + 1...newline_idx].to_i
+
+            byte_offset = stream_data[(space_idx + 1)...newline_idx].to_i
 
             yield oid, byte_offset + first_byte_offset
             offset = newline_idx + 1

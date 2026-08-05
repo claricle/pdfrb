@@ -12,12 +12,14 @@ module Pdfrb
 
         def path_count
           return 0 unless ink_list
+
           arr = ink_list.is_a?(Pdfrb::Model::PdfArray) ? ink_list.to_a : ink_list
           arr.is_a?(Array) ? arr.size : 0
         end
 
         def path_at(index)
           return nil unless ink_list
+
           arr = ink_list.is_a?(Pdfrb::Model::PdfArray) ? ink_list.to_a : ink_list
           arr && arr[index]
         end

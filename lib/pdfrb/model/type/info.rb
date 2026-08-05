@@ -38,6 +38,7 @@ module Pdfrb
         def parse_pdf_date(str)
           return str if str.is_a?(Time)
           return nil unless str
+
           match = str.to_s.match(/^D:(\d{4})(\d{2})(\d{2})(\d{2})?(\d{2})?(\d{2})?/)
           return nil unless match
 

@@ -31,7 +31,8 @@ module Pdfrb
         end
 
         def mapped_role(custom_name)
-          return nil unless role_map && role_map.is_a?(::Hash)
+          return nil unless role_map.is_a?(::Hash)
+
           role_map[custom_name.to_sym] || role_map[custom_name.to_s]
         end
 

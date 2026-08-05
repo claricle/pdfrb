@@ -70,8 +70,9 @@ module Pdfrb
         end
 
         def page_at(index)
-          return nil if index < 0 || index >= page_count
-          each_page.each_with_index do |page, i|
+          return nil if index.negative? || index >= page_count
+
+          each_page.with_index do |page, i|
             return page if i == index
           end
         end

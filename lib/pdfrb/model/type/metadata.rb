@@ -20,17 +20,20 @@ module Pdfrb
 
         def xmp?
           return false unless xml? && stream
+
           data = stream.to_s
           data.include?("<x:xmpmeta") || data.include?("xmlns:x=")
         end
 
         def xmp_packet?
           return false unless stream
+
           stream.to_s.include?("<?xpacket")
         end
 
         def xmp_string
           return nil unless stream
+
           stream.to_s.force_encoding(Encoding::UTF_8)
         end
       end

@@ -37,12 +37,14 @@ module Pdfrb
 
         def font_name
           return nil unless font
+
           arr = font.is_a?(Pdfrb::Model::PdfArray) ? font.to_a : font
           arr.is_a?(Array) ? arr[0] : nil
         end
 
         def font_size
           return nil unless font
+
           arr = font.is_a?(Pdfrb::Model::PdfArray) ? font.to_a : font
           arr.is_a?(Array) ? arr[1] : nil
         end
@@ -63,15 +65,19 @@ module Pdfrb
 
         def dash_array
           return nil unless dash_pattern
+
           arr = dash_pattern.is_a?(Pdfrb::Model::PdfArray) ? dash_pattern.to_a : dash_pattern
           return nil unless arr.is_a?(Array) && arr.size >= 1
+
           arr[0]
         end
 
         def dash_phase
           return nil unless dash_pattern
+
           arr = dash_pattern.is_a?(Pdfrb::Model::PdfArray) ? dash_pattern.to_a : dash_pattern
           return nil unless arr.is_a?(Array) && arr.size >= 2
+
           arr[1]
         end
       end

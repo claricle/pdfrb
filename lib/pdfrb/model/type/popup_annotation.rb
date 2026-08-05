@@ -11,6 +11,7 @@ module Pdfrb
         def markup_annotation
           ref = parent
           return nil unless ref && document
+
           document.object(ref)
         end
       end

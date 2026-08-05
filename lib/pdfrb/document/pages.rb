@@ -46,10 +46,10 @@ module Pdfrb
       end
       alias << add
 
-      def each(&block)
+      def each(&)
         return enum_for(:each) unless block_given?
 
-        walk(pages_root, &block)
+        walk(pages_root, &)
         self
       end
 

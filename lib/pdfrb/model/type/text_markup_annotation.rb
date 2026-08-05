@@ -10,18 +10,19 @@ module Pdfrb
 
         def quad_point_count
           return 0 unless quad_points
+
           arr = quad_points.is_a?(Pdfrb::Model::PdfArray) ? quad_points.to_a : quad_points
           arr.is_a?(Array) ? arr.size / 8 : 0
         end
 
-        def each_quad
-          return enum_for(:each_quad) unless block_given?
+        def each_quad(&block)
+          return enum_for(:each_quad) unless block
           return unless quad_points
 
           arr = quad_points.is_a?(Pdfrb::Model::PdfArray) ? quad_points.to_a : quad_points
           return unless arr.is_a?(Array)
 
-          arr.each_slice(8) { |quad| yield quad }
+          arr.each_slice(8, &block)
         end
       end
 

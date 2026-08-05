@@ -14,23 +14,27 @@ module Pdfrb
         def resolved_field
           ref = field
           return nil unless ref && document
+
           document.object(ref)
         end
 
         def button_background_color
           return nil unless mk
+
           obj = mk.is_a?(Pdfrb::Model::Reference) && document ? document.object(mk) : mk
           obj && obj[:BG]
         end
 
         def button_caption
           return nil unless mk
+
           obj = mk.is_a?(Pdfrb::Model::Reference) && document ? document.object(mk) : mk
           obj && obj[:CA]
         end
 
         def normal_caption
           return nil unless mk
+
           obj = mk.is_a?(Pdfrb::Model::Reference) && document ? document.object(mk) : mk
           obj && obj[:CA]
         end

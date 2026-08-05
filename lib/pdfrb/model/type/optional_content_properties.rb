@@ -18,6 +18,7 @@ module Pdfrb
 
         def base_state
           return :ON_UNLESS_OFF unless default_config
+
           default_config[:BaseState]&.to_sym || :ON_UNLESS_OFF
         end
       end

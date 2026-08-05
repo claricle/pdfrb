@@ -15,6 +15,7 @@ module Pdfrb
 
         def view_intent?
           return true unless intent
+
           arr = intent.is_a?(Pdfrb::Model::PdfArray) ? intent.to_a : intent
           arr = [arr] unless arr.is_a?(Array)
           arr.map(&:to_sym).include?(:View)
@@ -22,6 +23,7 @@ module Pdfrb
 
         def print_intent?
           return false unless intent
+
           arr = intent.is_a?(Pdfrb::Model::PdfArray) ? intent.to_a : intent
           arr = [arr] unless arr.is_a?(Array)
           arr.map(&:to_sym).include?(:Print)
@@ -29,6 +31,7 @@ module Pdfrb
 
         def export_intent?
           return false unless intent
+
           arr = intent.is_a?(Pdfrb::Model::PdfArray) ? intent.to_a : intent
           arr = [arr] unless arr.is_a?(Array)
           arr.map(&:to_sym).include?(:Export)

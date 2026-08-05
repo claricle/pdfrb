@@ -44,14 +44,16 @@ module Pdfrb
             when /\A[\[\]]\z/
               array = entries[i + 2]
               return nil unless first.is_a?(Integer) && array.is_a?(Array)
+
               offset = cid - first
               return array[offset] if offset >= 0 && offset < array.size
-              i += 3
+
             else
               value = entries[i + 2]
-              return value if cid >= first && cid <= second
-              i += 3
+              return value if cid.between?(first, second)
+
             end
+            i += 3
           end
 
           default_width

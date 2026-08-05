@@ -33,6 +33,7 @@ module Pdfrb
         def resolved_profile
           ref = dest_output_profile
           return nil unless ref && document
+
           document.object(ref)
         end
       end

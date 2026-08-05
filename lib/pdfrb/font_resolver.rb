@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "set"
-
 module Pdfrb
   # Font file resolver. Searches system font directories for font files
   # by family name + style. Eliminates the need for external font-finding

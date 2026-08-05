@@ -14,7 +14,7 @@ module Pdfrb
         ensure_stream_payload
       end
 
-      def save_graphics_state(&block)
+      def save_graphics_state(&)
         emit_op Pdfrb::Content::Operator::SaveGraphicsState
         if block_given?
           begin
@@ -27,21 +27,21 @@ module Pdfrb
       end
       alias with_graphics_state save_graphics_state
 
-      def translate(tx, ty, &block)
-        concat(1, 0, 0, 1, tx, ty, &block)
+      def translate(tx, ty, &)
+        concat(1, 0, 0, 1, tx, ty, &)
       end
 
-      def scale(sx, sy = sx, &block)
-        concat(sx, 0, 0, sy, 0, 0, &block)
+      def scale(sx, sy = sx, &)
+        concat(sx, 0, 0, sy, 0, 0, &)
       end
 
-      def rotate(angle_in_radians, &block)
+      def rotate(angle_in_radians, &)
         c = Math.cos(angle_in_radians)
         s = Math.sin(angle_in_radians)
-        concat(c, s, -s, c, 0, 0, &block)
+        concat(c, s, -s, c, 0, 0, &)
       end
 
-      def concat(a, b, c, d, e, f, &block)
+      def concat(a, b, c, d, e, f, &)
         emit_op Pdfrb::Content::Operator::ConcatMatrix, a, b, c, d, e, f
         return self unless block_given?
 
@@ -258,7 +258,7 @@ module Pdfrb
         emit_op(Pdfrb::Content::Operator::DashPattern, array, phase)
       end
 
-      def marked_content(tag, properties = nil, &block)
+      def marked_content(tag, properties = nil, &)
         if properties
           emit_op(Pdfrb::Content::Operator::BeginMarkedContentWithProperties,
                   tag, properties)
@@ -280,18 +280,18 @@ module Pdfrb
         self
       end
 
-      def tagged(tag, mcid: nil, **props, &block)
+      def tagged(tag, mcid: nil, **props, &)
         p = props.dup
         p[:MCID] = mcid if mcid
         p = nil if p.empty?
-        marked_content(tag, p, &block)
+        marked_content(tag, p, &)
       end
 
-      def artifact(type = nil, &block)
+      def artifact(type = nil, &)
         if type
-          marked_content(:Artifact, { Type: type }, &block)
+          marked_content(:Artifact, { Type: type }, &)
         else
-          marked_content(:Artifact, &block)
+          marked_content(:Artifact, &)
         end
       end
 

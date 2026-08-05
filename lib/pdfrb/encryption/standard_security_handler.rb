@@ -21,10 +21,10 @@ module Pdfrb
         @key = nil
       end
 
-      def verify_user_password(password)
+      def verify_user_password?(password)
         computed = compute_encryption_key(password)
         @key = computed
-        verify_user_password_hash(computed)
+        verify_user_password_hash?(computed)
       end
 
       def compute_encryption_key(password)
@@ -104,7 +104,7 @@ module Pdfrb
         first.to_s.encode(Encoding::BINARY)
       end
 
-      def verify_user_password_hash(key)
+      def verify_user_password_hash?(key)
         return true if @revision < 3
 
         hash = compute_user_password_hash(key)
@@ -134,7 +134,7 @@ module Pdfrb
 
       def encrypt_aes_cbc(data, key)
         iv = OpenSSL::Random.random_bytes(16)
-        cipher = OpenSSL::Cipher::AES.new(128, :CBC)
+        cipher = OpenSSL::Cipher.new("aes-128-cbc")
         cipher.encrypt
         cipher.key = key[0, 16]
         cipher.iv = iv
@@ -147,7 +147,7 @@ module Pdfrb
 
         iv = data[0, 16]
         ciphertext = data[16..]
-        decipher = OpenSSL::Cipher::AES.new(128, :CBC)
+        decipher = OpenSSL::Cipher.new("aes-128-cbc")
         decipher.decrypt
         decipher.key = key[0, 16]
         decipher.iv = iv

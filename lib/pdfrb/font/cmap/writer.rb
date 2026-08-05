@@ -12,7 +12,6 @@ module Pdfrb
       # chunking of bfchar sections (max 100 entries per section per
       # the PDF spec).
       class Writer
-
         def self.write(mapping, name: "Adobe-Identity-UCS")
           str_mapping = mapping.transform_values { |cp| [cp].pack("U") }
           new(

@@ -100,6 +100,7 @@ module Pdfrb
         def parent
           ref = value[:Parent]
           return nil unless ref && document
+
           document.object(ref)
         end
 
@@ -161,7 +162,8 @@ module Pdfrb
 
         def landscape?
           mb = media_box
-          return false unless mb && mb.is_a?(Array) && mb.size >= 4
+          return false unless mb.is_a?(Array) && mb.size >= 4
+
           width = mb[2].to_f - mb[0].to_f
           height = mb[3].to_f - mb[1].to_f
           width > height
@@ -169,7 +171,8 @@ module Pdfrb
 
         def portrait?
           mb = media_box
-          return false unless mb && mb.is_a?(Array) && mb.size >= 4
+          return false unless mb.is_a?(Array) && mb.size >= 4
+
           width = mb[2].to_f - mb[0].to_f
           height = mb[3].to_f - mb[1].to_f
           height > width

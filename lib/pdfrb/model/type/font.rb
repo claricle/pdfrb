@@ -17,6 +17,7 @@ module Pdfrb
         def font_descriptor
           ref = self[:FontDescriptor]
           return nil unless ref
+
           document ? document.object(ref) : ref
         end
 
@@ -52,24 +53,30 @@ module Pdfrb
           ref = self[:DescendantFonts]
           return nil unless ref
 
-          arr = ref.is_a?(Pdfrb::Model::Reference) && document ?
-                  document.object(ref) : ref
+          arr = if ref.is_a?(Pdfrb::Model::Reference) && document
+                  document.object(ref)
+                else
+                  ref
+                end
           return nil unless arr.is_a?(Array) || arr.is_a?(Pdfrb::Model::PdfArray)
 
-          first = arr.is_a?(Pdfrb::Model::PdfArray) ? arr[0] : arr[0]
+          first = arr[0]
           return nil unless first
 
-          first.is_a?(Pdfrb::Model::Reference) && document ?
-            document.object(first) : first
+          if first.is_a?(Pdfrb::Model::Reference) && document
+            document.object(first)
+          else
+            first
+          end
         end
 
         def glyph_width(char_code)
           return nil unless widths && first_char && last_char
 
           idx = char_code - first_char
-          return nil if idx < 0 || idx >= widths.length
+          return nil if idx.negative? || idx >= widths.length
 
-          widths.is_a?(Pdfrb::Model::PdfArray) ? widths[idx] : widths[idx]
+          widths[idx]
         end
       end
     end

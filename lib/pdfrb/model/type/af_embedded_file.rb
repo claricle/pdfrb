@@ -9,6 +9,7 @@ module Pdfrb
 
         def af_relationship
           return nil unless params
+
           obj = params.is_a?(Pdfrb::Model::Reference) && document ? document.object(params) : params
           obj && obj[:AFRelationship]
         end

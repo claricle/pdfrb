@@ -49,9 +49,11 @@ module Pdfrb
 
         def single_page_layout?; page_layout&.to_sym == :SinglePage; end
         def one_column_layout?; page_layout&.to_sym == :OneColumn; end
+
         def two_column_layout?
           [:TwoColumnLeft, :TwoColumnRight].include?(page_layout&.to_sym)
         end
+
         def two_page_layout?
           [:TwoPageLeft, :TwoPageRight].include?(page_layout&.to_sym)
         end
@@ -80,27 +82,32 @@ module Pdfrb
 
         def page_count
           return 0 unless pages
+
           obj = pages.is_a?(Pdfrb::Model::Reference) && document ? document.object(pages) : pages
           obj && obj[:Count]
         end
 
         def resolved_pages
           return nil unless pages && document
+
           document.object(pages)
         end
 
         def resolved_acro_form
           return nil unless acro_form && document
+
           document.object(acro_form)
         end
 
         def resolved_outlines
           return nil unless outlines && document
+
           document.object(outlines)
         end
 
         def resolved_metadata
           return nil unless metadata && document
+
           document.object(metadata)
         end
 
@@ -108,8 +115,11 @@ module Pdfrb
           return enum_for(:each_output_intent) unless block_given?
           return unless output_intents && document
 
-          arr = output_intents.is_a?(Pdfrb::Model::Reference) ?
-                  document.object(output_intents) : output_intents
+          arr = if output_intents.is_a?(Pdfrb::Model::Reference)
+                  document.object(output_intents)
+                else
+                  output_intents
+                end
           return unless arr.is_a?(Array) || arr.is_a?(Pdfrb::Model::PdfArray)
 
           arr.each do |entry|

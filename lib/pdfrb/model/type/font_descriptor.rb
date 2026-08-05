@@ -40,18 +40,19 @@ module Pdfrb
         def resolved_font_file
           ref = font_file_reference
           return nil unless ref && document
+
           document.object(ref)
         end
 
-        def fixed_pitch?; flags && (flags & 1) != 0; end
-        def serif?; flags && (flags & 2) != 0; end
-        def symbolic?; flags && (flags & 4) != 0; end
-        def script?; flags && (flags & 8) != 0; end
-        def nonsymbolic?; flags && (flags & 32) != 0; end
-        def italic?; flags && (flags & 64) != 0; end
-        def all_cap?; flags && (flags & 0x10000) != 0; end
-        def small_cap?; flags && (flags & 0x20000) != 0; end
-        def force_bold?; flags && (flags & 0x40000) != 0; end
+        def fixed_pitch?; flags&.anybits?(1); end
+        def serif?; flags&.anybits?(2); end
+        def symbolic?; flags&.anybits?(4); end
+        def script?; flags&.anybits?(8); end
+        def nonsymbolic?; flags&.anybits?(32); end
+        def italic?; flags&.anybits?(64); end
+        def all_cap?; flags&.anybits?(0x10000); end
+        def small_cap?; flags&.anybits?(0x20000); end
+        def force_bold?; flags&.anybits?(0x40000); end
       end
     end
   end

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "set"
-
 module Pdfrb
   module Source
     # Byte-level PDF lexer (s7.2). State machine that emits Token

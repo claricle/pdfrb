@@ -20,6 +20,7 @@ module Pdfrb
         def resolved_file_spec
           ref = embedded_file
           return nil unless ref && document
+
           document.object(ref)
         end
       end

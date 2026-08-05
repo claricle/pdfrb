@@ -35,7 +35,7 @@ RSpec.describe "Font system completeness" do
   describe Pdfrb::Font::TrueType::Wrapper do
     it "embeds a TrueType font" do
       doc = Pdfrb::Document.new
-      font = described_class.embed(doc, arial_data, resource_name: :"F1")
+      font = described_class.embed(doc, arial_data, resource_name: :F1)
       expect(font[:Subtype]).to eq(:TrueType)
       expect(font[:BaseFont]).to eq(:ArialMT)
     end
