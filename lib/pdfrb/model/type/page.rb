@@ -97,6 +97,98 @@ module Pdfrb
           inheritable(:Rotate) || 0
         end
 
+        def parent
+          ref = value[:Parent]
+          return nil unless ref && document
+          document.object(ref)
+        end
+
+        def annotations
+          self[:Annots]
+        end
+
+        def has_annotations?
+          !!annotations
+        end
+
+        def user_unit
+          self[:UserUnit] || 1.0
+        end
+
+        def duration
+          self[:Dur]
+        end
+
+        def transition
+          self[:Trans]
+        end
+
+        def thumbnail
+          self[:Thumb]
+        end
+
+        def tab_order
+          self[:Tabs]&.to_sym
+        end
+
+        def structural_parent
+          self[:StructParents]
+        end
+
+        def metadata
+          self[:Metadata]
+        end
+
+        def associated_files
+          self[:AF]
+        end
+
+        def output_intents
+          self[:OutputIntents]
+        end
+
+        def group
+          self[:Group]
+        end
+
+        def has_group?
+          !!group
+        end
+
+        def rotated?
+          rotate != 0
+        end
+
+        def landscape?
+          mb = media_box
+          return false unless mb && mb.is_a?(Array) && mb.size >= 4
+          width = mb[2].to_f - mb[0].to_f
+          height = mb[3].to_f - mb[1].to_f
+          width > height
+        end
+
+        def portrait?
+          mb = media_box
+          return false unless mb && mb.is_a?(Array) && mb.size >= 4
+          width = mb[2].to_f - mb[0].to_f
+          height = mb[3].to_f - mb[1].to_f
+          height > width
+        end
+
+        def each_annotation
+          return enum_for(:each_annotation) unless block_given?
+          return unless annotations && document
+
+          arr = annotations.is_a?(Pdfrb::Model::Reference) ?
+                  document.object(annotations) : annotations
+          return unless arr.is_a?(Array) || arr.is_a?(Pdfrb::Model::PdfArray)
+
+          arr.each do |entry|
+            obj = entry.is_a?(Pdfrb::Model::Reference) ? document.object(entry) : entry
+            yield obj if obj
+          end
+        end
+
         private
 
         def inheritable(key)
