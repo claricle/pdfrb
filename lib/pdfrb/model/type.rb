@@ -217,6 +217,13 @@ module Pdfrb
 
       # Signature build data.
       autoload :SignatureBuildPropDict, "pdfrb/model/type/appearance_trap_net"
+      autoload :SignatureBuildDataDict, "pdfrb/model/type/signature_build"
+      autoload :SignatureBuildDataAppDict, "pdfrb/model/type/signature_build"
+      autoload :SignatureBuildDataSigQDict, "pdfrb/model/type/signature_build"
+      autoload :SignatureReferenceDocMDP, "pdfrb/model/type/signature_build"
+      autoload :SignatureReferenceIdentity, "pdfrb/model/type/signature_build"
+      autoload :SignatureReferenceUR, "pdfrb/model/type/signature_build"
+      autoload :SignatureReferenceFieldMDP, "pdfrb/model/type/signature_build"
 
       # Page box color info (s7.7.3.3).
       autoload :BoxColorInfo, "pdfrb/model/type/box_color_info"
