@@ -6,9 +6,6 @@ require "stringio"
 module Pdfrb
   module DigitalSignature
     module Verification
-      Result = Struct.new(:signer, :valid?, :byte_range_ok?,
-                          :cert_chain, :error, keyword_init: true)
-
       module_function
 
       def verify(pdf_bytes, trusted_certs: [])
@@ -57,9 +54,10 @@ module Pdfrb
         byte_range = sig_info[:byte_range]
 
         if byte_range.nil? || byte_range.length != 4
-          return Result.new(signer: nil, valid?: false,
-                            byte_range_ok?: false, cert_chain: [],
-                            error: "invalid ByteRange")
+          return VerificationResult.new(valid?: false,
+                                        byte_range_ok?: false,
+                                        cert_chain: [],
+                                        error: "invalid ByteRange")
         end
 
         _start1, len1, start2, len2 = byte_range
@@ -83,17 +81,19 @@ module Pdfrb
                                OpenSSL::PKCS7::DETACHED |
                                OpenSSL::PKCS7::BINARY)
 
-          Result.new(
+          VerificationResult.new(
             signer: pkcs7.signers.first&.issuer&.to_s,
             valid?: valid,
             byte_range_ok?: true,
             cert_chain: pkcs7.certificates || [],
+            trusted?: !trusted_certs.empty? && valid,
             error: valid ? nil : "signature verification failed",
           )
         rescue OpenSSL::PKCS7::PKCS7Error => e
-          Result.new(signer: nil, valid?: false,
-                     byte_range_ok?: true, cert_chain: [],
-                     error: e.message)
+          VerificationResult.new(valid?: false,
+                                 byte_range_ok?: true,
+                                 cert_chain: [],
+                                 error: e.message)
         end
       end
     end
