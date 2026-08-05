@@ -61,6 +61,13 @@ module Pdfrb
       autoload :XObjectForm, "pdfrb/model/type/xobject_form"
       autoload :XObjectImage, "pdfrb/model/type/xobject_image"
 
+      # Function family (s8.9).
+      autoload :Function, "pdfrb/model/type/function"
+      autoload :FunctionExponential, "pdfrb/model/type/function_exponential"
+      autoload :FunctionStitching, "pdfrb/model/type/function_stitching"
+      autoload :FunctionSampled, "pdfrb/model/type/function_sampled"
+      autoload :FunctionPostScript, "pdfrb/model/type/function_postscript"
+
       # Font family.
       autoload :Font, "pdfrb/model/type/font"
       autoload :FontType1, "pdfrb/model/type/font_type1"
