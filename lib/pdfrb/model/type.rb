@@ -192,6 +192,12 @@ module Pdfrb
       autoload :URLAlias, "pdfrb/model/type/url_alias"
       autoload :URIDict, "pdfrb/model/type/uri_dict"
 
+      autoload :Field, "pdfrb/model/type/form_field"
+      autoload :TextField, "pdfrb/model/type/text_field"
+      autoload :Button, "pdfrb/model/type/button"
+      autoload :Choice, "pdfrb/model/type/choice"
+      autoload :SignatureField, "pdfrb/model/type/signature_field"
+
       # Structure types (s14.7).
       autoload :StructureAttributes, "pdfrb/model/type/structure_attributes"
       autoload :StructureElementKid, "pdfrb/model/type/structure_element_kid"
