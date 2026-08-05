@@ -33,7 +33,7 @@ module Pdfrb
           return unless kids && document
 
           arr = kids.is_a?(Pdfrb::Model::Reference) ? document.object(kids) : kids
-          return unless arr.is_a?(Array) || arr.is_a?(Pdfrb::Model::PdfArray)
+          return unless arr.is_a?(Array)
 
           arr.each do |kid_ref|
             obj = kid_ref.is_a?(Pdfrb::Model::Reference) ? document.object(kid_ref) : kid_ref
@@ -41,9 +41,8 @@ module Pdfrb
           end
         end
 
-        # Walk all leaf PageObjects under this node.
         def each_page(&block)
-          return enum_for(:each_page) unless block_given?
+          return enum_for(:each_page) unless block
 
           each_child do |kid|
             case kid[:Type]
@@ -58,7 +57,7 @@ module Pdfrb
         end
 
         def page_count
-          self[:Count] || 0
+          count
         end
 
         def first_page
@@ -76,14 +75,6 @@ module Pdfrb
             return page if i == index
           end
         end
-      end
-
-      # The root of the page tree — same shape as PageTreeNode but
-      # linked directly from the Catalog's /Pages. Tracked separately
-      # so type-dispatch can distinguish root from interior nodes
-      # (some validation rules apply only to the root).
-      class PageTreeNodeRoot < PageTreeNode
-        arlington_object "PageTreeNodeRoot"
       end
     end
   end
