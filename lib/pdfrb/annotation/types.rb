@@ -130,5 +130,93 @@ module Pdfrb
       end
       register_as
     end
+
+    # Line annotation. §12.5.6.7
+    class Line < Base
+      class << self
+        def subtype; :Line; end
+      end
+      register_as
+    end
+
+    # Polygon annotation. §12.5.6.9
+    class Polygon < Base
+      class << self
+        def subtype; :Polygon; end
+      end
+      register_as
+    end
+
+    # Polyline annotation. §12.5.6.9
+    class Polyline < Base
+      class << self
+        def subtype; :Polyline; end
+      end
+      register_as
+    end
+
+    # Ink annotation (freehand). §12.5.6.13
+    class Ink < Base
+      class << self
+        def subtype; :Ink; end
+      end
+      register_as
+    end
+
+    # Widget annotation (form field). §12.5.6.19
+    class Widget < Base
+      class << self
+        def subtype; :Widget; end
+      end
+      register_as
+    end
+
+    # Caret annotation. §12.5.6.11
+    class Caret < Base
+      class << self
+        def subtype; :Caret; end
+      end
+      register_as
+    end
+
+    # Redact annotation. §12.5.6.16
+    class Redact < Base
+      class << self
+        def subtype; :Redact; end
+      end
+      register_as
+    end
+
+    # Watermark annotation. §12.5.6.23 (PDF 2.0)
+    class Watermark < Base
+      class << self
+        def subtype; :Watermark; end
+      end
+      register_as
+    end
+
+    # PrinterMark annotation. §12.5.6.17
+    class PrinterMark < Base
+      class << self
+        def subtype; :PrinterMark; end
+      end
+      register_as
+    end
+
+    # Screen annotation. §12.5.6.18
+    class Screen < Base
+      class << self
+        def subtype; :Screen; end
+      end
+      register_as
+    end
+
+    # Sound annotation. §12.5.6.18
+    class Sound < Base
+      class << self
+        def subtype; :Sound; end
+      end
+      register_as
+    end
   end
 end
