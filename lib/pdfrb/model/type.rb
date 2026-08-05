@@ -215,6 +215,12 @@ module Pdfrb
       autoload :OutputIntentsContainer, "pdfrb/model/type/misc_helpers"
       autoload :CMapStream, "pdfrb/model/type/misc_helpers"
 
+      # Crypt filter (s7.6.5).
+      autoload :CryptFilter, "pdfrb/model/type/crypt_filter"
+      autoload :CryptFilterMap, "pdfrb/model/type/crypt_filter"
+      autoload :CryptFilterPublicKey, "pdfrb/model/type/crypt_filter"
+      autoload :CryptFilterPublicKeyMap, "pdfrb/model/type/crypt_filter"
+
       # Signature build data.
       autoload :SignatureBuildPropDict, "pdfrb/model/type/appearance_trap_net"
       autoload :SignatureBuildDataDict, "pdfrb/model/type/signature_build"
