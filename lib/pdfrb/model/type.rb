@@ -200,6 +200,13 @@ module Pdfrb
       autoload :MediaScreenParameters, "pdfrb/model/type/media_offset"
       autoload :MediaCriteria, "pdfrb/model/type/media_offset"
 
+      # Misc small helpers (one per file).
+      autoload :BorderArray, "pdfrb/model/type/misc_helpers"
+      autoload :LabRangeArray, "pdfrb/model/type/misc_helpers"
+      autoload :DestOutputProfileRef, "pdfrb/model/type/misc_helpers"
+      autoload :OutputIntentsContainer, "pdfrb/model/type/misc_helpers"
+      autoload :CMapStream, "pdfrb/model/type/misc_helpers"
+
       # Signature build data.
       autoload :SignatureBuildPropDict, "pdfrb/model/type/appearance_trap_net"
 
