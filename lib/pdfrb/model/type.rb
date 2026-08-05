@@ -141,6 +141,12 @@ module Pdfrb
       autoload :ActionImportData, "pdfrb/model/type/action_import_data"
       autoload :ActionTrans, "pdfrb/model/type/action_trans"
       autoload :ActionNamed, "pdfrb/model/type/action_named"
+      autoload :ActionRendition, "pdfrb/model/type/action_media"
+      autoload :ActionMovie, "pdfrb/model/type/action_media"
+      autoload :ActionSoundAction, "pdfrb/model/type/action_media"
+      autoload :ActionSetState, "pdfrb/model/type/action_media"
+      autoload :ActionThread, "pdfrb/model/type/action_media"
+      autoload :ActionGoTo3DView, "pdfrb/model/type/action_media"
     end
   end
 end
