@@ -3,11 +3,14 @@
 module Pdfrb
   module Model
     module Type
-      class ActionJavaScript < Cos::Dictionary
-        register_type action_type: :JavaScript
+      # JavaScript action (s12.6.4.16). Execute JavaScript code.
+      class ActionJavaScript < Action
+        register_subtype :JavaScript
 
-        def script
-          self[:JS]
+        def script; self[:JS]; end
+
+        def has_script?
+          !!script && (!script.is_a?(String) || !script.empty?)
         end
       end
     end

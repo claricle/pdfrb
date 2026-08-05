@@ -9,6 +9,7 @@ module Pdfrb
       # still widely used.
       class Info < Pdfrb::Model::Cos::Dictionary
         arlington_object "DocInfo"
+        register_type :Info
 
         def title; self[:Title]; end
         def author; self[:Author]; end

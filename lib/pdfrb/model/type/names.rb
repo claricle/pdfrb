@@ -8,6 +8,7 @@ module Pdfrb
       # /EmbeddedFiles, /AlternatePresentations, /Renditions.
       class Names < Pdfrb::Model::Cos::Dictionary
         arlington_object "Name"
+        register_type :Names
 
         def destinations; self[:Dests]; end
         def ap; self[:AP]; end
