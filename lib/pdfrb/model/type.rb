@@ -98,6 +98,18 @@ module Pdfrb
       autoload :ScreenAnnotation, "pdfrb/model/type/screen_annotation"
       autoload :SoundAnnotation, "pdfrb/model/type/sound_annotation"
       autoload :Action, "pdfrb/model/type/action"
+      autoload :ActionGoTo, "pdfrb/model/type/action_goto"
+      autoload :ActionGoToR, "pdfrb/model/type/action_go_to_r"
+      autoload :ActionURI, "pdfrb/model/type/action_uri"
+      autoload :ActionJavaScript, "pdfrb/model/type/action_java_script"
+      autoload :ActionLaunch, "pdfrb/model/type/action_launch"
+      autoload :ActionSetOCGState, "pdfrb/model/type/action_set_ocg_state"
+      autoload :ActionHide, "pdfrb/model/type/action_hide"
+      autoload :ActionSubmitForm, "pdfrb/model/type/action_submit_form"
+      autoload :ActionResetForm, "pdfrb/model/type/action_reset_form"
+      autoload :ActionImportData, "pdfrb/model/type/action_import_data"
+      autoload :ActionTrans, "pdfrb/model/type/action_trans"
+      autoload :ActionNamed, "pdfrb/model/type/action_named"
     end
   end
 end
