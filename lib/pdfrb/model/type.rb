@@ -112,6 +112,8 @@ module Pdfrb
       autoload :CIDFont, "pdfrb/model/type/cid_font"
       autoload :CIDSystemInfo, "pdfrb/model/type/cid_system_info"
       autoload :FontDescriptor, "pdfrb/model/type/font_descriptor"
+      autoload :FontMultipleMaster, "pdfrb/model/type/font_multiple_master"
+      autoload :CharProcMap, "pdfrb/model/type/font_multiple_master"
       autoload :FontFile, "pdfrb/model/type/font_file"
       autoload :FontFile2, "pdfrb/model/type/font_file2"
       autoload :FontFile3, "pdfrb/model/type/font_file3"
