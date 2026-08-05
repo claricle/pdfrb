@@ -22,14 +22,13 @@ module Pdfrb
       end
 
       # Add an explicit destination under +name+. Creates the /Dests
-      # dictionary if absent.
+      # dictionary if absent. +destination+ is typically an Array
+      # [page_ref, fit_keyword, *args].
       def add(name, destination)
         ensure_dictionaries
         catalog = document.catalog
         catalog.value[:Dests] ||= {}
-        dests = catalog.value[:Dests]
-        dests[name.to_sym] = destination
-        document.add(destination, type: Pdfrb::Model::Cos::Dictionary) unless destination.is_a?(Pdfrb::Model::Reference)
+        catalog.value[:Dests][name.to_sym] = destination
         name.to_sym
       end
 
