@@ -59,8 +59,11 @@ module Pdfrb
       autoload :OptContentLanguage, "pdfrb/model/type/opt_content_ext"
       autoload :OptContentUsage, "pdfrb/model/type/opt_content_ext"
       autoload :OptContentUsageApplication, "pdfrb/model/type/opt_content_ext"
+      autoload :OptContentPageElement, "pdfrb/model/type/opt_content_page_element"
 
       autoload :FileSpecification, "pdfrb/model/type/file_specification"
+      autoload :FileSpecEF, "pdfrb/model/type/file_spec_ef"
+      autoload :FileSpecRF, "pdfrb/model/type/file_spec_rf"
       autoload :EmbeddedFile, "pdfrb/model/type/embedded_file"
       autoload :AFFileSpecification, "pdfrb/model/type/af_file_specification"
       autoload :AFEmbeddedFile, "pdfrb/model/type/af_embedded_file"
@@ -97,6 +100,9 @@ module Pdfrb
       autoload :Indexed, "pdfrb/model/type/indexed"
       autoload :Separation, "pdfrb/model/type/separation"
       autoload :DeviceN, "pdfrb/model/type/device_n"
+      autoload :DeviceNMixingHints, "pdfrb/model/type/device_n_mixing_hints"
+      autoload :DeviceNProcess, "pdfrb/model/type/device_n_process"
+      autoload :ICCBasedColorSpace, "pdfrb/model/type/icc_based_color_space"
 
       # Pattern family (s8.7).
       autoload :Pattern, "pdfrb/model/type/pattern"
@@ -224,6 +230,7 @@ module Pdfrb
       autoload :MediaPlayers, "pdfrb/model/type/media_offset"
       autoload :MediaScreenParameters, "pdfrb/model/type/media_offset"
       autoload :MediaCriteria, "pdfrb/model/type/media_offset"
+      autoload :SoftwareIdentifier, "pdfrb/model/type/software_identifier"
 
       # Misc small helpers (one per file).
       autoload :BorderArray, "pdfrb/model/type/misc_helpers"
