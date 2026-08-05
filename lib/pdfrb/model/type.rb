@@ -150,6 +150,12 @@ module Pdfrb
       autoload :ActionGoToDp, "pdfrb/model/type/action_pdf20"
       autoload :ActionRichMediaExecute, "pdfrb/model/type/action_pdf20"
       autoload :ActionNOP, "pdfrb/model/type/action_pdf20"
+
+      # Signature family (s12.8).
+      autoload :Signature, "pdfrb/model/type/signature"
+      autoload :SigFieldLock, "pdfrb/model/type/signature"
+      autoload :SigFieldSeedValue, "pdfrb/model/type/signature"
+      autoload :DocMDPTransformParameters, "pdfrb/model/type/signature"
     end
   end
 end
