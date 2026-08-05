@@ -7,6 +7,7 @@ module Pdfrb
       # Required for PDF/X and PDF/A conformance.
       class OutputIntent < Pdfrb::Model::Cos::Dictionary
         arlington_object "OutputIntents"
+        register_type :OutputIntent
 
         def type; self[:Type]; end
         def output_intent_type; self[:S]; end

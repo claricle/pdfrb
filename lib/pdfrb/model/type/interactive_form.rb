@@ -6,6 +6,7 @@ module Pdfrb
       # AcroForm interactive form root (s12.7.2). Catalog /AcroForm.
       class InteractiveForm < Pdfrb::Model::Cos::Dictionary
         arlington_object "InteractiveForm"
+        register_type :AcroForm
 
         def fields; self[:Fields]; end
         def need_appearances; self[:NeedAppearances]; end

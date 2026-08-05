@@ -9,6 +9,7 @@ module Pdfrb
       # for /Figure elements.
       class StructElem < Pdfrb::Model::Cos::Dictionary
         arlington_object "StructElem"
+        register_type :StructElem
 
         def type; self[:Type]; end
         def structure_type; self[:S]; end

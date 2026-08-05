@@ -8,6 +8,7 @@ module Pdfrb
       # /AuthCode, /AdditionalStreams, /DocChecksum.
       class FileTrailer < Pdfrb::Model::Cos::Dictionary
         arlington_object "FileTrailer"
+        register_type :FileTrailer
 
         def size; self[:Size]; end
         def prev; self[:Prev]; end

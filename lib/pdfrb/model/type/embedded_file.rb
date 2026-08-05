@@ -7,6 +7,7 @@ module Pdfrb
       # /Filespec /EF entry.
       class EmbeddedFile < Pdfrb::Model::Cos::Stream
         arlington_object "EmbeddedFileStream"
+        register_type :EmbeddedFile
 
         def subtype; self[:Subtype]; end
         def length; self[:Length]; end

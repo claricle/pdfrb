@@ -6,6 +6,7 @@ module Pdfrb
       # File specification (s7.11.2). /FS, /F, /UF, /EF, /Desc, etc.
       class FileSpecification < Pdfrb::Model::Cos::Dictionary
         arlington_object "FileSpecification"
+        register_type :Filespec
 
         def file_system; self[:FS]; end
         def file; self[:F]; end
