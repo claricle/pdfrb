@@ -183,6 +183,14 @@ module Pdfrb
       autoload :ThreeDReference, "pdfrb/model/type/three_d_reference"
       autoload :ThreeDActivation, "pdfrb/model/type/three_d_activation"
 
+      # 3D Measure family (s13.6.4).
+      autoload :ThreeDMeasure, "pdfrb/model/type/three_d_measure"
+      autoload :ThreeDMeasure3DC, "pdfrb/model/type/three_d_measure_3dc"
+      autoload :ThreeDMeasurePD3, "pdfrb/model/type/three_d_measure_pd3"
+      autoload :ThreeDMeasureLD3, "pdfrb/model/type/three_d_measure_ld3"
+      autoload :ThreeDMeasureRD3, "pdfrb/model/type/three_d_measure_rd3"
+      autoload :ThreeDMeasureAD3, "pdfrb/model/type/three_d_measure_ad3"
+
       # Transition + 3D markup + geolocation.
       autoload :Transition, "pdfrb/model/type/transition"
       autoload :ExData3DMarkup, "pdfrb/model/type/transition"
