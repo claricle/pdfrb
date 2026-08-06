@@ -45,8 +45,7 @@ module Pdfrb
           max_width: afm.max_width,
           stem_v: 80,
           italic_angle: afm.italic_angle || 0,
-          bbox: [afm.font_bbox_x_min, afm.font_bbox_y_min,
-                 afm.font_bbox_x_max, afm.font_bbox_y_max]
+          bbox: afm.bbox
         )
       rescue StandardError
         nil
@@ -111,7 +110,10 @@ module Pdfrb
       end
 
       def standard14_afm_path(name)
-        base = File.expand_path("../../../data/afm", __dir__)
+        # __dir__ is lib/pdfrb/font/. Three .. gets to project root
+        # (lib/pdfrb/font → lib/pdfrb → lib → project root). Data
+        # files live at <root>/data/pdfrb/afm/.
+        base = File.expand_path("../../../data/pdfrb/afm", __dir__)
         File.join(base, "#{name}.afm")
       end
     end
