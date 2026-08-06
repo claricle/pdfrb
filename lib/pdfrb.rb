@@ -104,6 +104,7 @@ module Pdfrb
   autoload :Layout, "pdfrb/layout"
   autoload :Composer, "pdfrb/composer"
   autoload :Compare, "pdfrb/compare"
+  autoload :TestUtils, "pdfrb/test_utils"
   autoload :CLI, "pdfrb/cli"
   require "logger"
 

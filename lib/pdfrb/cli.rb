@@ -137,7 +137,146 @@ module Pdfrb
       end
     end
 
+    desc "split INPUT OUTPUT_PATTERN [FROM [TO]]", "Split a PDF into individual pages"
+    def split(input, output_pattern, from = nil, to = nil)
+      doc = open_doc(input)
+      total = doc.pages.count
+      from_idx = from ? from.to_i : 1
+      to_idx = to ? to.to_i : total
+      (from_idx..to_idx).each do |i|
+        target = Pdfrb::Document.new
+        Pdfrb::Importer.new(target).import(doc.pages[i - 1].value, doc)
+        out_path = format(output_pattern, i)
+        target.write(out_path)
+      end
+      puts "Split #{input} into #{to_idx - from_idx + 1} files"
+    end
+
+    desc "watermark INPUT OUTPUT --text TEXT", "Stamp text on every page"
+    method_option :text, type: :string, required: true
+    method_option :font, type: :string, default: "Helvetica"
+    method_option :size, type: :numeric, default: 50
+    method_option :color, type: :string, default: "0.5,0.5,0.5"
+    method_option :opacity, type: :numeric, default: 0.3
+    method_option :angle, type: :numeric, default: 45
+    def watermark(input, output)
+      doc = open_doc(input)
+      color = options[:color].split(",").map(&:to_f)
+      doc.pages.each do |page|
+        canvas = page.canvas
+        doc.graphics_state.register_transparency(page, opacity: options[:opacity])
+        canvas.save_graphics_state
+        canvas.opacity = options[:opacity]
+        canvas.fill_color(color)
+        canvas.text(options[:text], at: [100, 400],
+                                    font: options[:font].to_sym,
+                                    size: options[:size])
+        canvas.restore_graphics_state
+      end
+      doc.write(output)
+      puts "Watermarked #{doc.pages.count} pages → #{output}"
+    end
+
+    desc "modify INPUT OUTPUT", "Apply modifications to a PDF"
+    method_option :delete, type: :string, banner: "PAGE_RANGE e.g. 1-3,5"
+    method_option :rotate, type: :numeric, banner: "ANGLE 0/90/180/270"
+    def modify(input, output)
+      doc = open_doc(input)
+      apply_delete(doc, options[:delete]) if options[:delete]
+      apply_rotate(doc, options[:rotate]) if options[:rotate]
+      doc.write(output)
+      puts "Modified → #{output}"
+    end
+
+    desc "inspect INPUT", "Walk the PDF structure"
+    method_option :object, type: :numeric, banner: "OID to dump"
+    def inspect(input)
+      doc = open_doc(input)
+      if options[:object]
+        ref = Pdfrb::Model::Reference.new(options[:object], 0)
+        obj = doc.object(ref)
+        puts obj&.value
+        return
+      end
+
+      catalog = doc.catalog
+      puts "Catalog: /Type=#{catalog[:Type]}"
+      puts "  Pages: #{doc.pages.count}"
+      puts "  Title: #{doc.metadata.title || '-'}"
+      af = catalog[:AcroForm]
+      puts "  AcroForm: #{af ? 'present' : 'absent'}"
+      outlines = catalog[:Outlines]
+      puts "  Outlines: #{outlines ? 'present' : 'absent'}"
+    end
+
+    desc "files INPUT", "List embedded files in the document"
+    def files(input)
+      doc = open_doc(input)
+      if doc.files.empty?
+        puts "No embedded files."
+        return
+      end
+      doc.files.each do |name, spec|
+        size = spec[:EF] ? "embedded" : "external"
+        puts "#{name}  (#{size})"
+      end
+    end
+
+    desc "files-add INPUT OUTPUT FILE", "Embed a file into the document"
+    method_option :relationship, type: :string, default: nil
+    def files_add(input, output, file)
+      doc = open_doc(input)
+      doc.files.add(file, name: File.basename(file),
+                          relationship: options[:relationship]&.to_sym)
+      doc.write(output)
+      puts "Embedded #{file} → #{output}"
+    end
+
+    desc "batch INPUT OUTPUT COMMAND1 ARGS... -- COMMAND2 ARGS...",
+         "Run multiple operations on a single document"
+    def batch(input, output, *args)
+      doc = open_doc(input)
+      commands = args.split("--").reject(&:empty?)
+      commands.each do |cmd_args|
+        cmd, *cmd_args = cmd_args
+        apply_batch_command(doc, cmd, cmd_args)
+      end
+      doc.write(output)
+      puts "Batch processed → #{output}"
+    end
+
     private
+
+    def apply_delete(doc, range_spec)
+      ranges = range_spec.split(",").map { |r| parse_range(r, doc.pages.count) }
+      oids_to_delete = []
+      ranges.each do |(from, to)|
+        (from..to).each { |i| oids_to_delete << doc.pages[i - 1].oid }
+      end
+      oids_to_delete.uniq.each { |oid| doc.pages.delete_at(oid) }
+    end
+
+    def apply_rotate(doc, angle)
+      doc.pages.each { |page| page.value[:Rotate] = angle }
+    end
+
+    def parse_range(spec, _total)
+      if spec.include?("-")
+        from, to = spec.split("-").map(&:to_i)
+        [from, to]
+      else
+        n = spec.to_i
+        [n, n]
+      end
+    end
+
+    def apply_batch_command(doc, cmd, args)
+      case cmd
+      when "rotate" then apply_rotate(doc, args.first.to_i)
+      when "delete" then apply_delete(doc, args.first)
+      else warn "unknown batch command: #{cmd}"
+      end
+    end
 
     def open_doc(path)
       raise "no such file: #{path}" unless File.exist?(path)

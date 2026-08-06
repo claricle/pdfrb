@@ -10,6 +10,8 @@ module Pdfrb
     autoload :CMap, "pdfrb/font/cmap"
     autoload :TrueType, "pdfrb/font/true_type"
     autoload :Type1, "pdfrb/font/type1"
+    autoload :Metrics, "pdfrb/font/metrics_helper"
+    autoload :MetricsHelper, "pdfrb/font/metrics_helper"
   end
 
   # Top-level font loader registry. Extends what +Document::Fonts+

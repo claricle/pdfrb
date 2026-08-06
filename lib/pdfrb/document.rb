@@ -22,6 +22,7 @@ module Pdfrb
     autoload :Colors, "pdfrb/document/colors"
     autoload :Display, "pdfrb/document/display"
     autoload :Form, "pdfrb/document/form"
+    autoload :GraphicsState, "pdfrb/document/graphics_state"
     autoload :Layers, "pdfrb/document/layers"
     autoload :Portfolio, "pdfrb/document/portfolio"
     autoload :Structure, "pdfrb/document/structure"
@@ -144,6 +145,8 @@ module Pdfrb
     def shadings; @shadings ||= Document::Shadings.new(self); end
 
     def colors; @colors ||= Document::Colors.new(self); end
+
+    def graphics_state; @graphics_state ||= Document::GraphicsState.new(self); end
 
     def layers; @layers ||= Document::Layers.new(self); end
 
