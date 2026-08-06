@@ -101,6 +101,8 @@ module Pdfrb
   autoload :XrefSection, "pdfrb/xref_section"
   autoload :Document, "pdfrb/document"
 
+  autoload :Layout, "pdfrb/layout"
+  autoload :Composer, "pdfrb/composer"
   autoload :Compare, "pdfrb/compare"
   autoload :CLI, "pdfrb/cli"
   require "logger"
