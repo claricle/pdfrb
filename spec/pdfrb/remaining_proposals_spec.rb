@@ -31,14 +31,14 @@ RSpec.describe "Font embedding failure warning" do
     expect(output.string).not_to include("does not look like a valid TTF/OTF")
   end
 
-  it "recognizes OpenType OTTO magic" do
+  it "recognizes OpenType OTTO magic as CFF/Type1 (Issue #62)" do
     otf = "OTTO#{"\x00" * 100}"
     io = StringIO.new(otf)
 
     doc.fonts.add(io)
     font_ref = doc.catalog.value[:Resources][:Font][:F1]
     font = doc.object(font_ref)
-    expect(font[:Subtype]).to eq(:TrueType)
+    expect(font[:Subtype]).to eq(:Type1)
   end
 
   it "validates font data helper correctly" do

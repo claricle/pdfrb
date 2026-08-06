@@ -106,13 +106,16 @@ module Pdfrb
       max_oid = oids.max || 0
       @io << "xref\n"
       @io << "0 #{max_oid + 1}\n"
-      @io << sprintf("0000000000 65535 f \r\n")
+      # Each entry must be EXACTLY 20 bytes per s7.5.4: 10-digit offset,
+      # 1 space, 5-digit gen, 1 space, 1-char type, 2-byte EOL (CR+LF).
+      # No trailing space before the EOL — that was the bug.
+      @io << format("%010d %05d f\r\n", 0, 65_535)
       (1..max_oid).each do |oid|
         offset = @xref_offsets[oid]
         if offset
-          @io << sprintf("%010d %05d n \r\n", offset, 0)
+          @io << format("%010d %05d n\r\n", offset, 0)
         else
-          @io << sprintf("0000000000 00000 f \r\n")
+          @io << format("%010d %05d f\r\n", 0, 0)
         end
       end
       pos

@@ -351,7 +351,10 @@ module Pdfrb
           if File.file?(name_or_io)
             @pending_io_data = File.binread(name_or_io)
             @pending_subtype = true_type_subtype(@pending_io_data)
-            "FileFont-#{File.basename(name_or_io, '.*')}"
+            # Subset prefix per PDF spec s9.6.4: 6 uppercase letters + "+".
+            subset_tag = subset_tag_for(@pending_io_data)
+            base = File.basename(name_or_io, ".*")
+            "#{subset_tag}+#{base}"
           else
             name_or_io.to_s
           end
@@ -361,19 +364,41 @@ module Pdfrb
           unless valid_font_data?(@pending_io_data)
             Pdfrb.logger&.warn("Font data does not look like a valid TTF/OTF")
           end
-          "EmbeddedFont-#{@pending_io_data.bytesize}"
+          subset_tag = subset_tag_for(@pending_io_data)
+          "#{subset_tag}+EmbeddedFont#{@pending_io_data.bytesize}"
         else
           raise ArgumentError, "font name must be a String, Symbol, or IO"
         end
       end
 
+      # Generate a deterministic 6-letter subset tag from the font bytes
+      # so re-embedding the same font produces the same prefix. Format
+      # is six uppercase ASCII letters derived from the SHA-1 of the
+      # first 1 KB of the font file (per PDF spec s9.6.4).
+      def subset_tag_for(font_bytes)
+        require "digest"
+        digest = Digest::SHA1.digest(font_bytes.byteslice(0, 1024) || "")
+        digest.byteslice(0, 6).bytes.each_with_object(+"") do |b, s|
+          s << ((b % 26) + 65).chr
+        end
+      end
+
       def true_type_subtype(data)
         magic = data&.byteslice(0, 4)
+        # Per PDF spec s9.6.2 + s9.9: magic distinguishes the two
+        # outline formats. "OTTO" means OpenType with CFF outlines,
+        # which must be embedded via /FontFile3 + /Subtype /OpenType
+        # and treated as /Subtype /Type1 (CFF) — NOT as /Subtype
+        # /TrueType, which was the bug (Issue #62).
         return :TrueType if magic == "\x00\x01\x00\x00".b
         return :TrueType if magic == "true".b
-        return :TrueType if magic == "OTTO".b
+        return :Type1 if magic == "OTTO".b
 
         nil
+      end
+
+      def cff_font?(data)
+        true_type_subtype(data) == :Type1
       end
 
       def next_resource_name
@@ -406,8 +431,19 @@ module Pdfrb
             type: Pdfrb::Model::Cos::Stream
           )
           font_file.stream = @pending_io_data
-          fd.value[:FontFile2] =
-            Pdfrb::Model::Reference.new(font_file.oid, font_file.gen)
+          # Per PDF spec s9.9: TrueType outlines → FontFile2; CFF (OTF)
+          # outlines → FontFile3 with /Subtype /OpenType. Issue #62
+          # was embedding OTF/CFF as TrueType via FontFile2.
+          if cff_font?(@pending_io_data)
+            font_file.value[:Subtype] = :OpenType
+            font_file.value[:Length1] = @pending_io_data.bytesize
+            fd.value[:FontFile3] =
+              Pdfrb::Model::Reference.new(font_file.oid, font_file.gen)
+          else
+            font_file.value[:Length1] = @pending_io_data.bytesize
+            fd.value[:FontFile2] =
+              Pdfrb::Model::Reference.new(font_file.oid, font_file.gen)
+          end
         end
 
         subtype = @pending_subtype || :Type1
@@ -416,7 +452,7 @@ module Pdfrb
           Encoding: :WinAnsiEncoding, FirstChar: 0, LastChar: 255,
           Widths: Array.new(256, DEFAULT_WIDTH),
           FontDescriptor: fd_ref, ToUnicode: tu_ref
-        }, type: Pdfrb::Model::Type::FontType1)
+        }, type: subtype == :TrueType ? Pdfrb::Model::Type::FontTrueType : Pdfrb::Model::Type::FontType1)
       end
 
       def attach_to_resources(resource, font_dict)

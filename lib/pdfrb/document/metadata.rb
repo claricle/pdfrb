@@ -61,7 +61,7 @@ module Pdfrb
         obj = ref ? document.object(ref) : nil
 
         if obj.nil? && create
-          obj = document.add({ Type: :Metadata }, type: Pdfrb::Model::Type::Info)
+          obj = document.add({}, type: Pdfrb::Model::Type::Info)
           document.trailer[:Info] = Pdfrb::Model::Reference.new(obj.oid, obj.gen)
         end
         @cached_info = obj
