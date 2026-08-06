@@ -169,6 +169,10 @@ module Pdfrb
       autoload :RichMediaCommand, "pdfrb/model/type/rich_media_command"
       autoload :RichMediaContent, "pdfrb/model/type/rich_media_content"
       autoload :RichMediaCuePoint, "pdfrb/model/type/rich_media_cue_point"
+      autoload :RichMediaAnimation, "pdfrb/model/type/rich_media_animation"
+      autoload :RichMediaWindow, "pdfrb/model/type/rich_media_window"
+      autoload :RichMediaSettings, "pdfrb/model/type/rich_media_settings"
+      autoload :RichMediaPresentation, "pdfrb/model/type/rich_media_presentation"
 
       # 3D family (s13.6).
       autoload :ThreeDStream, "pdfrb/model/type/three_d_stream"
