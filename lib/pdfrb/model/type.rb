@@ -170,6 +170,19 @@ module Pdfrb
       autoload :RichMediaContent, "pdfrb/model/type/rich_media_content"
       autoload :RichMediaCuePoint, "pdfrb/model/type/rich_media_cue_point"
 
+      # 3D family (s13.6).
+      autoload :ThreeDStream, "pdfrb/model/type/three_d_stream"
+      autoload :ThreeDView, "pdfrb/model/type/three_d_view"
+      autoload :ThreeDAnimationStyle, "pdfrb/model/type/three_d_animation_style"
+      autoload :ThreeDBackground, "pdfrb/model/type/three_d_background"
+      autoload :ThreeDLightingScheme, "pdfrb/model/type/three_d_lighting_scheme"
+      autoload :ThreeDRenderMode, "pdfrb/model/type/three_d_render_mode"
+      autoload :ThreeDCrossSection, "pdfrb/model/type/three_d_cross_section"
+      autoload :ThreeDNode, "pdfrb/model/type/three_d_node"
+      autoload :ThreeDUnits, "pdfrb/model/type/three_d_units"
+      autoload :ThreeDReference, "pdfrb/model/type/three_d_reference"
+      autoload :ThreeDActivation, "pdfrb/model/type/three_d_activation"
+
       # Transition + 3D markup + geolocation.
       autoload :Transition, "pdfrb/model/type/transition"
       autoload :ExData3DMarkup, "pdfrb/model/type/transition"
