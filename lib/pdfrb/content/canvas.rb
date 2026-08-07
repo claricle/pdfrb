@@ -193,6 +193,26 @@ module Pdfrb
         self
       end
 
+      # Draw a Form XObject by resource name at (x, y) with an optional
+      # matrix transform. Public API for page stamping, form flattening,
+      # and appearance-stream embedding.
+      # @param name [Symbol] the resource name in /Resources /XObject.
+      # @param at [Array<Numeric>] x, y translation.
+      # @param matrix [Array<Numeric>, nil] 6-element transform matrix.
+      def draw_form_xobject(name, at: [0, 0], matrix: nil)
+        @used_xobjects[name] = true
+        save_graphics_state do
+          if matrix
+            a, b, c, d, e, f = matrix
+            concat(a, b, c, d, e, f)
+          elsif at
+            translate(at[0], at[1])
+          end
+          emit_op(Pdfrb::Content::Operator::InvokeXObject, name)
+        end
+        self
+      end
+
       def text(str, at:, font:, size:, char_spacing: nil, word_spacing: nil)
         @used_fonts[font] = size
         encoded = encode_for_font(str.to_s, font)

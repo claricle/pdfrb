@@ -6,7 +6,7 @@ module Pdfrb
       # Border array [horizontal_radius vertical_radius width_dash
       # ...]  Deprecated; use BorderStyling instead (s7.7.3.3).
       # Encapsulated as a thin struct.
-      class BorderArray < Pdfrb::Model::Cos::Array
+      class BorderArray < Pdfrb::Model::PdfArray
         def horizontal_radius
           self[0] || 0
         end
@@ -26,7 +26,7 @@ module Pdfrb
 
       # Lab Range Array [a_min a_max b_min b_max]. Used inside the
       # Lab color space dict (s8.6.3.4).
-      class LabRangeArray < Pdfrb::Model::Cos::Array
+      class LabRangeArray < Pdfrb::Model::PdfArray
         def a_min; self[0]; end
         def a_max; self[1]; end
         def b_min; self[2]; end

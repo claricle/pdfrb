@@ -78,6 +78,11 @@ module Pdfrb
         end
       end
 
+      # Serializer-compatible alias for encrypt_data. The Serializer
+      # calls encrypter.encrypt(payload, oid, gen) on string/stream
+      # payloads during serialization.
+      alias encrypt encrypt_data
+
       def decrypt_data(data, oid, gen)
         return data unless @key
 
