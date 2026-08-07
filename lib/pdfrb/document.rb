@@ -30,6 +30,7 @@ module Pdfrb
     autoload :OutputIntents, "pdfrb/document/output_intents"
     autoload :Info, "pdfrb/document/info"
     autoload :PageLabels, "pdfrb/document/page_labels"
+    autoload :Stamps, "pdfrb/document/stamps"
 
     def initialize(io: nil, config: {})
       @config = Configuration.new(config)
@@ -157,6 +158,8 @@ module Pdfrb
     def output_intents; @output_intents ||= Document::OutputIntents.new(self); end
 
     def page_labels; @page_labels ||= Document::PageLabels.new(self); end
+
+    def stamps; @stamps ||= Document::Stamps.new(self); end
 
     def info; @info ||= Document::Info.new(self); end
 
