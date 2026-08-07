@@ -81,6 +81,58 @@ module Pdfrb
         elem
       end
 
+      # Set alternate text on a structure element for screen readers.
+      # Required for /Figure elements per PDF/UA-1 Tech Note 001.
+      # @param element [Pdfrb::Model::Cos::Dictionary] the StructElem.
+      # @param text [String] the alt text.
+      def set_alt_text(element, text)
+        element.value[:Alt] = text.to_s
+      end
+
+      # Set actual text on a structure element. Overrides the visual
+      # text for screen readers (e.g., expanding abbreviations).
+      # @param element [Pdfrb::Model::Cos::Dictionary] the StructElem.
+      # @param text [String] the actual text.
+      def set_actual_text(element, text)
+        element.value[:ActualText] = text.to_s
+      end
+
+      # Set language on a structure element (overrides document /Lang).
+      # @param element [Pdfrb::Model::Cos::Dictionary] the StructElem.
+      # @param lang [String] BCP 47 language tag (e.g., "en-US").
+      def set_language(element, lang)
+        element.value[:Lang] = lang.to_s
+      end
+
+      # Check if a structure element has alt text (required for /Figure).
+      # @param element [Pdfrb::Model::Cos::Dictionary] the StructElem.
+      # @return [Boolean]
+      def has_alt_text?(element)
+        alt = element.value[:Alt]
+        alt && !alt.to_s.empty?
+      end
+
+      # Validate that all /Figure elements have /Alt text per PDF/UA-1.
+      # @return [Array<Hash>] list of violations (element + reason).
+      def validate_alt_text!
+        violations = []
+        each_element do |elem|
+          next unless elem.value[:S]&.to_sym == :Figure
+
+          unless has_alt_text?(elem)
+            violations << { element: elem, reason: "Figure missing /Alt text" }
+          end
+        end
+        violations
+      end
+
+      # Walk all structure elements depth-first.
+      def each_element(&block)
+        return enum_for(:each_element) unless block
+
+        @elements.each(&block)
+      end
+
       # Define a role mapping: maps a custom structure type name to
       # a standard one. Required for PDF/UA when custom types are used.
       # @param custom [Symbol] the custom type name.

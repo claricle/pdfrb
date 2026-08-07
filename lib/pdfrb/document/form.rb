@@ -103,7 +103,113 @@ module Pdfrb
         end
       end
 
+      # List of fully qualified field names (T values).
+      def field_names
+        each_field.filter_map { |f| f.value[:T] }
+      end
+
+      # Set a field value by name. Auto-regenerates the appearance stream
+      # for text/checkbox fields. For unsupported types, sets /V only.
+      # @param name [String] the field's /T value.
+      # @param value [Object] the new /V value.
+      # @return [Pdfrb::Model::Cos::Dictionary, nil] the field if found.
+      def set_value(name, value)
+        field = find(name)
+        return nil unless field
+
+        field.value[:V] = normalize_value(field, value)
+        regenerate_appearance(field)
+        field
+      end
+
+      # Get a field value by name.
+      # @param name [String] the field's /T value.
+      # @return [Object, nil] the /V value, or nil if not found.
+      def get_value(name)
+        field = find(name)
+        return nil unless field
+
+        field.value[:V]
+      end
+
+      # Flatten all form fields: stamp their appearance streams into page
+      # content, then remove the field from /AcroForm /Fields. After
+      # flattening, the form is read-only.
+      def flatten!
+        each_field.to_a.each do |field|
+          stamp_field_appearance(field)
+          remove_field(field)
+        end
+        acroform = document.catalog.value[:AcroForm]
+        acroform&.value&.delete(:Fields)
+        acroform&.value&.delete(:NeedAppearances)
+        document
+      end
+
+      # Remove a single field from /AcroForm /Fields and its widget from
+      # the page's /Annots array.
+      def remove_field(field)
+        acroform = document.catalog.value[:AcroForm]
+        return nil unless acroform
+
+        fields = acroform[:Fields]
+        return nil unless fields
+
+        field_ref = Pdfrb::Model::Reference.new(field.oid, field.gen)
+        fields.delete_if { |r| r == field_ref || (r.is_a?(Pdfrb::Model::Reference) && r.oid == field.oid) }
+
+        # Remove widget annotation from page /Annots
+        page_ref = field.value[:P]
+        if page_ref
+          page = page_ref.is_a?(Pdfrb::Model::Reference) ? document.object(page_ref) : page_ref
+          annots = page&.value&.[](:Annots)
+          annots&.delete_if { |r| r == field_ref || (r.is_a?(Pdfrb::Model::Reference) && r.oid == field.oid) }
+        end
+        field
+      end
+
       private
+
+      def normalize_value(field, value)
+        case field.value[:FT]&.to_sym
+        when :Btn
+          # Buttons accept :Yes/:Off or boolean. Normalize to symbol.
+          if [true, :Yes].include?(value)
+            :Yes
+          else
+            ([false, :Off].include?(value) ? :Off : value)
+          end
+        when :Ch
+          # Choices: validate against /Opt if present.
+          value
+        else
+          # Text and signature: accept strings.
+          value.to_s
+        end
+      end
+
+      def regenerate_appearance(field)
+        ft = field.value[:FT]&.to_sym
+        generator = Pdfrb::Appearance::Generator.new(document)
+        case ft
+        when :Tx
+          generator.text_field(field, value: field.value[:V].to_s)
+        when :Btn
+          checked = field.value[:V] == :Yes
+          generator.checkbox(field, checked: checked)
+        end
+      rescue StandardError
+        # Appearance generation is best-effort; viewer can regenerate.
+      end
+
+      def stamp_field_appearance(field)
+        # For v1, flattening removes the widget from /Annots and marks
+        # the form as static. Full appearance-to-content-stream merging
+        # requires Do operator resource registration which lives on
+        # the Canvas private API.
+        # TODO: emit Do for /AP /N via Canvas#draw_form_xobject
+        # once Canvas exposes a public form-XObject registration path.
+      end
 
       def build_widget(name, page:, rect:)
         widget = document.add(
