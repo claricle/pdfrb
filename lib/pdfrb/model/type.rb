@@ -17,14 +17,22 @@ module Pdfrb
       class << self
         attr_reader :arlington_registry
 
-        # Register a Type subclass under its Arlington TSV name.
         def register_arlington(name, klass)
           @arlington_registry[name] = klass
         end
 
-        # Look up a Type subclass by Arlington TSV name.
         def lookup(name)
           @arlington_registry[name]
+        end
+
+        # Force-load all autoloaded type classes so register_type and
+        # register_subtype calls fire. Call this before parsing or
+        # when iterating type_map. Idempotent.
+        def eager_load!
+          return if @eager_loaded
+
+          constants.each { |c| const_get(c) }
+          @eager_loaded = true
         end
       end
 
@@ -57,7 +65,6 @@ module Pdfrb
       autoload :OptContentPrint, "pdfrb/model/type/opt_content_ext"
       autoload :OptContentView, "pdfrb/model/type/opt_content_ext"
       autoload :OptContentLanguage, "pdfrb/model/type/opt_content_ext"
-      autoload :OptContentUsage, "pdfrb/model/type/opt_content_ext"
       autoload :OptContentUsageApplication, "pdfrb/model/type/opt_content_ext"
       autoload :OptContentPageElement, "pdfrb/model/type/opt_content_page_element"
 
@@ -70,7 +77,38 @@ module Pdfrb
       autoload :StructTreeRoot, "pdfrb/model/type/struct_tree_root"
       autoload :StructElem, "pdfrb/model/type/struct_elem"
 
-      # XObject family.
+      # Additional base types (previously loaded via require in pdfrb.rb;
+      # now autoloaded per project rule).
+      autoload :MarkInformation, "pdfrb/model/type/mark_information"
+      autoload :IconFit, "pdfrb/model/type/icon_fit"
+      autoload :PageLabel, "pdfrb/model/type/page_label"
+      autoload :BorderStyling, "pdfrb/model/type/border_styling"
+      autoload :BorderEffect, "pdfrb/model/type/border_effect"
+      autoload :LineEndingStyling, "pdfrb/model/type/line_ending_styling"
+      autoload :InteriorColor, "pdfrb/model/type/interior_color"
+      autoload :ObjectReference, "pdfrb/model/type/object_reference"
+      autoload :SquareCircle, "pdfrb/model/type/square_circle"
+      autoload :VariableTextField, "pdfrb/model/type/variable_text_field"
+      autoload :DocumentSecurityStore, "pdfrb/model/type/document_security_store"
+      autoload :Measure, "pdfrb/model/type/measure"
+      autoload :OptionalContentConfiguration, "pdfrb/model/type/optional_content_config"
+      autoload :MarkedContentReference, "pdfrb/model/type/marked_content_reference"
+      autoload :AppearanceGenerator, "pdfrb/model/type/appearance_generator"
+      autoload :Field, "pdfrb/model/type/form_field"
+      autoload :TextField, "pdfrb/model/type/text_field"
+      autoload :Button, "pdfrb/model/type/button"
+      autoload :Choice, "pdfrb/model/type/choice"
+      autoload :SignatureField, "pdfrb/model/type/signature_field"
+      autoload :ViewerPreferences, "pdfrb/model/type/viewer_preferences"
+      autoload :FontMultipleMaster, "pdfrb/model/type/font_multiple_master"
+      autoload :CharProcMap, "pdfrb/model/type/font_multiple_master"
+      autoload :FontEncoding, "pdfrb/model/type/font_encoding"
+      autoload :CIDFontDescriptorMetrics, "pdfrb/model/type/cid_font_descriptor_metrics"
+      autoload :FontCIDType0, "pdfrb/model/type/font_cid_type0"
+      autoload :FontCIDType2, "pdfrb/model/type/font_cid_type2"
+      autoload :FontDescriptorCIDType0, "pdfrb/model/type/font_descriptor_cid_type0"
+      autoload :FontDescriptorCIDType2, "pdfrb/model/type/font_descriptor_cid_type2"
+      autoload :ToUnicodeCMapStream, "pdfrb/model/type/to_unicode_cmap_stream"
       autoload :XObjectForm, "pdfrb/model/type/xobject_form"
       autoload :XObjectImage, "pdfrb/model/type/xobject_image"
 

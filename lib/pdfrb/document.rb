@@ -33,6 +33,7 @@ module Pdfrb
     autoload :Stamps, "pdfrb/document/stamps"
 
     def initialize(io: nil, config: {})
+      Pdfrb::Model::Type.eager_load!
       @config = Configuration.new(config)
       @io = io
       @objects = {}        # oid -> Pdfrb::Model::Object (modified or new)

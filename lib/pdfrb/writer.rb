@@ -23,9 +23,40 @@ module Pdfrb
       @io = io
       @serializer = Serializer.new(
         compress_streams: document.config["writer.compress_streams"],
-        compress_min_size: document.config["writer.compress_min_size"]
+        compress_min_size: document.config["writer.compress_min_size"],
+        **serializer_encrypter_opts
       )
-      @xref_offsets = {} # oid -> byte offset
+      @xref_offsets = {}
+    end
+
+    # Build the encrypter option for the Serializer from the document's
+    # /Encrypt dict. If the document isn't encrypted, returns empty hash.
+    # The SecurityHandler's encrypt_data method becomes the Serializer's
+    # encrypter, which encrypts string/stream payloads per-object.
+    def serializer_encrypter_opts
+      trailer = document.trailer
+      return {} unless trailer
+
+      encrypt_ref = trailer[:Encrypt]
+      return {} unless encrypt_ref
+
+      encrypt_dict = encrypt_ref.is_a?(Pdfrb::Model::Reference) ?
+                        document.object(encrypt_ref) : encrypt_ref
+      return {} unless encrypt_dict
+
+      # Wrap the StandardSecurityHandler as a simple encrypter lambda.
+      handler = Pdfrb::Encryption::StandardSecurityHandler.new(
+        Encrypt: encrypt_dict.value,
+        ID: trailer[:ID]
+      )
+      # Verify user password if set in config, else use empty.
+      password = document.config["encryption.password"] || ""
+      handler.verify_user_password(password)
+
+      { encrypter: handler }
+    rescue StandardError
+      # If encryption setup fails, fall back to non-encrypted output.
+      {}
     end
 
     def self.write(document, io)
