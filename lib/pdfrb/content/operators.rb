@@ -16,6 +16,7 @@ module Pdfrb
       autoload :GraphicsStateParams, "pdfrb/content/operators/graphics_state_params"
       autoload :MarkedContent, "pdfrb/content/operators/marked_content"
       autoload :Clipping, "pdfrb/content/operators/clipping"
+      autoload :InlineImage, "pdfrb/content/operators/inline_image"
     end
   end
 end

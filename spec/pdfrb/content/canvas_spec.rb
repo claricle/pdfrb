@@ -54,4 +54,69 @@ RSpec.describe Pdfrb::Content::Canvas do
     expect(stream.stream).to include("/Figure BMC\n")
     expect(stream.stream).to include("EMC\n")
   end
+
+  describe "drawing primitives" do
+    it "polyline connects points via moveto + lineto" do
+      canvas.polyline([[0, 0], [10, 10], [20, 0]])
+      expect(stream.stream).to include("0 0 m\n")
+      expect(stream.stream).to include("10 10 l\n")
+      expect(stream.stream).to include("20 0 l\n")
+    end
+
+    it "polygon closes the path" do
+      canvas.polygon([[0, 0], [10, 0], [10, 10]])
+      expect(stream.stream).to include("h\n")
+    end
+
+    it "arc emits moveto and at least one lineto" do
+      canvas.arc(50, 50, 10, start_angle: 0, end_angle: Math::PI)
+      expect(stream.stream).to include(" m\n")
+      expect(stream.stream).to include(" l\n")
+    end
+
+    it "arc with zero span is a no-op" do
+      canvas.arc(0, 0, 10, start_angle: 0.5, end_angle: 0.5)
+      expect(stream.stream).to eq("")
+    end
+
+    it "circle closes the path" do
+      canvas.circle(50, 50, 10)
+      expect(stream.stream).to include("h\n")
+    end
+
+    it "ellipse produces a closed path" do
+      canvas.ellipse(50, 50, 20, 10)
+      expect(stream.stream).to include("h\n")
+    end
+
+    it "rounded_rectangle emits moveto and close" do
+      canvas.rounded_rectangle(0, 0, 100, 50, 5)
+      expect(stream.stream).to include(" m\n")
+      expect(stream.stream).to include("h\n")
+    end
+
+    it "rounded_rectangle accepts 4-corner radii" do
+      expect do
+        canvas.rounded_rectangle(0, 0, 100, 50, [2, 4, 6, 8])
+      end.not_to raise_error
+    end
+
+    it "dash= is an alias for dash_pattern=" do
+      canvas.dash = [3, 2]
+      expect(stream.stream).to include("[3 2] 0 d\n")
+    end
+
+    it "inline_image emits BI/ID/EI block" do
+      canvas.inline_image(dict: { W: 2, H: 2, CS: :G, BPC: 8 },
+                          data: "\x00\xFF\xFF\x00".b)
+      out = stream.stream
+      expect(out).to include("BI\n")
+      expect(out).to include("/W 2")
+      expect(out).to include("/H 2")
+      expect(out).to include("/CS /G")
+      expect(out).to include("/BPC 8")
+      expect(out).to include("ID\n")
+      expect(out).to include("EI\n")
+    end
+  end
 end

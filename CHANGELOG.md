@@ -2,6 +2,57 @@
 
 All notable changes to the pdfrb gem will be documented in this file.
 
+## [0.7.0] — 2026-08-08
+
+### Added — Release infrastructure
+
+* `.github/workflows/rake.yml` — Metanorma CI generic-rake workflow
+  for tests on every push, PR, tag, and dispatch.
+* `.github/workflows/release.yml` — Metanorma CI rubygems-release
+  workflow driven by `workflow_dispatch` with `next_version` input
+  or `repository_dispatch` of type `do-release`.
+* `RELEASE.md` — documents the publish flow and required secrets.
+
+### Added — Image subsystem
+
+* `Pdfrb::Image::Audit` — read-only metadata extractor (ImageInfo
+  struct per image XObject) with `each_image`, `all`, `oversized`
+  helpers.
+* `Pdfrb::Image::Downsampler` — pure-Ruby nearest-neighbour for
+  FlateDecode-encoded 8-bpc non-palette images. PNG predictor
+  round-trip on both decode and encode. JPEG/JP2K skipped (no
+  native deps).
+* `Pdfrb::Task::Optimize#downsample_images!(factor:)` — applies the
+  downsampler across every image XObject in the document.
+
+### Added — Layout bidi
+
+* `Pdfrb::Layout::Bidi` — paragraph-level UAX #9 bidi reordering
+  (P2-P3 paragraph level, BD1 type classification, I1/I2 implicit
+  levels, L2 reverse by level, L4 paired-bracket mirroring).
+* `Pdfrb::Layout::TextLayouter#layout` calls `Bidi.reorder` before
+  line breaking, so Hebrew and Arabic render in visual order.
+
+### Fixed
+
+* Issue #63: `Document::Fonts#add` now extracts the PostScript name
+  (name table nameID 6) and uses it in `/BaseFont` (e.g.
+  `ABCDEF+MinionPro-Regular` instead of `ABCDEF+EmbeddedFont3132`).
+* Issue #64: `Model::Type::Resources#empty?` handles Hash, Array,
+  Cos::Dictionary, and PdfArray values via a single
+  `empty_collection?` helper.
+
+### Changed
+
+* `Pdfrb::Task::Optimize.dedup_streams!` now actually rewrites
+  references to duplicate streams (was a stub).
+* `Pdfrb::Writer#write_xref_stream` emits a free entry for every
+  gap in the oid space, so dedup'd oids don't misalign the reader's
+  per-oid index.
+* `Pdfrb::Document::Form#flatten!` stamps each field's `/AP /N`
+  appearance stream into the page content via the `/Do` operator
+  (was a stubbed no-op).
+
 ## [0.3.0] — 2026-08-02
 
 ### Added — Semantic PDF diff

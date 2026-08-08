@@ -353,6 +353,9 @@ module Pdfrb
       # Structure types (s14.7).
       autoload :StructureAttributes, "pdfrb/model/type/structure_attributes"
       autoload :StructureElementKid, "pdfrb/model/type/structure_element_kid"
+
+      # Page-piece dictionary (s14.5).
+      autoload :PagePieceInfo, "pdfrb/model/type/page_piece_info"
     end
   end
 end

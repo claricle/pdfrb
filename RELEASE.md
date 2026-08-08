@@ -1,48 +1,61 @@
 # Releasing pdfrb
 
-Releases are driven by git tags. The release workflow is at
-`.github/workflows/release.yml` and runs on tag push (or manual dispatch
-for an existing tag).
+Releases are driven by the Metanorma CI reusable workflow at
+`.github/workflows/release.yml`. It supports two triggers:
 
-## Publish flow
+1. **`workflow_dispatch`** with a `next_version` input — manual run
+   from the Actions UI. Accepted values: `x.y.z`, `major`, `minor`,
+   `patch`, or `pre|rc|etc` to bump to a prerelease.
+2. **`repository_dispatch`** with event type `do-release` — for
+   automation triggers from other repos.
 
-1. Ensure `lib/pdfrb/version.rb` has the target version.
-2. Merge the version-bump change via a PR (never commit directly to main).
-3. When the PR lands, tag the merged commit:
+Both call
+[`metanorma/ci/.github/workflows/rubygems-release.yml@main`](https://github.com/metanorma/ci/blob/main/.github/workflows/rubygems-release.yml),
+which handles version bumping, tag creation, gem build, RubyGems
+publish, and GitHub release creation.
 
-   ```sh
-   git tag v$(ruby -Ilib -e 'require "pdfrb/version"; print Pdfrb::VERSION')
-   git push origin v<VERSION>
-   ```
+## Required secrets
 
-4. The `Release` workflow fires automatically:
-   - Verifies tag ↔ `lib/pdfrb/version.rb` match.
-   - Builds the gem (`bundle exec rake build`).
-   - Publishes to RubyGems via OIDC trusted publishing (no stored API key).
-   - Creates a GitHub release with auto-generated notes.
+* `CLARICLE_CI_RUBYGEMS_API_KEY` — RubyGems API key with `push`
+  permission on the `pdfrb` gem. Set in repo Settings → Secrets and
+  Variables → Actions.
+* `GITHUB_TOKEN` — automatic; used for creating the GitHub release.
 
-## Trusted publishing (OIDC)
+## Triggering a release
 
-The workflow uses `rubygems/configure-rubygems-credentials` with OIDC.
-To enable, on RubyGems:
+### From the Actions UI
 
-1. Open the `pdfrb` gem settings.
-2. Add the GitHub workflow as a trusted publisher:
-   - Repository: `claricle/pdfrb`
-   - Workflow filename: `release.yml`
-   - Environment: (leave blank)
+1. Go to Actions → `release` workflow.
+2. Click "Run workflow".
+3. Enter the next version (e.g., `0.7.0`, `patch`, `minor`, `major`).
+4. Click "Run workflow".
 
-Until that is configured, the `Publish to RubyGems` step will fail.
+### From the API / CI
 
-## Manual dispatch
+```sh
+gh workflow run release.yml \
+  -f next_version=0.7.0
+```
 
-The workflow accepts a `tag` input. Run it from the Actions UI on a
-previously-pushed tag if the auto-trigger missed (e.g., the workflow
-file was added after the tag was pushed).
+Or via `repository_dispatch` from another repo:
+
+```sh
+gh api /repos/claricle/pdfrb/dispatches \
+  -f event_type=do-release \
+  -f 'client_payload[next_version]=0.7.0'
+```
+
+## CI (test) workflow
+
+`.github/workflows/rake.yml` runs the standard Metanorma CI
+generic-rake workflow on every push to `main`/`master`, every tag
+push, every pull request, and via manual `workflow_dispatch`. It
+fires the test matrix across supported Ruby versions.
 
 ## Pre-release checklist
 
-- `bundle exec rake` is green.
-- `lib/pdfrb/version.rb` matches the intended tag.
-- `CHANGELOG.md` has an entry for the new version.
-- No uncommitted changes on `main`.
+* `bundle exec rake` is green locally.
+* `lib/pdfrb/version.rb` matches the intended release (the release
+  workflow handles this automatically when given `next_version`).
+* `CHANGELOG.md` has an entry for the new version.
+* No uncommitted changes on `main`.

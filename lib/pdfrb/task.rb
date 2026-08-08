@@ -9,5 +9,6 @@ module Pdfrb
     autoload :GenerateCorpus, "pdfrb/task/generate_corpus"
     autoload :Benchmark, "pdfrb/task/benchmark"
     autoload :MemoryProfile, "pdfrb/task/memory_profile"
+    autoload :RegenerateAppearances, "pdfrb/task/regenerate_appearances"
   end
 end
