@@ -88,6 +88,52 @@ module Pdfrb
         page
       end
 
+      # Delete the page at +index+ (0-based).
+      def delete_at(index)
+        page = self[index]
+        return nil unless page
+
+        delete(page)
+      end
+
+      # Set /Rotate on every page. +angle+ must be 0, 90, 180, or 270.
+      def rotate(angle)
+        each { |page| page.value[:Rotate] = angle }
+        self
+      end
+
+      # Move a page from one position to another.
+      # @param from [Integer] source index (0-based).
+      # @param to [Integer] destination index (0-based).
+      def move(from, to)
+        return self if from == to
+
+        root = pages_root
+        kids = root.value[:Kids]
+        return self unless kids.is_a?(::Array)
+
+        page = self[from]
+        return self unless page
+
+        ref = ref_to(page)
+        kids.delete(ref)
+        # Clamp to valid range after deletion.
+        insert_at = to > from ? to - 1 : to
+        kids.insert(insert_at, ref)
+        self
+      end
+
+      # Iterate pages with index.
+      def each_with_index(&)
+        return enum_for(:each_with_index) unless block_given?
+
+        i = 0
+        each do |page|
+          yield page, i
+          i += 1
+        end
+      end
+
       private
 
       def pages_root
@@ -105,26 +151,24 @@ module Pdfrb
       end
 
       def walk(node, &block)
-        kids = node.respond_to?(:value) ? node.value[:Kids] : node[:Kids]
+        kids = node.is_a?(Pdfrb::Model::Cos::Dictionary) ? node.value[:Kids] : node[:Kids]
         return unless kids
 
-        # Kids may itself be an indirect reference, especially in
-        # compressed-object PDFs (FOP output).
         kids = document.object(kids).value if kids.is_a?(Pdfrb::Model::Reference)
-        kids = kids.value if kids.respond_to?(:value) && !kids.is_a?(::Hash)
+        kids = kids.value if kids.is_a?(Pdfrb::Model::Cos::Dictionary) && !kids.is_a?(::Hash)
 
         Array(kids).each do |kid_ref|
           kid = kid_ref.is_a?(Pdfrb::Model::Reference) ?
                   document.object(kid_ref) : kid_ref
           next unless kid
 
-          type = kid.respond_to?(:value) ? kid.value[:Type] : nil
+          type = kid.is_a?(Pdfrb::Model::Cos::Dictionary) ? kid.value[:Type] : nil
           case type
           when :Pages then walk(kid, &block)
           when :Page then yield kid
           else
             # Unknown type — best effort, treat as a Page.
-            yield kid if kid.respond_to?(:value)
+            yield kid if kid.is_a?(Pdfrb::Model::Cos::Dictionary)
           end
         end
       end

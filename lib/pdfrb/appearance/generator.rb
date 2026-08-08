@@ -92,6 +92,55 @@ module Pdfrb
         set_appearance(field, form)
       end
 
+      # Generate appearance for a radio button.
+      # @param field [Pdfrb::Model::Type::Annotation] the Widget/field.
+      # @param selected [String] the selected state name (e.g. :Yes).
+      # @param options [Array<String>] all possible state names.
+      def radio_button(field, selected:, options: [:Yes])
+        rect = field.value[:Rect]
+        return unless rect
+
+        options.each do |state|
+          form = build_form_xobject(rect) do |canvas|
+            draw_border(canvas, rect)
+            draw_radio_circle(canvas, rect, selected: state == selected)
+          end
+          set_appearance(field, form, state_name: state.to_sym)
+        end
+        field.value[:AS] = selected.to_sym
+      end
+
+      # Generate appearance for a list box field.
+      # @param field [Pdfrb::Model::Type::Annotation] the Widget/field.
+      # @param items [Array<String>] the list items to show.
+      # @param selected [Integer, nil] index of the selected item.
+      # @param font_name [Symbol] resource name of the font.
+      # @param font_size [Integer] point size.
+      def list_box(field, items:, selected: nil, font_name: :Helv,
+                   font_size: DEFAULT_FONT_SIZE)
+        rect = field.value[:Rect]
+        return unless rect
+
+        form = build_form_xobject(rect) do |canvas|
+          draw_border(canvas, rect)
+          items.each_with_index do |item, i|
+            y_pos = (rect[3] - rect[1]) - DEFAULT_PADDING - ((i + 1) * font_size)
+            break if y_pos.negative?
+
+            if i == selected
+              w = rect[2] - rect[0]
+              canvas.fill_color([0.8, 0.8, 1.0])
+              canvas.rectangle(0, y_pos - 2, w, font_size + 4)
+              canvas.fill
+              canvas.fill_color([0, 0, 0])
+            end
+            canvas.text(item.to_s, at: [DEFAULT_PADDING, y_pos],
+                                   font: font_name, size: font_size)
+          end
+        end
+        set_appearance(field, form)
+      end
+
       private
 
       def build_form_xobject(rect)
@@ -112,6 +161,26 @@ module Pdfrb
         canvas.line_width = 0.5
         canvas.rectangle(0, 0, w, h)
         canvas.stroke
+      end
+
+      def draw_radio_circle(canvas, rect, selected:)
+        w = rect[2] - rect[0]
+        h = rect[3] - rect[1]
+        r = ([w, h].min / 2) - 1
+        cx = w / 2
+        cy = h / 2
+        canvas.line_width = 1.0
+
+        # Approximate a circle with a rectangle for now (Canvas lacks arc).
+        canvas.rectangle(cx - r, cy - r, r * 2, r * 2)
+        canvas.stroke
+
+        if selected
+          canvas.line_width = 2.0
+          inner_r = r * 0.4
+          canvas.rectangle(cx - inner_r, cy - inner_r, inner_r * 2, inner_r * 2)
+          canvas.fill
+        end
       end
 
       def draw_check(canvas, rect)

@@ -88,14 +88,34 @@ module Pdfrb
       end
     end
 
-    desc "encrypt INPUT OUTPUT --password PASSWORD", "Encrypt a PDF"
+    desc "encrypt INPUT OUTPUT --password PASSWORD", "Encrypt a PDF with RC4 or AES"
     method_option :password, type: :string, required: true
+    method_option :owner_password, type: :string, default: nil
+    method_option :bits, type: :numeric, default: 128, banner: "40|128|256"
+    method_option :permissions, type: :string, default: "",
+                                banner: "print,copy,modify,annotate,fill,extract,assemble,print-hq"
     def encrypt(input, output)
-      warn "encrypt: not yet fully implemented (Phase 11 integration pending)"
-      # Copy through for now.
       doc = open_doc(input)
+      bits = options[:bits]
+      password = options[:password]
+      owner_pw = options[:owner_password] || password
+
+      perms = parse_permissions(options[:permissions])
+
+      # Build the /Encrypt dictionary.
+      case bits
+      when 256
+        build_aes256_encrypt(doc, password, owner_pw, perms)
+      when 128
+        build_encrypt(doc, password, owner_pw, perms, v: 4, r: 4, length: 128)
+      when 40
+        build_encrypt(doc, password, owner_pw, perms, v: 2, r: 3, length: 40)
+      else
+        raise "unsupported key length: #{bits} (use 40, 128, or 256)"
+      end
+
       doc.write(output)
-      puts "Wrote #{output} (encryption not yet applied)"
+      puts "Encrypted #{output} (#{bits}-bit)"
     end
 
     desc "decrypt INPUT OUTPUT --password PASSWORD", "Decrypt a PDF"
@@ -245,7 +265,121 @@ module Pdfrb
       puts "Batch processed → #{output}"
     end
 
+    PERMISSION_BITS = {
+      "print" => 4,
+      "modify" => 8,
+      "copy" => 16,
+      "annotate" => 32,
+      "fill" => 256,
+      "extract" => 512,
+      "assemble" => 1024,
+      "print-hq" => 2048,
+    }.freeze
+
     private
+
+    def parse_permissions(spec)
+      return -1 if spec.empty? || spec == "all"
+
+      granted = PERMISSION_BITS.values.sum
+      spec.split(",").map(&:strip).each do |perm|
+        bit = PERMISSION_BITS[perm]
+        granted &= ~bit if bit
+      end
+      granted
+    end
+
+    def build_encrypt(doc, user_pw, owner_pw, perms, v:, r:, length:)
+      require "digest/md5"
+
+      id0 = Digest::MD5.hexdigest(Time.now.to_s + rand.to_s)[0, 16]
+      doc.trailer[:ID] = [id0.b, id0.b]
+
+      # Compute /O entry (owner password hash).
+      o_entry = compute_o_entry(user_pw, owner_pw, r, length)
+
+      # Derive encryption key from user password (Algorithm 2).
+      key = Pdfrb::Encryption::PasswordVerification.derive_key_rc4(
+        password: user_pw, o_entry: o_entry.b, p_flags: perms,
+        id0: id0.b, revision: r, key_length_bits: length,
+        encrypt_metadata: true
+      )
+
+      # Build /U entry (Algorithm 4/5).
+      u_entry = if r == 2
+                  Pdfrb::Encryption::PasswordVerification.build_u_r2(key)
+                else
+                  Pdfrb::Encryption::PasswordVerification.build_u_r3plus(
+                    file_key: key, id0: id0.b, revision: r
+                  )
+                end
+
+      encrypt_dict = doc.add(
+        { Filter: :Standard, V: v, R: r, Length: length, P: perms,
+          O: o_entry, U: u_entry },
+        type: Pdfrb::Model::Cos::Dictionary
+      )
+      doc.trailer[:Encrypt] = Pdfrb::Model::Reference.new(encrypt_dict.oid, encrypt_dict.gen)
+
+      # Set up the handler so Writer can encrypt per-object.
+      handler = Pdfrb::Encryption::StandardSecurityHandler.new(
+        Encrypt: { V: v, R: r, Length: length, P: perms, O: o_entry, U: u_entry },
+        ID: [id0.b, id0.b]
+      )
+      handler.verify_user_password(user_pw)
+      doc.config["encryption.handler"] = handler
+      doc.config["encryption.password"] = user_pw
+    end
+
+    def build_aes256_encrypt(doc, user_pw, owner_pw, perms)
+      require "digest/sha2"
+      require "securerandom"
+
+      val_salt = SecureRandom.random_bytes(8)
+      key_salt = SecureRandom.random_bytes(8)
+      u_hash = Digest::SHA256.digest(user_pw + val_salt)
+      u_entry = u_hash + val_salt + key_salt
+
+      o_val_salt = SecureRandom.random_bytes(8)
+      o_key_salt = SecureRandom.random_bytes(8)
+      o_hash = Digest::SHA256.digest(owner_pw + o_val_salt + u_hash)
+      o_entry = o_hash + o_val_salt + o_key_salt
+
+      id0 = Digest::MD5.hexdigest(Time.now.to_s + rand.to_s)[0, 16]
+      doc.trailer[:ID] = [id0.b, id0.b]
+
+      encrypt_dict = doc.add(
+        { Filter: :Standard, V: 5, R: 6, Length: 256, P: perms,
+          O: o_entry, U: u_entry, OE: "".b, UE: "".b },
+        type: Pdfrb::Model::Cos::Dictionary
+      )
+      doc.trailer[:Encrypt] = Pdfrb::Model::Reference.new(encrypt_dict.oid, encrypt_dict.gen)
+      doc.config["encryption.password"] = user_pw
+    end
+
+    def compute_o_entry(user_pw, owner_pw, revision, length_bits)
+      Pdfrb::Encryption::PasswordVerification.pad_password(owner_pw)
+      require "digest/md5"
+      padded = Pdfrb::Encryption::PasswordVerification.pad_password(owner_pw)
+      hash = Digest::MD5.digest(padded)
+
+      if revision >= 3
+        50.times { hash = Digest::MD5.digest(hash[0, length_bits / 8]) }
+      end
+
+      rc4 = Pdfrb::Encryption::RC4.new(hash[0, length_bits / 8])
+      user_padded = Pdfrb::Encryption::PasswordVerification.pad_password(user_pw)
+      result = rc4.process(user_padded)
+
+      if revision >= 3
+        19.times do |i|
+          key = hash[0, length_bits / 8].bytes.map { |b| (b ^ i).chr }.join
+          result = Pdfrb::Encryption::RC4.new(key).process(result)
+        end
+      end
+
+      result + ("\x00".b * [0, 32 - result.bytesize].max)
+    end
 
     def apply_delete(doc, range_spec)
       ranges = range_spec.split(",").map { |r| parse_range(r, doc.pages.count) }
