@@ -118,12 +118,23 @@ module Pdfrb
       puts "Encrypted #{output} (#{bits}-bit)"
     end
 
-    desc "decrypt INPUT OUTPUT --password PASSWORD", "Decrypt a PDF"
+    desc "decrypt INPUT OUTPUT --password PASSWORD", "Decrypt a PDF (remove /Encrypt)"
     method_option :password, type: :string, default: ""
     def decrypt(input, output)
       doc = open_doc(input)
+
+      # Strip /Encrypt from trailer and clear handler config so the
+      # Writer doesn't re-encrypt on output.
+      trailer = doc.trailer
+      if trailer && trailer[:Encrypt]
+        trailer.value.delete(:Encrypt)
+        doc.config.delete("encryption.handler")
+        doc.config.delete("encryption.password")
+        puts "Stripped encryption"
+      end
+
       doc.write(output)
-      puts "Wrote #{output}"
+      puts "Decrypted → #{output}"
     end
 
     desc "images-add INPUT IMAGE OUTPUT", "Add an image to a new page"
