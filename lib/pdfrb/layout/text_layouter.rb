@@ -17,7 +17,8 @@ module Pdfrb
       # @param width [Float] target line width in PDF units.
       # @return [Array<Line>] lines, each fitting in +width+.
       def layout(text, width)
-        clusters = text.to_s.grapheme_clusters
+        reordered = reorder_for_layout(text.to_s)
+        clusters = reordered.grapheme_clusters
         return [] if clusters.empty?
 
         lines = []
@@ -38,6 +39,14 @@ module Pdfrb
       end
 
       private
+
+      def reorder_for_layout(text)
+        return text unless Pdfrb::Layout::Bidi.rtl?(text)
+
+        Pdfrb::Layout::Bidi.reorder(text)
+      rescue StandardError
+        text
+      end
 
       def lookup_metrics
         font_name = @style.font_name

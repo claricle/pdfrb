@@ -22,6 +22,7 @@ module Pdfrb
     autoload :TextLayouter, "pdfrb/layout/text_layouter"
     autoload :TextFragment, "pdfrb/layout/text_fragment"
     autoload :Line, "pdfrb/layout/line"
+    autoload :Bidi, "pdfrb/layout/bidi"
     autoload :RomanNumeral, "pdfrb/layout/list_box"
   end
 end

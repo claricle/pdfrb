@@ -24,8 +24,28 @@ module Pdfrb
           opts[:threshold] || 200
 
         dedup_streams!(document) unless opts[:dedup] == false
+        downsample_images!(document, factor: opts[:downsample_factor]) unless opts[:downsample] == false
         document.write(io: io)
         io.string.bytesize
+      end
+
+      # Walk every image XObject and (for FlateDecode-encoded 8-bpc
+      # non-palette images) halve each dimension by +factor+ using
+      # nearest-neighbour. JPEG/JP2K are skipped — re-encoding them in
+      # pure Ruby isn't tractable. Returns the count of images that
+      # were modified.
+      def downsample_images!(document, factor: 2)
+        return 0 unless factor && factor >= 2
+
+        count = 0
+        document.each_indirect_object do |obj|
+          next unless Pdfrb::Image::Audit.image_xobject?(obj)
+          next unless Pdfrb::Image::Downsampler.eligible?(obj)
+
+          changed = Pdfrb::Image::Downsampler.downsample!(obj, factor: factor)
+          count += 1 if changed
+        end
+        count
       end
 
       # Deduplicate identical stream objects within the document.
