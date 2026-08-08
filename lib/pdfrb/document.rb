@@ -198,6 +198,14 @@ module Pdfrb
       @objects[obj.oid] = obj
     end
 
+    # Drop a modified/new object from the in-memory table so it's no
+    # longer emitted by the writer. Used by Task::Optimize when a
+    # stream has been deduplicated against a canonical sibling.
+    # Returns the dropped object (or nil if not present).
+    def forget(oid)
+      @objects.delete(oid)
+    end
+
     # Write this document to +path+ (or any IO via +io:).
     def write(path = nil, io: nil)
       target = io || (path && File.open(path, "wb"))
