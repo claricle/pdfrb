@@ -351,9 +351,9 @@ module Pdfrb
           if File.file?(name_or_io)
             @pending_io_data = File.binread(name_or_io)
             @pending_subtype = true_type_subtype(@pending_io_data)
-            # Subset prefix per PDF spec s9.6.4: 6 uppercase letters + "+".
             subset_tag = subset_tag_for(@pending_io_data)
-            base = File.basename(name_or_io, ".*")
+            base = postscript_name_for(@pending_io_data) ||
+              File.basename(name_or_io, ".*")
             "#{subset_tag}+#{base}"
           else
             name_or_io.to_s
@@ -365,10 +365,36 @@ module Pdfrb
             Pdfrb.logger&.warn("Font data does not look like a valid TTF/OTF")
           end
           subset_tag = subset_tag_for(@pending_io_data)
-          "#{subset_tag}+EmbeddedFont#{@pending_io_data.bytesize}"
+          base = postscript_name_for(@pending_io_data) ||
+            "EmbeddedFont#{@pending_io_data.bytesize}"
+          "#{subset_tag}+#{base}"
         else
           raise ArgumentError, "font name must be a String, Symbol, or IO"
         end
+      end
+
+      # Extract the PostScript name (name table nameID 6) from raw
+      # TTF/OTF bytes. Returns nil if the data isn't parseable or the
+      # name record is missing. Used to derive a meaningful BaseFont
+      # name (e.g. "MinionPro-Regular") instead of falling back to a
+      # size-derived placeholder.
+      def postscript_name_for(font_bytes)
+        return nil unless font_bytes && font_bytes.bytesize >= 12
+        return nil unless valid_font_data?(font_bytes)
+
+        ttf = Pdfrb::Font::TrueType::File.new(font_bytes)
+        name = ttf.name_table_parsed
+        return nil unless name
+
+        sanitize_ps_name(name.ps_name)
+      end
+
+      # PDF /BaseFont names must be a Name token: no whitespace, no
+      # delimiter chars (()[<>/{%]). Trim and substitute.
+      def sanitize_ps_name(name)
+        return nil if name.nil? || name.empty?
+
+        name.to_s.gsub(/[\s()\[\]<>{}\/%]+/, "-")
       end
 
       # Generate a deterministic 6-letter subset tag from the font bytes

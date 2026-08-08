@@ -90,3 +90,45 @@ RSpec.describe Pdfrb::Content::Canvas do
     expect(page.value[:Resources][:Font][:Helv]).not_to be_nil
   end
 end
+
+RSpec.describe Pdfrb::Model::Type::Resources do
+  it "loads without a syntax error" do
+    expect { described_class }.not_to raise_error
+  end
+
+  it "empty? returns true when all named entries are nil" do
+    resources = described_class.new({})
+    expect(resources).to be_empty
+  end
+
+  it "empty? returns true when all named entries are empty Hashes" do
+    resources = described_class.new(
+      { Font: {}, XObject: {}, ExtGState: {}, ColorSpace: {},
+        Pattern: {}, Shading: {}, Properties: {} }
+    )
+    expect(resources).to be_empty
+  end
+
+  it "empty? returns false when any named entry has content" do
+    resources = described_class.new({ Font: { Helv: :ref } })
+    expect(resources).not_to be_empty
+  end
+
+  it "empty? handles Cos::Dictionary values" do
+    dict = Pdfrb::Model::Cos::Dictionary.new({})
+    resources = described_class.new({ Font: dict })
+    expect(resources).to be_empty
+
+    dict.value[:Helv] = :ref
+    expect(resources).not_to be_empty
+  end
+
+  it "empty? handles PdfArray values" do
+    arr = Pdfrb::Model::PdfArray.new([])
+    resources = described_class.new({ Font: arr })
+    expect(resources).to be_empty
+
+    arr.value << :ref
+    expect(resources).not_to be_empty
+  end
+end
