@@ -80,6 +80,47 @@ RSpec.describe Pdfrb::Document::Fonts do
       expect { doc.fonts.add(io) }.not_to raise_error
     end
   end
+
+  describe "PostScript name extraction (Issue #63)" do
+    let(:ttf_path) { "/Users/mulgogi/Library/Fonts/RiboseLogoType-Alternate.ttf" }
+    let(:otf_path) { "/Users/mulgogi/Library/Fonts/Posterama 1901 Light.otf" }
+
+    def font_names(doc)
+      doc.fonts.each.map(&:first)
+    end
+
+    it "extracts PS name when adding from file path" do
+      skip "test font not available" unless File.file?(ttf_path)
+
+      doc.fonts.add(ttf_path)
+      expect(font_names(doc)).to include(include("RiboseLogoType-Alternate"))
+    end
+
+    it "extracts PS name when adding from IO" do
+      skip "test font not available" unless File.file?(otf_path)
+
+      data = File.binread(otf_path)
+      doc.fonts.add(StringIO.new(data))
+      expect(font_names(doc)).to include(include("Posterama1901-Light"))
+    end
+
+    it "falls back to EmbeddedFont<bytesize> when name table is absent" do
+      ttf_data = "OTTO#{"\x00" * 100}"
+      io = StringIO.new(ttf_data)
+      doc.fonts.add(io)
+      expect(font_names(doc).first).to match(/EmbeddedFont\d+\z/)
+    end
+
+    it "produces a BaseFont with subset tag plus PS name" do
+      skip "test font not available" unless File.file?(ttf_path)
+
+      resource = doc.fonts.add(ttf_path)
+      font_ref = doc.catalog.value[:Resources][:Font][resource]
+      font_dict = doc.object(font_ref)
+      base_font = font_dict.value[:BaseFont].to_s
+      expect(base_font).to match(/\A[A-Z]{6}\+RiboseLogoType-Alternate\z/)
+    end
+  end
 end
 
 RSpec.describe Pdfrb::Document do

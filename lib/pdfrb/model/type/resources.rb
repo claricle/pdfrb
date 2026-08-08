@@ -58,11 +58,19 @@ module Pdfrb
 
         def empty?
           %i[Font XObject ExtGState ColorSpace Pattern Shading Properties].all? do |k|
-            value[k].nil? || (value[k].is_a?(Array) && value[k].empty?)
+            value[k].nil? || empty_collection?(value[k])
           end
         end
 
         private
+
+        def empty_collection?(value)
+          case value
+          when ::Array, ::Hash then value.empty?
+          when Pdfrb::Model::Cos::Dictionary, Pdfrb::Model::PdfArray then value.value.empty?
+          else false
+          end
+        end
 
         def dict_keys(dict)
           return [] unless dict

@@ -7,12 +7,12 @@ module Pdfrb
         attr_reader :format, :count, :records
 
         def initialize(data)
+          @records = {}
           return unless data && data.bytesize >= 6
 
           @format = u16(data, 0)
           @count = u16(data, 2)
           string_offset = u16(data, 4)
-          @records = {}
 
           @count.times do |i|
             offset = 6 + (i * 12)
