@@ -31,6 +31,7 @@ module Pdfrb
   autoload :FontLoader, "pdfrb/font_loader"
   autoload :FontResolver, "pdfrb/font_resolver"
   autoload :ImageLoader, "pdfrb/image_loader"
+  autoload :Image, "pdfrb/image"
   autoload :Task, "pdfrb/task"
   autoload :Color, "pdfrb/color"
   autoload :Annotation, "pdfrb/annotation"
