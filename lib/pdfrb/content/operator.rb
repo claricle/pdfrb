@@ -20,11 +20,31 @@ module Pdfrb
         end
 
         def [](name)
-          @registry[name.to_s]
+          key = name.to_s
+          result = @registry[key]
+          return result if result
+
+          # Lazy-load on miss: trigger eager_load! which populates
+          # the registry, then retry.
+          eager_load! unless @eager_loaded
+          @registry[key]
         end
 
         def names
           @registry.keys
+        end
+
+        # Force-load all operator implementations so register calls
+        # fire and populate the registry. Idempotent.
+        def eager_load!
+          return if @eager_loaded
+
+          Pdfrb::Content::Operators.constants.each do |c|
+            Pdfrb::Content::Operators.const_get(c)
+          rescue NameError
+            # Skip modules that don't resolve.
+          end
+          @eager_loaded = true
         end
       end
 

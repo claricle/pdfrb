@@ -180,7 +180,6 @@ module Pdfrb
     end
 
     def load_xmp_packet
-      require "pdfrb/xmp"
       Pdfrb::XMP::Packet.new
     rescue LoadError
       nil
