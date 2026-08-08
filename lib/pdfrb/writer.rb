@@ -34,6 +34,11 @@ module Pdfrb
     # The SecurityHandler's encrypt_data method becomes the Serializer's
     # encrypter, which encrypts string/stream payloads per-object.
     def serializer_encrypter_opts
+      # Use a pre-configured handler if the document provides one
+      # (e.g., set by the encryption CLI).
+      handler = document.config["encryption.handler"]
+      return { encrypter: handler } if handler
+
       trailer = document.trailer
       return {} unless trailer
 
@@ -44,18 +49,15 @@ module Pdfrb
                         document.object(encrypt_ref) : encrypt_ref
       return {} unless encrypt_dict
 
-      # Wrap the StandardSecurityHandler as a simple encrypter lambda.
       handler = Pdfrb::Encryption::StandardSecurityHandler.new(
         Encrypt: encrypt_dict.value,
         ID: trailer[:ID]
       )
-      # Verify user password if set in config, else use empty.
       password = document.config["encryption.password"] || ""
       handler.verify_user_password(password)
 
       { encrypter: handler }
     rescue StandardError
-      # If encryption setup fails, fall back to non-encrypted output.
       {}
     end
 
