@@ -161,7 +161,7 @@ module Pdfrb
         def parse_tounicode(ref)
           return nil unless ref
 
-          doc = @font_dict.respond_to?(:document) ? @font_dict.document : nil
+          doc = @font_dict.is_a?(Pdfrb::Model::Cos::Dictionary) ? @font_dict.document : nil
           stream = if ref.is_a?(Pdfrb::Model::Reference) && doc
                      doc.object(ref)
                    else
