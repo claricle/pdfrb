@@ -141,9 +141,19 @@ module Pdfrb
           remove_field(field)
         end
         acroform = document.catalog.value[:AcroForm]
-        acroform&.value&.delete(:Fields)
-        acroform&.value&.delete(:NeedAppearances)
+        delete_acroform_key(acroform, :Fields)
+        delete_acroform_key(acroform, :NeedAppearances)
         document
+      end
+
+      def delete_acroform_key(acroform, key)
+        return unless acroform
+
+        if acroform.is_a?(Pdfrb::Model::Cos::Dictionary)
+          acroform.value.delete(key)
+        else
+          acroform.delete(key)
+        end
       end
 
       # Remove a single field from /AcroForm /Fields and its widget from
@@ -203,12 +213,90 @@ module Pdfrb
       end
 
       def stamp_field_appearance(field)
-        # For v1, flattening removes the widget from /Annots and marks
-        # the form as static. Full appearance-to-content-stream merging
-        # requires Do operator resource registration which lives on
-        # the Canvas private API.
-        # TODO: emit Do for /AP /N via Canvas#draw_form_xobject
-        # once Canvas exposes a public form-XObject registration path.
+        form_stream = appearance_form_stream(field)
+        return unless form_stream
+
+        page_ref = field.value[:P]
+        return unless page_ref
+
+        page = page_ref.is_a?(Pdfrb::Model::Reference) ? document.object(page_ref) : page_ref
+        return unless page
+
+        name = register_form_on_page(page, form_stream)
+        rect = field.value[:Rect]
+        origin = rect ? [rect[0], rect[1]] : [0, 0]
+        emit_do_on_page(page, name, origin)
+      end
+
+      # Resolve the Form XObject stream that backs the field's current
+      # appearance. Handles single-state (/AP /N -> ref) and multi-state
+      # (/AP /N -> {state -> ref}, picked from /AS).
+      def appearance_form_stream(field)
+        ap = field.value[:AP]
+        return nil unless ap
+
+        n = dictionary_get(ap, :N)
+        return nil unless n
+
+        target = if dictionary?(n)
+                   state = field.value[:AS]
+                   dictionary_get(n, state) ||
+                     dictionary_get(n, :Normal) ||
+                     dictionary_values(n).first
+                 else
+                   n
+                 end
+        return nil unless target
+
+        target.is_a?(Pdfrb::Model::Reference) ? document.object(target) : target
+      end
+
+      def dictionary?(value)
+        value.is_a?(::Hash) || value.is_a?(Pdfrb::Model::Cos::Dictionary)
+      end
+
+      def dictionary_get(dict, key)
+        return nil unless key
+
+        if dict.is_a?(Pdfrb::Model::Cos::Dictionary)
+          dict.value[key]
+        else
+          dict[key]
+        end
+      end
+
+      def dictionary_values(dict)
+        if dict.is_a?(Pdfrb::Model::Cos::Dictionary)
+          dict.value.values
+        else
+          dict.values
+        end
+      end
+
+      def register_form_on_page(page, form_stream)
+        resources = page.value[:Resources]
+        resources = page.value[:Resources] = Pdfrb::Model::Cos::Dictionary.new({}) unless resources.is_a?(Pdfrb::Model::Cos::Dictionary)
+        xobjects = resources.value[:XObject] || {}
+        name = unique_xobject_name(xobjects)
+        xobjects[name] = Pdfrb::Model::Reference.new(form_stream.oid, form_stream.gen)
+        resources.value[:XObject] = xobjects
+        name
+      end
+
+      def unique_xobject_name(existing)
+        counter = (existing.keys.map { |k| k.to_s[/\d+\z/].to_i }.max || 0) + 1
+        :"Fm#{counter}"
+      end
+
+      def emit_do_on_page(page, name, at)
+        canvas = page.canvas
+        canvas.save_graphics_state
+        canvas.translate(at[0], at[1]) if at[0] != 0 || at[1] != 0
+        canvas.emit_op(Pdfrb::Content::Operator::InvokeXObject, name)
+        canvas.restore_graphics_state
+      rescue StandardError
+        # Pages without a content stream or with malformed resources
+        # cannot be stamped; flattening still removes the widget.
       end
 
       def build_widget(name, page:, rect:)
