@@ -54,7 +54,7 @@ module Pdfrb
         end
 
         def indexed?
-          color_space.respond_to?(:to_ary) &&
+          color_space.is_a?(Array) &&
             color_space.to_ary.first&.to_sym == :Indexed
         end
 

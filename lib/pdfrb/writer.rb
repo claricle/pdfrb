@@ -71,7 +71,7 @@ module Pdfrb
 
     def write
       @io.binmode
-      @io.truncate(0) if @io.respond_to?(:truncate)
+      @io.truncate(0) if @io.is_a?(StringIO)
       write_header
       dispatch_before_write
 
@@ -114,7 +114,7 @@ module Pdfrb
       @io << document.io.read
       dispatch_before_write
       # Emit only the modified objects.
-      document.instance_variable_get(:@objects).each_value do |obj|
+      document.each_indirect_object do |obj|
         next unless obj.indirect?
 
         @xref_offsets[obj.oid] = @io.pos
@@ -186,7 +186,7 @@ module Pdfrb
 
       compressed = ::Zlib::Deflate.deflate(data)
 
-      xref_stream_oid = document.instance_variable_get(:@next_oid) || (max_oid + 1)
+      xref_stream_oid = document.next_oid || (max_oid + 1)
       stream_offset = @io.pos
       header = "#{xref_stream_oid} 0 obj\n"
 
@@ -273,9 +273,9 @@ module Pdfrb
 
     def write_trailer(xref_pos, prev: nil)
       root = document.catalog
-      root_ref = root && root.respond_to?(:indirect?) && root.indirect? ?
+      root_ref = root && root.is_a?(Pdfrb::Model::Object) && root.indirect? ?
                    Pdfrb::Model::Reference.new(root.oid, root.gen) : nil
-      size = [(@xref_offsets.keys.max || 0) + 1, document.instance_variable_get(:@next_oid) || 1].max
+      size = [(@xref_offsets.keys.max || 0) + 1, document.next_oid || 1].max
 
       existing = document.trailer || {}
       trailer_hash = {}
@@ -334,7 +334,7 @@ module Pdfrb
         hash[k] = v
       end
       [(@xref_offsets.keys.max || 0) + 1,
-       document.instance_variable_get(:@next_oid) || 1].max
+       document.next_oid || 1].max
       hash
     end
 

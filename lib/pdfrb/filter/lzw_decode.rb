@@ -86,12 +86,13 @@ module Pdfrb
           predictor = parms[:Predictor] || 1
           return bytes if predictor == 1
 
-          Pdfrb::Filter::FlateDecode.send(:apply_png_predictor_decode,
+          Pdfrb::Filter::PNGPredictor.decode(
             bytes,
             predictor: predictor,
             columns: parms[:Columns] || 1,
             colors: parms[:Colors] || 1,
-            bits_per_component: parms[:BitsPerComponent] || 8)
+            bits_per_component: parms[:BitsPerComponent] || 8
+          )
         end
       end
 

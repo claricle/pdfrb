@@ -51,24 +51,10 @@ module Pdfrb
         # predictor: 10..15 = PNG predictors; we implement the None/Sub/Up/
         # Average/Paeth (filter type byte at start of each row).
         def apply_png_predictor_decode(bytes, predictor:, columns:, colors:, bits_per_component:)
-          return bytes unless (10..15).cover?(predictor)
-
-          row_len = columns * colors * (bits_per_component / 8)
-          row_len += 1 # leading filter-type byte per row
-          rows = bytes.each_byte.each_slice(row_len).to_a
-          prev_row = nil
-          bpp = (colors * (bits_per_component / 8)) || 1
-          bpp = 1 if bpp.zero?
-
-          out = +""
-          rows.each do |row|
-            filter_type = row[0]
-            data = row[1..]
-            unfiltered = unfilter_row(filter_type, data, prev_row, bpp)
-            out << unfiltered.pack("C*")
-            prev_row = unfiltered
-          end
-          out.force_encoding(Encoding::BINARY)
+          Pdfrb::Filter::PNGPredictor.decode(
+            bytes, predictor: predictor, columns: columns,
+                   colors: colors, bits_per_component: bits_per_component
+          )
         end
 
         def unfilter_row(filter_type, data, prev_row, bpp)

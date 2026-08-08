@@ -17,7 +17,7 @@ module Pdfrb
     autoload :CCITTFaxDecode, "pdfrb/filter/ccitt_fax_decode"
     autoload :JBIG2Decode, "pdfrb/filter/jbig2_decode"
     autoload :BrotliDecode, "pdfrb/filter/brotli_decode"
-
+    autoload :PNGPredictor, "pdfrb/filter/png_predictor"
     class << self
       def registry; @registry ||= {}; end
 

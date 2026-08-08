@@ -20,7 +20,7 @@ module Pdfrb
           return 0 unless assets
 
           obj = assets.is_a?(Pdfrb::Model::Reference) && document ? document.object(assets) : assets
-          obj.respond_to?(:value) ? obj.value.size : 0
+          obj.is_a?(Pdfrb::Model::Cos::Dictionary) ? obj.value.size : 0
         end
       end
     end

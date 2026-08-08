@@ -17,7 +17,7 @@ module Pdfrb
         end
 
         def mapped_role(custom_name)
-          return nil unless role_map_ns.respond_to?(:[])
+          return nil unless role_map_ns.is_a?(Hash)
 
           role_map_ns[custom_name.to_sym] || role_map_ns[custom_name.to_s]
         end

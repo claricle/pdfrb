@@ -68,7 +68,7 @@ module Pdfrb
         def walk(start, segments)
           cur = start
           segments.each do |seg|
-            return nil unless cur.respond_to?(:[])
+            return nil unless cur.is_a?(Hash)
             next if seg.nil?
 
             cur = cur[seg.to_sym]

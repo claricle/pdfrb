@@ -16,7 +16,7 @@ module Pdfrb
                 else
                   halftones
                 end
-          obj.respond_to?(:value) ? obj.value.size : obj&.size || 0
+          obj.is_a?(Pdfrb::Model::Cos::Dictionary) ? obj.value.size : obj&.size || 0
         end
       end
     end
