@@ -68,6 +68,122 @@ module Pdfrb
         move_to(x1, y1).line_to(x2, y2)
       end
 
+      # Draw a connected polyline through +points+. Each point is
+      # [x, y]. If +close+ is true, append a close-path operator.
+      def polyline(points, close: false)
+        return self if points.empty?
+
+        first = points.first
+        move_to(first[0], first[1])
+        points.drop(1).each { |x, y| line_to(x, y) }
+        close_path if close
+        self
+      end
+
+      # Draw a closed polygon through +points+.
+      def polygon(points)
+        polyline(points, close: true)
+      end
+
+      # Approximate a circular arc from +start_angle+ to +end_angle+
+      # (radians) centered at (cx, cy) with +radius+. Uses 16-line
+      # segment approximation per full revolution.
+      def arc(cx, cy, radius, start_angle:, end_angle:, segments_per_rev: 16)
+        span = end_angle - start_angle
+        return self if span.abs < 1e-6
+
+        seg_count = [(segments_per_rev * span.abs / (2 * Math::PI)).ceil, 1].max
+        step = span / seg_count
+        seg_count.times do |i|
+          a0 = start_angle + (i * step)
+          a1 = a0 + step
+          x0 = cx + (radius * Math.cos(a0))
+          y0 = cy + (radius * Math.sin(a0))
+          x1 = cx + (radius * Math.cos(a1))
+          y1 = cy + (radius * Math.sin(a1))
+          i.zero? ? move_to(x0, y0) : line_to(x0, y0)
+          line_to(x1, y1)
+        end
+        self
+      end
+
+      # Full circle centered at (cx, cy) with +radius+.
+      def circle(cx, cy, radius)
+        arc(cx, cy, radius, start_angle: 0, end_angle: 2 * Math::PI)
+        close_path
+      end
+
+      # Ellipse centered at (cx, cy) with x/y radii (rx, ry).
+      # Built from a scaled circle.
+      def ellipse(cx, cy, rx, ry)
+        save_graphics_state do
+          translate(cx, cy)
+          concat(1, 0, 0, 1, 0, 0)
+          # Approximate ellipse by scaling a unit circle.
+          segments = 32
+          segments.times do |i|
+            a0 = (i / segments.to_f) * 2 * Math::PI
+            a1 = ((i + 1) / segments.to_f) * 2 * Math::PI
+            x0 = rx * Math.cos(a0)
+            y0 = ry * Math.sin(a0)
+            x1 = rx * Math.cos(a1)
+            y1 = ry * Math.sin(a1)
+            i.zero? ? move_to(x0, y0) : line_to(x0, y0)
+            line_to(x1, y1)
+          end
+          close_path
+        end
+        self
+      end
+
+      # Rectangle with rounded corners. +radius+ is the corner radius
+      # (a single value or 4-element [tl, tr, br, bl]).
+      def rounded_rectangle(x, y, width, height, radius)
+        radii = radius.is_a?(::Array) ? radius : [radius] * 4
+        tl, tr, br, bl = radii
+        # bottom edge
+        move_to(x + bl, y)
+        line_to(x + width - br, y)
+        corner(x + width - br, y, x + width, y + br)
+        line_to(x + width, y + height - tr)
+        corner(x + width, y + height - tr,
+               x + width - tr, y + height)
+        line_to(x + tl, y + height)
+        corner(x + tl, y + height, x, y + height - tl)
+        line_to(x, y + bl)
+        corner(x, y + bl, x + bl, y)
+        close_path
+        self
+      end
+
+      # Convenience alias matching HexaPDF's naming. Accepts either
+      # an Array (interpreted as the dash array, phase 0) or an
+      # [array, phase] pair.
+      def dash=(spec)
+        array, phase = case spec
+                       when ::Array
+                         if spec.first.is_a?(::Array)
+                           spec
+                         else
+                           [spec, 0]
+                         end
+                       else
+                         [[spec], 0]
+                       end
+        emit_op(Pdfrb::Content::Operator::DashPattern, array, phase)
+      end
+
+      # Draw a quarter-circle corner from (x0, y0) to (x1, y1) by
+      # multi-segment linear interpolation. Adequate for typical
+      # radii (< 30 pts); for larger radii use curve_to directly.
+      def corner(x0, y0, x1, y1)
+        segments = 6
+        segments.times do |i|
+          t = (i + 1) / segments.to_f
+          line_to(x0 + ((x1 - x0) * t), y0 + ((y1 - y0) * t))
+        end
+      end
+
       def curve_to(c1x, c1y, c2x, c2y, x, y)
         emit_op(Pdfrb::Content::Operator::CurveTo, c1x, c1y, c2x, c2y, x, y)
         self
@@ -211,6 +327,27 @@ module Pdfrb
           end
           emit_op(Pdfrb::Content::Operator::InvokeXObject, name)
         end
+        self
+      end
+
+      # Emit an inline image (BI ... ID ... EI) directly into the
+      # content stream. Avoids the /Resources /XObject registration
+      # overhead for one-shot images. The +dict+ keys are the image
+      # header keys (/W, /H, /CS, /BPC, /F, etc.); +data+ is the
+      # encoded image bytes (raw, Flate-compressed, or DCT).
+      #
+      # @param dict [Hash{Symbol=>Object}] inline image header entries
+      #   (e.g. { W: 100, H: 100, CS: :RGB, BPC: 8, F: :DCTDecode }).
+      # @param data [String] raw image bytes (binary-encoded).
+      def inline_image(dict:, data:)
+        header = +"BI\n"
+        dict.each do |k, v|
+          header << @serializer.serialize(k) << " " << @serializer.serialize(v) << "\n"
+        end
+        header << "ID\n"
+        append(header)
+        append(data)
+        append("\nEI\n")
         self
       end
 
