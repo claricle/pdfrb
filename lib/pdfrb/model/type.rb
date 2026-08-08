@@ -31,7 +31,11 @@ module Pdfrb
         def eager_load!
           return if @eager_loaded
 
-          constants.each { |c| const_get(c) }
+          constants.each do |c|
+            const_get(c)
+          rescue NameError
+            # Skip autoload targets that don't define a class yet.
+          end
           @eager_loaded = true
         end
       end

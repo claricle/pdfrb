@@ -6,6 +6,7 @@ module Pdfrb
       attr_reader :stream, :document, :serializer, :used_fonts, :used_xobjects
 
       def initialize(stream, document: nil)
+        Pdfrb::Content::Operator.eager_load!
         @stream = stream
         @document = document || stream.document
         @serializer = Pdfrb::Serializer.new

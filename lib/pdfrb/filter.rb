@@ -6,6 +6,17 @@ module Pdfrb
   # document)` class methods, registered via `register_as`.
   module Filter
     autoload :Base, "pdfrb/filter/base"
+    autoload :FlateDecode, "pdfrb/filter/flate_decode"
+    autoload :ASCIIHexDecode, "pdfrb/filter/ascii_hex_decode"
+    autoload :ASCII85Decode, "pdfrb/filter/ascii_85_decode"
+    autoload :LZWDecode, "pdfrb/filter/lzw_decode"
+    autoload :RunLengthDecode, "pdfrb/filter/run_length_decode"
+    autoload :Crypt, "pdfrb/filter/crypt"
+    autoload :DCTDecode, "pdfrb/filter/dct_decode"
+    autoload :JPXDecode, "pdfrb/filter/jpx_decode"
+    autoload :CCITTFaxDecode, "pdfrb/filter/ccitt_fax_decode"
+    autoload :JBIG2Decode, "pdfrb/filter/jbig2_decode"
+    autoload :BrotliDecode, "pdfrb/filter/brotli_decode"
 
     class << self
       def registry; @registry ||= {}; end
@@ -18,7 +29,21 @@ module Pdfrb
         registry[name.to_s]
       end
 
+      # Force-load all filter implementations so register_as calls
+      # fire and populate the registry. Idempotent.
+      def eager_load!
+        return if @eager_loaded
+
+        constants.each do |c|
+          const_get(c)
+        rescue NameError
+          # Skip autoload targets that don't define a class.
+        end
+        @eager_loaded = true
+      end
+
       def apply(bytes, filters:, parms:, direction:, document: nil)
+        eager_load!
         return bytes if filters.empty?
 
         case direction
@@ -50,15 +75,3 @@ module Pdfrb
     end
   end
 end
-
-# Eager-load filters so register_as calls populate the registry
-# before any stream decode happens. Must be after the Filter module
-# and its singleton methods are fully defined.
-require "pdfrb/filter/base"
-require "pdfrb/filter/flate_decode"
-require "pdfrb/filter/ascii_hex_decode"
-require "pdfrb/filter/ascii_85_decode"
-require "pdfrb/filter/lzw_decode"
-require "pdfrb/filter/run_length_decode"
-require "pdfrb/filter/crypt"
-require "pdfrb/filter/passthrough_filters"
