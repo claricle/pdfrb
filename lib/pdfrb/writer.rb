@@ -168,22 +168,8 @@ module Pdfrb
       w_type = 1
       w_field2 = 3
       w_field3 = 1
-      w_type + w_field2 + w_field3
 
-      data = +""
-      (0..max_oid).each do |oid|
-        if oid.zero?
-          data << encode_xref_entry(0, 0, 0, w_type, w_field2, w_field3)
-        elsif @xref_offsets.key?(oid)
-          data << encode_xref_entry(1, @xref_offsets[oid], 0,
-                                    w_type, w_field2, w_field3)
-        elsif packed.key?(oid)
-          objstm_oid, index = packed[oid]
-          data << encode_xref_entry(2, objstm_oid, index,
-                                    w_type, w_field2, w_field3)
-        end
-      end
-
+      data = build_xref_stream_data(max_oid, packed, w_type, w_field2, w_field3)
       compressed = ::Zlib::Deflate.deflate(data)
 
       xref_stream_oid = document.next_oid || (max_oid + 1)
@@ -206,6 +192,33 @@ module Pdfrb
       @io << "\nendstream\nendobj\n"
 
       stream_offset
+    end
+
+    # Build the binary xref stream body. Always emits max_oid + 1
+    # entries (one per oid 0..max_oid) so the reader's per-oid index
+    # stays aligned. Gaps from dedup'd oids become free entries.
+    def build_xref_stream_data(max_oid, packed, w_type, w_field2, w_field3)
+      data = +""
+      (0..max_oid).each do |oid|
+        entry = xref_entry_for(oid, packed)
+        data << encode_xref_entry(entry[0], entry[1], entry[2],
+                                  w_type, w_field2, w_field3)
+      end
+      data
+    end
+
+    # Returns [type, field2, field3] for the xref entry of +oid+.
+    def xref_entry_for(oid, packed)
+      return [0, 0, 0] if oid.zero?
+
+      if @xref_offsets.key?(oid)
+        [1, @xref_offsets[oid], 0]
+      elsif packed.key?(oid)
+        objstm_oid, index = packed[oid]
+        [2, objstm_oid, index]
+      else
+        [0, 0, 0]
+      end
     end
 
     def write_xref_stream_trailer(xref_pos)
