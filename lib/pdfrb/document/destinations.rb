@@ -90,7 +90,7 @@ module Pdfrb
         names = document.object(names) if names.is_a?(Pdfrb::Model::Reference)
         return nil unless names
 
-        d = names.respond_to?(:value) ? names.value[:Dests] : names[:Dests]
+        d = names.is_a?(Pdfrb::Model::Cos::Dictionary) ? names.value[:Dests] : names[:Dests]
         return nil unless d
 
         d.is_a?(Pdfrb::Model::Reference) ? document.object(d) : d
@@ -99,11 +99,11 @@ module Pdfrb
       def lookup_in_name_tree(node, name)
         return nil unless node
 
-        if node.respond_to?(:value) && node.value[:Names]
+        if node.is_a?(Pdfrb::Model::Cos::Dictionary) && node.value[:Names]
           arr = node.value[:Names]
           arr = arr.to_a if arr.is_a?(Pdfrb::Model::PdfArray)
           arr.each_slice(2) { |k, v| return v if k == name }
-        elsif node.respond_to?(:value) && node.value[:Kids]
+        elsif node.is_a?(Pdfrb::Model::Cos::Dictionary) && node.value[:Kids]
           arr = node.value[:Kids]
           arr = arr.to_a if arr.is_a?(Pdfrb::Model::PdfArray)
           arr.each do |kid_ref|
@@ -111,7 +111,7 @@ module Pdfrb
             result = lookup_in_name_tree(kid, name)
             return result if result
           end
-        elsif node.respond_to?(:[]) && node[:Names]
+        elsif node.is_a?(Hash) && node[:Names]
           arr = node[:Names]
           arr = arr.to_a if arr.is_a?(Pdfrb::Model::PdfArray)
           arr.each_slice(2) { |k, v| return v if k == name }
@@ -122,18 +122,18 @@ module Pdfrb
       def each_name_tree_key(node, &block)
         return unless node
 
-        if node.respond_to?(:value) && node.value[:Names]
+        if node.is_a?(Pdfrb::Model::Cos::Dictionary) && node.value[:Names]
           arr = node.value[:Names]
           arr = arr.to_a if arr.is_a?(Pdfrb::Model::PdfArray)
           arr.each_slice(2) { |k, _v| yield k }
-        elsif node.respond_to?(:value) && node.value[:Kids]
+        elsif node.is_a?(Pdfrb::Model::Cos::Dictionary) && node.value[:Kids]
           arr = node.value[:Kids]
           arr = arr.to_a if arr.is_a?(Pdfrb::Model::PdfArray)
           arr.each do |kid_ref|
             kid = kid_ref.is_a?(Pdfrb::Model::Reference) ? document.object(kid_ref) : kid_ref
             each_name_tree_key(kid, &block)
           end
-        elsif node.respond_to?(:[]) && node[:Names]
+        elsif node.is_a?(Hash) && node[:Names]
           arr = node[:Names]
           arr = arr.to_a if arr.is_a?(Pdfrb::Model::PdfArray)
           arr.each_slice(2) { |k, _v| yield k }

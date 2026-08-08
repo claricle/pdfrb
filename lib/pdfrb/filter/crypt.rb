@@ -15,7 +15,7 @@ module Pdfrb
           return bytes unless document
           return bytes if parms == :Identity || parms.nil?
 
-          handler = document.security_handler if document.respond_to?(:security_handler)
+          handler = document.security_handler if !document.config["security.handler"].nil?
           return bytes unless handler
 
           handler.decrypt(bytes, document.current_object_oid)
@@ -25,7 +25,7 @@ module Pdfrb
           return bytes unless document
           return bytes if parms == :Identity || parms.nil?
 
-          handler = document.security_handler if document.respond_to?(:security_handler)
+          handler = document.security_handler if !document.config["security.handler"].nil?
           return bytes unless handler
 
           handler.encrypt(bytes, document.current_object_oid)

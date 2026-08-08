@@ -41,7 +41,7 @@ module Pdfrb
         private
 
         def build_subset
-          return @ttf.instance_variable_get(:@data) unless can_subset?
+          return @ttf.raw_data unless can_subset?
 
           @resolved = resolve_composites(@glyph_ids)
 
@@ -63,7 +63,7 @@ module Pdfrb
           copy_remaining_tables(tables)
           assemble_ttf(tables)
         rescue StandardError
-          @ttf.instance_variable_get(:@data)
+          @ttf.raw_data
         end
 
         def can_subset?
@@ -297,7 +297,7 @@ module Pdfrb
         end
 
         def copy_remaining_tables(tables)
-          raw = @ttf.instance_variable_get(:@data)
+          raw = @ttf.raw_data
           num_tables = (raw.getbyte(4) * 256) + raw.getbyte(5)
           num_tables.times do |i|
             base = 12 + (i * 16)

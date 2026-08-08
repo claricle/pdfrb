@@ -119,7 +119,7 @@ module Pdfrb
       def metrics_for(resource); @afm_metrics[resource]; end
 
       def valid_font_data?(data)
-        return false unless data.respond_to?(:bytesize) && data.bytesize >= 4
+        return false unless data.is_a?(String) && data.bytesize >= 4
 
         magic = data.byteslice(0, 4)
         ["ttcf".b, "\x00\x01\x00\x00".b, "OTTO".b, "true".b, "typ1".b].include?(magic)

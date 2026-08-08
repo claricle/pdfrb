@@ -7,10 +7,11 @@ module Pdfrb
       # sfnt header + table directory; lazy-loads individual tables
       # on access.
       class File
-        attr_reader :tables, :num_tables
+        attr_reader :tables, :num_tables, :raw_data
 
         def initialize(data)
           @data = data.b
+          @raw_data = @data
           @tables = {}
           parse_directory
         end

@@ -21,7 +21,7 @@ module Pdfrb
         def each_difference(&block)
           return enum_for(:each_difference) unless block
 
-          return unless differences.respond_to?(:each)
+          return unless differences.is_a?(Array)
 
           current_code = nil
           differences.each do |entry|

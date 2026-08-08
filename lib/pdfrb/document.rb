@@ -204,7 +204,7 @@ module Pdfrb
       raise ArgumentError, "write needs a path or io:" unless target
 
       Pdfrb::Writer.write(self, target)
-      target.close if path && io.nil? && target.respond_to?(:close)
+      target.close if path && io.nil? && target.is_a?(IO)
       self
     end
 

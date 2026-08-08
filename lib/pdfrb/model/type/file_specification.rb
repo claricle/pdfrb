@@ -42,7 +42,7 @@ module Pdfrb
                     else
                       embedded_file
                     end
-          return nil unless mapping.respond_to?(:[])
+          return nil unless mapping.is_a?(Hash)
 
           ref = mapping[:UF] || mapping[:F]
           return nil unless ref && document

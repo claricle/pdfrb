@@ -31,7 +31,7 @@ module Pdfrb
               else
                 normal
               end
-          return nil unless n.respond_to?(:[])
+          return nil unless n.is_a?(Hash)
 
           n[state_name]
         end

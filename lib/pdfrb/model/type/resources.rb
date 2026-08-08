@@ -58,7 +58,7 @@ module Pdfrb
 
         def empty?
           %i[Font XObject ExtGState ColorSpace Pattern Shading Properties].all? do |k|
-            value[k].nil? || (value[k].respond_to?(:empty?) && value[k].empty?)
+            value[k].nil? || (value[k].is_a?(Array) && value[k].empty?)
           end
         end
 

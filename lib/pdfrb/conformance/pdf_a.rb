@@ -32,7 +32,7 @@ module Pdfrb
                       severity: :error, spec_clause: "ISO 19005-1 6.1",
                       check: ->(doc) {
                         doc.each_indirect_object do |obj|
-                          next unless obj.respond_to?(:value)
+                          next unless obj.is_a?(Pdfrb::Model::Cos::Dictionary)
                           if obj.value[:S] == :JavaScript
                             return Violation.new(rule_id: "6.1-4", message: "PDF/A prohibits JavaScript actions",
                                                  object: "JavaScript action", severity: :error,
@@ -102,7 +102,7 @@ module Pdfrb
                       severity: :error, spec_clause: "ISO 19005-1 6.2.4",
                       check: ->(doc) {
                         doc.each_indirect_object do |obj|
-                          next unless obj.respond_to?(:value)
+                          next unless obj.is_a?(Pdfrb::Model::Cos::Dictionary)
                           next unless obj.value[:Type] == :ObjStm
 
                           return Violation.new(rule_id: "a1-2",
@@ -170,7 +170,7 @@ module Pdfrb
                       severity: :error, spec_clause: "ISO 19005-2 6.2",
                       check: ->(doc) {
                         doc.each_indirect_object do |obj|
-                          next unless obj.respond_to?(:value)
+                          next unless obj.is_a?(Pdfrb::Model::Cos::Dictionary)
                           next unless obj.value[:Type] == :EmbeddedFile
 
                           return Violation.new(rule_id: "a2-2",
@@ -201,7 +201,7 @@ module Pdfrb
                       check: ->(doc) {
                         vs = []
                         doc.each_indirect_object do |obj|
-                          next unless obj.respond_to?(:value)
+                          next unless obj.is_a?(Pdfrb::Model::Cos::Dictionary)
                           next unless obj.value[:Type] == :Filespec
                           next if obj.value[:AFRelationship]
 
@@ -233,7 +233,7 @@ module Pdfrb
                       check: ->(doc) {
                         vs = []
                         doc.each_indirect_object do |obj|
-                          next unless obj.respond_to?(:value)
+                          next unless obj.is_a?(Pdfrb::Model::Cos::Dictionary)
                           next unless obj.value[:Type] == :Filespec
                           next if obj.value[:AFRelationship]
 
@@ -251,7 +251,7 @@ module Pdfrb
                       check: ->(doc) {
                         vs = []
                         doc.each_indirect_object do |annot|
-                          next unless annot.respond_to?(:value)
+                          next unless annot.is_a?(Pdfrb::Model::Cos::Dictionary)
                           next unless annot.value[:Type] == :Annot
 
                           st = annot.value[:Subtype]
