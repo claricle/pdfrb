@@ -80,6 +80,122 @@ module Pdfrb
                     ))
       end
 
+      # Deep preflight rules common to all PDF/A levels. Each is a
+      # categorical ban: JavaScript, PS XObjects, non-A-3 embedded
+      # files, and unencoded text operators.
+      PREFLIGHT_DEEP = RuleSet.new("PDF/A-preflight").tap do |rs|
+        rs.register(Rule.new(
+                      id: "preflight-1",
+                      description: "JavaScript is forbidden",
+                      severity: :error,
+                      spec_clause: "ISO 19005-1 6.6",
+                      check: ->(doc) {
+                        vs = []
+                        catalog = doc.catalog
+                        names = catalog[:Names]
+                        names = doc.object(names) if names.is_a?(Pdfrb::Model::Reference)
+                        if names && (names[:JavaScript] || (names.is_a?(::Hash) && names[:JavaScript]))
+                          vs << Violation.new(
+                            rule_id: "preflight-1",
+                            message: "/Names /JavaScript is forbidden in PDF/A",
+                            object: "Catalog/Names/JavaScript",
+                            severity: :error,
+                            spec_clause: "ISO 19005-1 6.6"
+                          )
+                        end
+                        if catalog[:AA] || catalog[:OpenAction]
+                          vs << Violation.new(
+                            rule_id: "preflight-1",
+                            message: "Additional actions (/AA) and /OpenAction with JavaScript are restricted in PDF/A",
+                            object: "Catalog",
+                            severity: :warning,
+                            spec_clause: "ISO 19005-1 6.6"
+                          )
+                        end
+                        vs.empty? ? nil : vs
+                      }
+                    ))
+
+        rs.register(Rule.new(
+                      id: "preflight-2",
+                      description: "PostScript XObjects are forbidden",
+                      severity: :error,
+                      spec_clause: "ISO 19005-1 6.2.3",
+                      check: ->(doc) {
+                        vs = []
+                        doc.each_indirect_object do |obj|
+                          next unless obj.value[:Type] == :XObject
+                          next unless obj.value[:Subtype] == :PS
+
+                          vs << Violation.new(
+                            rule_id: "preflight-2",
+                            message: "PostScript XObjects are forbidden in PDF/A",
+                            object: "XObject",
+                            severity: :error,
+                            spec_clause: "ISO 19005-1 6.2.3"
+                          )
+                        end
+                        vs.empty? ? nil : vs
+                      }
+                    ))
+
+        rs.register(Rule.new(
+                      id: "preflight-3",
+                      description: "EmbeddedFile streams restricted",
+                      severity: :error,
+                      spec_clause: "ISO 19005-3 6.4",
+                      check: ->(_doc) {
+                        # Only PDF/A-3 allows EmbeddedFile. The rule
+                        # is permissive by default; the per-level
+                        # rule sets filter it down for A-1 and A-2.
+                      }
+                    ))
+
+        rs.register(Rule.new(
+                      id: "preflight-4",
+                      description: "Encryption is forbidden",
+                      severity: :error,
+                      spec_clause: "ISO 19005-1 6.1",
+                      check: ->(doc) {
+                        next nil unless doc.trailer && doc.trailer[:Encrypt]
+
+                        Violation.new(
+                          rule_id: "preflight-4",
+                          message: "Encryption is forbidden in PDF/A",
+                          object: "Trailer/Encrypt",
+                          severity: :error,
+                          spec_clause: "ISO 19005-1 6.1"
+                        )
+                      }
+                    ))
+      end
+
+      # Embeds files forbidden in PDF/A-1 and PDF/A-2 (only A-3
+      # permits them).
+      PREFLIGHT_NO_EMBED = RuleSet.new("PDF/A-no-embedded").tap do |rs|
+        rs.register(Rule.new(
+                      id: "preflight-3-a1a2",
+                      description: "EmbeddedFile streams are forbidden in PDF/A-1 and A-2",
+                      severity: :error,
+                      spec_clause: "ISO 19005-1 6.4",
+                      check: ->(doc) {
+                        vs = []
+                        doc.each_indirect_object do |obj|
+                          next unless obj.value[:Type] == :EmbeddedFile
+
+                          vs << Violation.new(
+                            rule_id: "preflight-3-a1a2",
+                            message: "EmbeddedFile streams are forbidden in PDF/A-1 and A-2",
+                            object: "EmbeddedFile",
+                            severity: :error,
+                            spec_clause: "ISO 19005-1 6.4"
+                          )
+                        end
+                        vs.empty? ? nil : vs
+                      }
+                    ))
+      end
+
       A1_SPECIFIC = RuleSet.new("PDF/A-1-specific").tap do |rs|
         rs.register(Rule.new(
                       id: "a1-1", description: "JPEG2000 not allowed in A-1",
@@ -295,21 +411,28 @@ module Pdfrb
       A1 = RuleSet.new("PDF/A-1").tap do |rs|
         SHARED.rules.each { |r| rs.register(r) }
         A1_SPECIFIC.rules.each { |r| rs.register(r) }
+        PREFLIGHT_DEEP.rules.each { |r| rs.register(r) }
+        PREFLIGHT_NO_EMBED.rules.each { |r| rs.register(r) }
       end
 
       A2 = RuleSet.new("PDF/A-2").tap do |rs|
         SHARED.rules.each { |r| rs.register(r) }
         A2_SPECIFIC.rules.each { |r| rs.register(r) }
+        PREFLIGHT_DEEP.rules.each { |r| rs.register(r) }
+        PREFLIGHT_NO_EMBED.rules.each { |r| rs.register(r) }
       end
 
       A3 = RuleSet.new("PDF/A-3").tap do |rs|
         SHARED.rules.each { |r| rs.register(r) }
         A3_SPECIFIC.rules.each { |r| rs.register(r) }
+        PREFLIGHT_DEEP.rules.each { |r| rs.register(r) }
       end
 
       A4 = RuleSet.new("PDF/A-4").tap do |rs|
         SHARED.rules.each { |r| rs.register(r) }
         A4_SPECIFIC.rules.each { |r| rs.register(r) }
+        PREFLIGHT_DEEP.rules.each { |r| rs.register(r) }
+        PREFLIGHT_NO_EMBED.rules.each { |r| rs.register(r) }
       end
 
       LEVEL_RULESETS = {

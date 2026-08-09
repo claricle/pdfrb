@@ -43,6 +43,7 @@ module Pdfrb
       @object_reader = nil
       @version = "1.4"
       @empty_trailer = nil
+      @revisions = []      # array of [xref, trailer] tuples, latest first
 
       if io
         read_from_io(io)
@@ -259,6 +260,29 @@ module Pdfrb
       end
     end
 
+    # Walk every revision in the document's incremental-update chain,
+    # from the latest (most recent) revision backward via /Prev.
+    # Each revision yields a (revision_index, xref, trailer) tuple
+    # where revision_index 0 is the latest. Documents without
+    # incremental updates yield a single tuple.
+    #
+    # Useful for forensic inspection, version-aware rendering, and
+    # debugging "ghost" objects that were modified in a later
+    # revision.
+    def each_revision
+      return enum_for(:each_revision) unless block_given?
+
+      return (yield 0, @xref, trailer) if @revisions.empty? && @xref
+
+      @revisions.each_with_index { |(xref, tr), i| yield i, xref, tr }
+    end
+
+    # Number of revisions in the document. 1 for a freshly written
+    # PDF; >1 for incrementally-updated PDFs.
+    def revision_count
+      @revisions.empty? ? 1 : @revisions.length
+    end
+
     private
 
     def allocate_oid
@@ -285,6 +309,10 @@ module Pdfrb
       xref, trailer = load_single_xref(io, sxref)
       return [nil, nil] unless xref && trailer
 
+      # Track each revision's xref + trailer so callers can walk the
+      # history (Document#each_revision).
+      @revisions = [[xref, trailer]]
+
       # Follow /Prev chain for incremental updates. Earlier entries
       # fill gaps; later entries take precedence (already in xref).
       prev_offset = trailer[:Prev]
@@ -292,6 +320,7 @@ module Pdfrb
         prev_xref, prev_trailer = load_single_xref(io, prev_offset)
         break unless prev_xref
 
+        @revisions << [prev_xref, prev_trailer]
         xref.merge!(prev_xref)
         prev_offset = prev_trailer && prev_trailer[:Prev]
       end
