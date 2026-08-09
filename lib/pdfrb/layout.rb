@@ -25,6 +25,11 @@ module Pdfrb
     autoload :Line, "pdfrb/layout/line"
     autoload :Bidi, "pdfrb/layout/bidi"
     autoload :Hyphenation, "pdfrb/layout/hyphenation"
+    autoload :TextShaper, "pdfrb/layout/text_shaper"
+    autoload :PolygonFrame, "pdfrb/layout/polygon_frame"
+    autoload :FontFallback, "pdfrb/layout/font_fallback"
+    autoload :JustificationKashidas, "pdfrb/layout/justification_kashidas"
+    autoload :MultiCellTextLayout, "pdfrb/layout/multi_cell_text_layout"
     autoload :RomanNumeral, "pdfrb/layout/list_box"
   end
 end

@@ -17,6 +17,8 @@ module Pdfrb
     autoload :AES, "pdfrb/encryption/aes"
     autoload :PasswordVerification, "pdfrb/encryption/password_verification"
     autoload :Identity, "pdfrb/encryption/identity"
+    autoload :PublicKeySecurityHandler, "pdfrb/encryption/public_key_security_handler"
+    autoload :V5Writer, "pdfrb/encryption/v5_writer"
 
     module_function
 

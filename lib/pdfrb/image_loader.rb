@@ -10,6 +10,8 @@ module Pdfrb
     autoload :JPEG, "pdfrb/image_loader/jpeg"
     autoload :PNG, "pdfrb/image_loader/png"
     autoload :PDF, "pdfrb/image_loader/pdf"
+    autoload :TIFF, "pdfrb/image_loader/tiff"
+    autoload :GIF, "pdfrb/image_loader/gif"
 
     @loaders = []
 

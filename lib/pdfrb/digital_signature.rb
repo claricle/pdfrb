@@ -11,6 +11,7 @@ module Pdfrb
     autoload :VerificationResult, "pdfrb/digital_signature/verification_result"
     autoload :CmsHandler, "pdfrb/digital_signature/cms_handler"
     autoload :TimestampHandler, "pdfrb/digital_signature/timestamp_handler"
+    autoload :TimestampClient, "pdfrb/digital_signature/timestamp_client"
 
     HANDLERS = {
       "adbe.pkcs7.detached": CmsHandler,
