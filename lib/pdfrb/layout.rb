@@ -23,6 +23,7 @@ module Pdfrb
     autoload :TextFragment, "pdfrb/layout/text_fragment"
     autoload :Line, "pdfrb/layout/line"
     autoload :Bidi, "pdfrb/layout/bidi"
+    autoload :Hyphenation, "pdfrb/layout/hyphenation"
     autoload :RomanNumeral, "pdfrb/layout/list_box"
   end
 end
