@@ -10,5 +10,6 @@ module Pdfrb
     autoload :FromFile, "pdfrb/font_loader/from_file"
     autoload :VariantFromName, "pdfrb/font_loader/variant_from_name"
     autoload :FromConfiguration, "pdfrb/font_loader/from_configuration"
+    autoload :Type3, "pdfrb/font_loader/type3"
   end
 end

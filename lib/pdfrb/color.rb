@@ -8,5 +8,7 @@ module Pdfrb
   module Color
     autoload :ICCProfile, "pdfrb/color/icc_profile"
     autoload :ColorSpace, "pdfrb/color/color_space"
+    autoload :DefaultProfile, "pdfrb/color/default_profile"
+    autoload :ICCValidator, "pdfrb/color/icc_validator"
   end
 end
