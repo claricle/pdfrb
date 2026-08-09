@@ -20,5 +20,6 @@ module Pdfrb
     autoload :ObjectStreamReader, "pdfrb/source/object_stream_reader"
     autoload :Recovery, "pdfrb/source/recovery"
     autoload :LinearizationDetection, "pdfrb/source/linearization_detection"
+    autoload :LinearizationReader, "pdfrb/source/linearization_reader"
   end
 end
