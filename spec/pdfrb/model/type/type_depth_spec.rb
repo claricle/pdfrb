@@ -62,8 +62,10 @@ end
 RSpec.describe Pdfrb::Encryption::StandardSecurityHandler do
   it "initializes from encrypt dict" do
     handler = described_class.new(
-      Encrypt: { V: 2, R: 3, Length: 128, P: -4, O: "\x00" * 32, U: "\x00" * 32 },
-      ID: ["test-id"]
+      {
+        Encrypt: { V: 2, R: 3, Length: 128, P: -4, O: "\x00" * 32, U: "\x00" * 32 },
+        ID: ["test-id"],
+      }
     )
     expect(handler.version).to eq(2)
     expect(handler.revision).to eq(3)

@@ -37,3 +37,4 @@ end
 
 # Register built-in handlers after the module is fully defined.
 Pdfrb::Encryption::SecurityHandler.register("Standard", Pdfrb::Encryption::StandardSecurityHandler)
+Pdfrb::Encryption::SecurityHandler.register("Adobe.PPKLite", Pdfrb::Encryption::PublicKeySecurityHandler)
