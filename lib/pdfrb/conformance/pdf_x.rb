@@ -21,7 +21,7 @@ module Pdfrb
       module_function
 
       def profiles
-        { x1a: X1A, x3: X3, x4: X4 }
+        { x1a: X1A, x3: X3, x4: X4, x6: X6 }
       end
 
       def validate(document, level: :x4)
@@ -32,6 +32,7 @@ module Pdfrb
         case level.to_s
         when /\Ax1/i then X1A
         when /\Ax3/i then X3
+        when /\Ax6/i then X6
         else X4
         end
       end
@@ -219,6 +220,70 @@ module Pdfrb
       # X-4: allows transparency and layers
       X4 = RuleSet.new("PDF/X-4").tap do |rs|
         SHARED.rules.each { |r| rs.register(r) }
+      end
+
+      # X-6 specific rules. Defined as lambdas (not module methods)
+      # so they are in scope when X6 is built.
+      X6_VERSION_RULE = Rule.new(
+        id: "x6-1",
+        description: "PDF/X-6 requires PDF 2.0",
+        severity: :error,
+        spec_clause: "ISO 15930-11 6.1",
+        check: ->(doc) {
+          v = doc.version.to_s
+          next nil if compare_versions(v, "2.0") >= 0
+
+          Violation.new(
+            rule_id: "x6-1",
+            message: "PDF/X-6 requires PDF version 2.0 (was #{v})",
+            object: "Header",
+            severity: :error,
+            spec_clause: "ISO 15930-11 6.1"
+          )
+        }
+      )
+
+      X6_OUTPUT_INTENT_RULE = Rule.new(
+        id: "x6-2",
+        description: "PDF/X-6 OutputIntents should use /S /GTS_PDFX",
+        severity: :warning,
+        spec_clause: "ISO 15930-11 6.2.4",
+        check: ->(doc) {
+          intents = doc.catalog[:OutputIntents]
+          intents_array = case intents
+                          when ::Array then intents
+                          when Pdfrb::Model::PdfArray then intents.value
+                          when nil then []
+                          else [intents]
+                          end
+          has_pdfx = intents_array.any? do |i|
+            obj = i.is_a?(Pdfrb::Model::Reference) ? doc.object(i) : i
+            obj && obj[:S] == :GTS_PDFX
+          end
+          next nil if has_pdfx
+
+          Violation.new(
+            rule_id: "x6-2",
+            message: "PDF/X-6 OutputIntents should include an entry with /S /GTS_PDFX",
+            object: "Catalog/OutputIntents",
+            severity: :warning,
+            spec_clause: "ISO 15930-11 6.2.4"
+          )
+        }
+      )
+
+      # X-6: ISO 15930-11 — PDF 2.0 based. Adds the PDF 2.0 base
+      # version requirement and PDF/X-4's relaxed rules.
+      X6 = RuleSet.new("PDF/X-6").tap do |rs|
+        SHARED.rules.each { |r| rs.register(r) }
+        rs.register(X6_VERSION_RULE)
+        rs.register(X6_OUTPUT_INTENT_RULE)
+      end
+
+      def compare_versions(a, b)
+        aa = a.to_s.split(".").map(&:to_i)
+        bb = b.to_s.split(".").map(&:to_i)
+        (aa <=> bb) || 0
       end
 
       def scan_color_spaces(doc, &block)

@@ -15,6 +15,7 @@ module Pdfrb
     autoload :ImageBox, "pdfrb/layout/image_box"
     autoload :ListBox, "pdfrb/layout/list_box"
     autoload :TableBox, "pdfrb/layout/table_box"
+    autoload :MultiPageTableBox, "pdfrb/layout/multi_page_table_box"
     autoload :ColumnBox, "pdfrb/layout/column_box"
     autoload :InlineBox, "pdfrb/layout/inline_box"
     autoload :BoxFitter, "pdfrb/layout/box_fitter"
