@@ -40,7 +40,7 @@ module Pdfrb
                       check: ->(doc) {
                         vs = []
                         prev_level = 0
-                        TaggedPdf.send(:walk_structure, doc) do |elem|
+                        TaggedPdf.walk_structure(doc) do |elem|
                           s = elem[:S]&.to_s
                           next unless s&.match?(/\AH([1-6])\z/)
 
@@ -67,7 +67,7 @@ module Pdfrb
                       spec_clause: "ISO 14289-2 7.9",
                       check: ->(doc) {
                         vs = []
-                        TaggedPdf.send(:walk_structure, doc) do |elem|
+                        TaggedPdf.walk_structure(doc) do |elem|
                           next unless elem[:S] == :Formula
                           next if elem[:Alt] || elem[:ActualText]
 

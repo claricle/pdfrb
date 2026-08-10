@@ -52,6 +52,27 @@ module Pdfrb
         self
       end
 
+      # Whether the underlying IO is at end of stream.
+      def eof?
+        @io.eof?
+      end
+
+      # Read one byte from the underlying IO. Returns nil at EOF.
+      def read_byte
+        b = @io.getbyte
+        @pos += 1 if b
+        b
+      end
+
+      # Skip whitespace bytes (NUL, HT, LF, FF, CR, SP).
+      def skip_whitespace
+        while (b = peek_byte)
+          break unless WHITESPACE_BYTES.include?(b)
+
+          advance_byte
+        end
+      end
+
       private
 
       def fill_lookahead(n)

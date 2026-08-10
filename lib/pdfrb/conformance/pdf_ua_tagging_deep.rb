@@ -21,10 +21,10 @@ module Pdfrb
                       spec_clause: "ISO 14289-1 7.4",
                       check: ->(doc) {
                         vs = []
-                        TaggedPdf.send(:walk_structure, doc) do |elem|
+                        TaggedPdf.walk_structure(doc) do |elem|
                           next unless elem[:S] == :L
 
-                          kids = TaggedPdf.send(:structure_kids, elem, doc)
+                          kids = TaggedPdf.structure_kids(elem, doc)
                           has_li = kids.any? { |k| k[:S] == :LI }
                           next if has_li
 
@@ -47,10 +47,10 @@ module Pdfrb
                       spec_clause: "ISO 14289-1 7.4",
                       check: ->(doc) {
                         vs = []
-                        TaggedPdf.send(:walk_structure, doc) do |elem|
+                        TaggedPdf.walk_structure(doc) do |elem|
                           next unless elem[:S] == :LI
 
-                          kids = TaggedPdf.send(:structure_kids, elem, doc)
+                          kids = TaggedPdf.structure_kids(elem, doc)
                           has_body = kids.any? { |k| k[:S] == :LBody }
                           next if has_body
 
@@ -73,10 +73,10 @@ module Pdfrb
                       spec_clause: "ISO 14289-1 7.5",
                       check: ->(doc) {
                         vs = []
-                        TaggedPdf.send(:walk_structure, doc) do |elem|
+                        TaggedPdf.walk_structure(doc) do |elem|
                           next unless elem[:S] == :Table
 
-                          kids = TaggedPdf.send(:structure_kids, elem, doc)
+                          kids = TaggedPdf.structure_kids(elem, doc)
                           has_tr = kids.any? { |k| k[:S] == :TR }
                           next if has_tr
 
@@ -99,7 +99,7 @@ module Pdfrb
                       spec_clause: "ISO 14289-1 7.5",
                       check: ->(doc) {
                         vs = []
-                        TaggedPdf.send(:walk_structure, doc) do |elem|
+                        TaggedPdf.walk_structure(doc) do |elem|
                           next unless elem[:S] == :TH
                           next if elem[:Scope] || elem[:Headers]
 
