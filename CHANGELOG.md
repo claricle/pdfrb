@@ -2,6 +2,99 @@
 
 All notable changes to the pdfrb gem will be documented in this file.
 
+## [Unreleased]
+
+### Added — Parity batches 4-9
+
+* **TODO 103 Hyphenation** — Knuth-Liang `Pdfrb::Layout::Hyphenation`
+  with curated English patterns in `data/pdfrb/layout/hyphenation_en.txt`.
+* **TODO 116 PDF/X-6** — `Pdfrb::Conformance::PdfX#X6` ISO 15930-11
+  profile.
+* **TODO 117 PDF/VT** — `Pdfrb::Conformance::PdfVT` (VT-1, VT-2)
+  ISO 16612-2 profiles.
+* **TODO 118 Multi-revision traversal** — `Document#each_revision`
+  walks the `/Prev` chain yielding `(revision_index, xref, trailer)`.
+* **TODO 119 Table cell spans** — `TableBox.cell(box, colspan:,
+  rowspan:)`, hash-form cells, span-aware layout.
+* **TODO 120 Multi-page table** — `MultiPageTableBox` splits a table
+  across pages with header-row repeat.
+* **TODO 122 Bidi** — `Pdfrb::Layout::Bidi` paragraph-level UAX #9
+  reordering; `TextLayouter` reorders Hebrew/Arabic for visual order.
+* **TODO 128 Linearization-aware reader** —
+  `Source::LinearizationReader.detect(io)` parses the first indirect
+  object's dict for `/Linearized`.
+* **TODO 129 Type3 font loader** — `Pdfrb::FontLoader::Type3` with
+  glyph procedures + encoding.
+* **TODO 131 Inline images (write)** — `Canvas#inline_image(dict:,
+  data:)` plus `Operator::{BeginInlineImage, EndInlineImage}`.
+* **TODO 133 Custom canvas primitives** — `polyline`, `polygon`,
+  `arc`, `circle`, `ellipse`, `rounded_rectangle`, `dash=`.
+* **TODO 135 PDF thumbnail generation** — `Pdfrb::Task::Thumbnail`
+  builds `/Thumb` image XObjects on every page.
+* **TODO 136 PDF/A preflight deep** — `PREFLIGHT_DEEP` rule set on
+  PdfA (JavaScript, PostScript XObjects, encryption, embedded-file
+  bans for A-1/A-2/A-4).
+* **TODO 137 PDF/UA tagging deep** — list/LI/LBody, Table/TR,
+  TH/Scope structural checks.
+* **TODO 138 Tagged PDF validation** —
+  `Pdfrb::Conformance::TaggedPdf` baseline structural rule set.
+* **TODO 140 PDF 2.0 AF validation** —
+  `Pdfrb::Conformance::Pdf2AF` App Note 002 validator.
+* **TODO 104 Default ICC profile** — `Color::DefaultProfile` emits a
+  usable sRGB v4 ICC profile with desc/wtpt/rXYZ/gXYZ/bXYZ/rTRC/
+  gTRC/bTRC tags and a real MD5 Profile ID.
+* **TODO 139 ICC profile validation** —
+  `Pdfrb::Color::ICCValidator` checks signature, version, device
+  class, color space per ICC.1:2022 §7.
+* **TODO 108 Image downsampling** —
+  `Pdfrb::Image::Downsampler` + `Task::Optimize#downsample_images!`
+  for FlateDecode 8-bpc non-palette images.
+* **TODO 130 Color-key masking** — `ImageLoader::PNG` parses tRNS and
+  emits `/Mask` color-key array.
+* **TODO 131 Inline images (read)** — `Content::Parser` recognises
+  the BI/ID/EI sequence and yields an `InlineImage` invocation.
+* **TODO 132 Page-piece dict** —
+  `Pdfrb::Model::Type::PagePieceInfo` per s14.5.
+* **TODO 134 Tagged PDF alt-text API** — `Document::Structure`
+  facade for `/Alt`, `/ActualText`, `/Lang`.
+* **Layout** — cluster-aware default `TextShaper`, real AFM-based
+  `FontFallback`, `PolygonFrame` with proper inscribed-rectangle
+  scan, `MultiCellTextLayout`, `JustificationKashidas`.
+* **Encryption** — `StandardSecurityHandler.for_v5` write-side
+  AES-256 R6 handler (file key + `/U`/`/O`/`/UE`/`/OE`/`/Perms`),
+  `V5Writer` PKCS#5 algorithms, `PublicKeySecurityHandler` with
+  real CMS EnvelopedData construction via `OpenSSL::PKCS7`.
+* **Signatures** — `Pdfrb::Conformance::Pades` (B-B, B-T, B-LT,
+  B-LTA profiles), `Pdfrb::Conformance::Ltv` long-term validation,
+  `Pdfrb::Conformance::PdfA4Deep`, `PdfUA2Deep`,
+  `DigitalSignature::TimestampClient` (RFC 3161 TSA over HTTPS).
+* **Images** — `ImageLoader::TIFF` decodes uncompressed RGB/gray;
+  `ImageLoader::GIF` does full GIF-spec LZW decode with palette.
+* **Source** — extended `Pdfrb::Source::Recovery` with
+  trailer-reference recovery, hybrid-xref detection,
+  object-stream rebuild.
+* **Tasks** — `Pdfrb::Task::RegenerateAppearances` walks widget
+  annotations and rebuilds `/AP /N` via `Appearance::Generator`.
+
+### Fixed
+
+* Stream deduplication in `Task::Optimize` (was a stub).
+* `Writer#write_xref_stream` now emits a free entry for every gap
+  in the oid space (was misaligning the reader).
+* `Document::Form#flatten!` now stamps field appearances into page
+  content via `/Do` (was a stub).
+* Issue #63: PostScript name extraction for `/BaseFont`.
+* Issue #64: `Resources#empty?` handles Hash, Array, Cos::Dictionary,
+  PdfArray.
+
+### Changed
+
+* Release workflow switched to emf2svg-ruby pattern: direct OIDC
+  trusted publishing via `rubygems/configure-rubygems-credentials@main`
+  + plain `gem push`. Bump job commits version.rb and tags `vX.Y.Z`.
+* Removed all `instance_variable_set/get`, `send` to private
+  methods, `respond_to?` for type checks.
+
 ## [0.7.0] — 2026-08-08
 
 ### Added — Release infrastructure

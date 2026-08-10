@@ -23,11 +23,21 @@ module Pdfrb
 
       # Yields (operator_class, operands) pairs. Returns an Enumerator
       # if no block.
+      #
+      # Special-cases the BI/ID/EI inline image sequence: when BI is
+      # seen, the inline image dict + raw byte payload are read as a
+      # single InlineImage invocation rather than as discrete tokens.
       def each_invocation
         return enum_for(:each_invocation) unless block_given?
 
         operands = []
         while (tok = tokenizer.next_token)
+          if tok.type == :keyword && tok.value == "BI"
+            yield Pdfrb::Content::Operator::BeginInlineImage, [parse_inline_image]
+            operands = []
+            next
+          end
+
           case tok.type
           when :keyword
             op = Pdfrb::Content::Operator[tok.value]
@@ -46,6 +56,78 @@ module Pdfrb
           end
         end
         self
+      end
+
+      # Parse a BI ... ID <bytes> EI inline image sequence. The BI
+      # keyword has already been consumed; the next tokens form the
+      # image header (key/value pairs), then ID introduces the raw
+      # byte payload terminated by EI.
+      #
+      # Returns a Hash with :header (the key-value pairs) and
+      # :data (the raw image bytes).
+      def parse_inline_image
+        header = {}
+        # Read header pairs until we hit the ID keyword.
+        while (tok = tokenizer.next_token)
+          break if tok.type == :keyword && tok.value == "ID"
+
+          if tok.type == :name
+            key = abbrev_for(tok.value) || tok.value.to_sym
+            val_tok = tokenizer.next_token
+            header[key] = token_value(val_tok)
+          end
+        end
+
+        # After ID, exactly one whitespace byte separates the
+        # keyword from the data. Read raw bytes until "\nEI" or
+        # " EI" terminator.
+        data = read_inline_image_data
+        { header: header, data: data }
+      end
+
+      # Map inline-image abbreviation keys to full PDF names per
+      # ISO 32000-2 §8.9.7 Table 89.
+      def abbrev_for(name)
+        ABBREV_TABLE[name.to_sym]
+      end
+
+      ABBREV_TABLE = {
+        BPC: :BitsPerComponent,
+        CS: :ColorSpace,
+        D: :Decode,
+        DP: :DecodeParms,
+        F: :Filter,
+        H: :Height,
+        IM: :ImageMask,
+        Intent: :Intent,
+        I: :Interpolate,
+        W: :Width,
+      }.freeze
+
+      def read_inline_image_data
+        # Skip exactly one whitespace byte after ID.
+        tokenizer.skip_whitespace
+        bytes = +"".b
+        # Read until we see the "EI" marker. The marker is usually
+        # preceded by whitespace and followed by whitespace or EOF.
+        until tokenizer.eof?
+          b = tokenizer.read_byte
+          break if b.nil?
+
+          bytes << b
+          if bytes.bytesize >= 3 &&
+              whitespace_byte?(bytes.getbyte(-3)) &&
+              bytes.byteslice(-2, 2) == "EI"
+            return bytes.byteslice(0, bytes.bytesize - 3).b
+          end
+        end
+        bytes.b
+      end
+
+      WHITESPACE_BYTE_VALUES = [0, 9, 10, 12, 13, 32].freeze
+
+      def whitespace_byte?(byte)
+        WHITESPACE_BYTE_VALUES.include?(byte)
       end
 
       private
