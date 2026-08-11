@@ -1,36 +1,28 @@
 # Releasing pdfrb
 
-Releases are driven by the workflow at `.github/workflows/release.yml`,
-modelled on the emf2svg-ruby release flow. It supports two triggers:
+Releases are driven by the Metanorma CI reusable workflow at
+`.github/workflows/release.yml`. It supports two triggers:
 
-1. **`workflow_dispatch`** with a `bump-type` choice (`current`,
-   `patch`, `minor`, `major`). The workflow bumps `lib/pdfrb/version.rb`,
-   commits, tags `vX.Y.Z`, and pushes both. The tag push then triggers
-   the publish path.
-2. **`push` to `v*` tags** — fires the publish path directly when you
-   push a tag yourself.
+1. **`workflow_dispatch`** with a `next_version` input — manual run
+   from the Actions UI. Accepted values: `x.y.z`, `major`, `minor`,
+   `patch`, `pre|rc|etc`, or `skip` (release the current gemspec
+   version as-is).
+2. **`repository_dispatch`** with event type `do-release` — for
+   automation triggers from other repos.
 
-## Authentication: OIDC Trusted Publishing
+Both call
+[`metanorma/ci/.github/workflows/rubygems-release.yml@main`](https://github.com/metanorma/ci/blob/main/.github/workflows/rubygems-release.yml),
+which handles version bumping, tag creation, gem build, RubyGems
+publish, and GitHub release creation.
 
-The publish job uses
-[`rubygems/configure-rubygems-credentials@main`](https://github.com/rubygems/configure-rubygems-credentials)
-to mint short-lived push credentials from GitHub's OIDC token. No
-long-lived API key is stored in repo secrets.
+## Authentication
 
-Required GitHub workflow permissions:
-```yaml
-permissions:
-  contents: write   # push bump commit + tag
-  id-token: write   # RubyGems OIDC
-```
+The reusable workflow uses the `CLARICLE_CI_RUBYGEMS_API_KEY` secret
+for RubyGems authentication. Ensure this secret is set in repo
+Settings → Secrets and Variables → Actions.
 
-Required RubyGems trusted-publisher setup (one-time, on
-https://rubygems.org/gems/pdfrb/settings/trusted_publishers):
-
-- Repository owner: `claricle`
-- Repository name: `pdfrb`
-- Workflow filename: `release.yml`
-- Environment name: (leave blank)
+The `GITHUB_TOKEN` is passed as `pat_token` for the version-bump
+commit/tag/push steps.
 
 ## Triggering a release
 
@@ -38,32 +30,38 @@ https://rubygems.org/gems/pdfrb/settings/trusted_publishers):
 
 1. Go to Actions → `release` workflow.
 2. Click "Run workflow".
-3. Pick `bump-type` (default `patch`).
+3. Enter the next version (e.g., `0.8.0`, `patch`, `minor`, `major`).
 4. Click "Run workflow".
 
-### From the API
+### From the API / CI
 
 ```sh
-gh workflow run release.yml -f bump-type=patch
+gh workflow run release.yml \
+  -f next_version=0.8.0
 ```
 
-The workflow bumps, tags, pushes the tag, then builds and publishes.
-Total runtime ~3 minutes.
-
-### Pushing a tag directly
-
-If `lib/pdfrb/version.rb` was already bumped via a merged PR, just
-push the matching tag and the publish path runs:
+Or via `repository_dispatch` from another repo:
 
 ```sh
-git tag v$(ruby -Ilib -e 'require "pdfrb/version"; print Pdfrb::VERSION')
-git push origin v<VERSION>
+gh api /repos/claricle/pdfrb/dispatches \
+  -f event_type=do-release \
+  -f 'client_payload[next_version]=0.8.0'
 ```
+
+## CI (test) workflow
+
+`.github/workflows/rake.yml` runs the standard Metanorma CI
+generic-rake workflow on every push to `main`/`master`, every tag
+push, every pull request, and via manual `workflow_dispatch`.
+
+`.github/workflows/ci.yml` (the original hand-rolled CI) is also
+present as a fallback.
 
 ## Pre-release checklist
 
 * `bundle exec rake` is green locally.
+* `lib/pdfrb/version.rb` matches the intended release (the release
+  workflow handles this automatically when given `next_version`).
 * `CHANGELOG.md` has an entry for the new version.
 * No uncommitted changes on `main`.
-* The RubyGems trusted publisher is configured for `claricle/pdfrb`
-  with workflow filename `release.yml` (one-time setup).
+* `CLARICLE_CI_RUBYGEMS_API_KEY` secret is set in repo settings.
