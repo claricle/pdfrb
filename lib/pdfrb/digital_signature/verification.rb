@@ -89,7 +89,7 @@ module Pdfrb
             trusted?: !trusted_certs.empty? && valid,
             error: valid ? nil : "signature verification failed",
           )
-        rescue OpenSSL::PKCS7::PKCS7Error => e
+        rescue OpenSSL::PKCS7::PKCS7Error, ArgumentError => e
           VerificationResult.new(valid?: false,
                                  byte_range_ok?: true,
                                  cert_chain: [],
