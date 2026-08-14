@@ -356,6 +356,21 @@ module Pdfrb
 
       # Page-piece dictionary (s14.5).
       autoload :PagePieceInfo, "pdfrb/model/type/page_piece_info"
+
+      # PAdES validation-related information (ETSI EN 319 142-1).
+      autoload :Vri, "pdfrb/model/type/vri"
+
+      # Page thumbnails (s12.3.4).
+      autoload :Thumbnail, "pdfrb/model/type/thumbnail"
+
+      # Timespan (s12.7.11, PDF 1.5+).
+      autoload :Timespan, "pdfrb/model/type/timespan"
+
+      # Viewport (s12.7.11, PDF 1.6+).
+      autoload :Viewport, "pdfrb/model/type/viewport"
+
+      # User property (s14.7.5).
+      autoload :UserProperty, "pdfrb/model/type/user_property"
     end
   end
 end
