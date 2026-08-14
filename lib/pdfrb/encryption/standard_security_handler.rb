@@ -219,7 +219,11 @@ module Pdfrb
         hash = md5.digest
 
         rc4 = RC4Impl.new(key)
-        20.times { |i| hash = rc4.process(hash, key ^ i) }
+        19.downto(1) do |i|
+          xored_key = key.bytes.map { |b| b ^ i }.pack("C*")
+          rc4 = RC4Impl.new(xored_key)
+          hash = rc4.process(hash)
+        end
 
         hash[0, 16]
       end

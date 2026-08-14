@@ -31,6 +31,7 @@ module Pdfrb
     autoload :Info, "pdfrb/document/info"
     autoload :PageLabels, "pdfrb/document/page_labels"
     autoload :Stamps, "pdfrb/document/stamps"
+    autoload :Encryption, "pdfrb/document/encryption"
 
     def initialize(io: nil, config: {})
       Pdfrb::Model::Type.eager_load!
@@ -162,6 +163,8 @@ module Pdfrb
     def page_labels; @page_labels ||= Document::PageLabels.new(self); end
 
     def stamps; @stamps ||= Document::Stamps.new(self); end
+
+    def encryption; @encryption ||= Document::Encryption.new(self); end
 
     def info; @info ||= Document::Info.new(self); end
 
