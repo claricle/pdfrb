@@ -3,7 +3,9 @@
 module Pdfrb
   module Layout
     # Fits an ordered list of boxes into a Frame, flowing to a new
-    # Frame (provided by a block) when one fills up.
+    # Frame (provided by a block) when one fills up. Delegates area
+    # tracking to the Frame (which now properly tracks removed areas
+    # and returns non-overlapping positions).
     class BoxFitter
       attr_reader :boxes, :frame, :result, :overflow
 
@@ -16,26 +18,8 @@ module Pdfrb
 
       def fit
         current_frame = @frame
-        cursor_y = current_frame.top
         @boxes.each do |box|
-          loop do
-            position = current_frame.find_available_area(box.width || current_frame.width, box.height || (cursor_y - current_frame.bottom))
-            if position && box.fit?(position[2] || current_frame.width, position[3] || (cursor_y - current_frame.bottom))
-              @result << [box, position]
-              current_frame.remove_area(position[0], position[1] - box.height, box.width, box.height)
-              cursor_y = position[1] - box.height
-              break
-            else
-              next_frame = yield if block_given?
-              if next_frame
-                current_frame = next_frame
-                cursor_y = current_frame.top
-              else
-                @overflow << box
-                break
-              end
-            end
-          end
+          current_frame = fit_box(box, current_frame)
         end
         self
       end
@@ -48,6 +32,37 @@ module Pdfrb
 
       def fit_complete?
         @overflow.empty?
+      end
+
+      private
+
+      def fit_box(box, frame)
+        loop do
+          return frame if place?(box, frame)
+
+          next_frame = yield if block_given?
+          unless next_frame
+            @overflow << box
+            return frame
+          end
+
+          frame = next_frame
+        end
+      end
+
+      def place?(box, frame)
+        box_w = box.width || frame.width
+        box_h = box.height || frame.available_height
+        position = frame.find_available_area(box_w, box_h)
+        return false unless position
+
+        actual_w = position[2] || frame.width
+        actual_h = position[3] || frame.available_height
+        return false unless box.fit?(actual_w, actual_h)
+
+        @result << [box, position]
+        frame.remove_area(position[0], position[1], actual_w, box.height || actual_h)
+        true
       end
     end
   end

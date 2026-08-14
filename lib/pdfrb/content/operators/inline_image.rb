@@ -10,10 +10,9 @@ module Pdfrb
       # needed, but the bytes live in the content stream so they
       # can't be reused.
       #
-      # The serialise path emits the BI dict, ID marker, raw bytes,
-      # and EI marker. The invoke path is intentionally a no-op; the
-      # content Parser handles BI/ID/EI as a single bounded block
-      # rather than via the operator dispatch table.
+      # The Parser detects BI ... ID ... EI and yields a single
+      # BeginInlineImage invocation with the parsed image Hash as
+      # the operand. The invoke hook calls Processor#inline_image.
       class BeginInlineImage < Base
         class << self
           def name; "BI"; end
@@ -27,7 +26,9 @@ module Pdfrb
             buf
           end
 
-          def invoke(_processor, *_operands); end
+          def invoke(processor, image = nil)
+            processor.inline_image(image) if image
+          end
           register
         end
       end
@@ -35,14 +36,6 @@ module Pdfrb
       class EndInlineImage < Base
         class << self
           def name; "EI"; end
-
-          # The byte payload sits between ID and EI. The serializer
-          # for inline images writes the payload directly via
-          # Canvas#inline_image; this method is here so the registry
-          # knows about EI.
-          def serialize(_serializer, *_operands)
-            "EI\n"
-          end
 
           def invoke(_processor, *_operands); end
           register
