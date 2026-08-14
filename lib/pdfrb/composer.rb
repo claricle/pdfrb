@@ -57,12 +57,19 @@ module Pdfrb
     def new_page(style_name = nil)
       @current_style_name = style_name || next_style_name
       style_obj = @page_styles[@current_style_name]
+      # Reset the frame cursor for the new page.
+      reset_frame_cursor(style_obj)
       page = @document.pages.add
       page.value[:MediaBox] = [0, 0, style_obj.width, style_obj.height]
       @current_page = page
       @pending_boxes = []
       page
     end
+
+    def reset_frame_cursor(style_obj)
+      style_obj&.frame&.reset!
+    end
+    private :reset_frame_cursor
 
     def x
       @cursor_x || 50
@@ -143,17 +150,29 @@ module Pdfrb
 
       style_obj = @page_styles[@current_style_name]
       frame = style_obj.frame
-      cursor_y = frame.top
 
       @pending_boxes.each do |box|
-        unless box.fit?(frame.width, cursor_y - frame.bottom)
+        available_h = frame.available_height.positive? ? frame.available_height : (frame.top - frame.bottom)
+        unless box.fit?(frame.width, available_h)
           new_page
-          cursor_y = @page_styles[@current_style_name].frame.top
-          box.fit?(frame.width, cursor_y - frame.bottom)
+          style_obj = @page_styles[@current_style_name]
+          frame = style_obj.frame
+          available_h = frame.top - frame.bottom
+          box.fit?(frame.width, available_h)
         end
+
+        position = frame.find_available_area(box.width || frame.width, box.height || available_h)
+        if position
+          draw_x, draw_y, = position
+        else
+          draw_x = frame.left
+          draw_y = frame.cursor_y - (box.height || 0)
+        end
+
         canvas = @current_page.canvas
-        box.draw(canvas, frame.left, cursor_y)
-        cursor_y -= box.height
+        box.draw(canvas, draw_x, draw_y)
+        box_h = box.height || available_h
+        frame.remove_area(draw_x, draw_y, box.width || frame.width, box_h)
       end
       @pending_boxes = []
     end
