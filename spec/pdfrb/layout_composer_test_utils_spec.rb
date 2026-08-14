@@ -19,7 +19,7 @@ RSpec.describe Pdfrb::Layout do
     it "finds available area for a fitting size" do
       f = described_class.new(left: 0, bottom: 0, width: 100, height: 100)
       pos = f.find_available_area(50, 30)
-      expect(pos).to eq([0.0, 70.0])
+      expect(pos).to eq([0.0, 70.0, 50.0, 30.0])
     end
 
     it "returns nil when size doesn't fit" do
