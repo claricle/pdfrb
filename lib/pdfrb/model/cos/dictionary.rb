@@ -95,8 +95,8 @@ module Pdfrb
           end
           private :own_fields
 
-          def arlington_loaded_for?(_name)
-            @arlington_loaded_name == name
+          def arlington_loaded_for?(arlington_name)
+            @arlington_loaded_name == arlington_name
           end
           private :arlington_loaded_for?
 
@@ -113,11 +113,23 @@ module Pdfrb
           end
           private :arlington_available?
 
+          # Merge Arlington field metadata with any hand-coded
+          # define_field declaration. Hand-coded fields win: if the
+          # class already declares this key explicitly (with a type),
+          # we rebuild the Field preserving the hand-coded
+          # type/default/required and only attach the Arlington def
+          # for reference.
           def define_field_from_arlington(field_def)
             types = arlington_types_to_ruby(field_def)
             return if types.empty?
 
             key = arlington_key_to_symbol(field_def.key)
+            existing = own_fields[key]
+            if existing
+              own_fields[key] = merged_field(existing, field_def)
+              return
+            end
+
             define_field(
               key,
               type: types.length == 1 ? types.first : types,
@@ -128,6 +140,20 @@ module Pdfrb
             )
           end
           private :define_field_from_arlington
+
+          def merged_field(existing, field_def)
+            Fields::Field.new(
+              existing.pdf_name,
+              type: existing.type,
+              required: existing.required,
+              default: existing.default,
+              indirect: existing.indirect,
+              allowed_values: existing.allowed_values,
+              version: arlington_version(field_def),
+              arlington: field_def
+            )
+          end
+          private :merged_field
 
           def arlington_types_to_ruby(field_def)
             field_def.types.map { |t| arlington_one_type_to_ruby(t) }.flatten.compact.uniq
