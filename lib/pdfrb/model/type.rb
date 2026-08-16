@@ -385,6 +385,15 @@ module Pdfrb
 
       # Trapping (Adobe TechNote 5620).
       autoload :TrapRegion, "pdfrb/model/type/trap_region"
+
+      # Additional actions on the Catalog (s12.6.3.17).
+      autoload :AddActionCatalog, "pdfrb/model/type/add_action_catalog"
+
+      # Alternate image (s8.9.5).
+      autoload :AlternateImage, "pdfrb/model/type/alternate_image"
+
+      # Sound action (s12.6.4.11, deprecated 2.0).
+      autoload :ActionSound, "pdfrb/model/type/action_sound"
     end
   end
 end
