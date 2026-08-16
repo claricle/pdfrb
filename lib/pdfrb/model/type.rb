@@ -371,6 +371,20 @@ module Pdfrb
 
       # User property (s14.7.5).
       autoload :UserProperty, "pdfrb/model/type/user_property"
+
+      # Threads/articles (s12.4).
+      autoload :Thread, "pdfrb/model/type/thread"
+      autoload :Bead, "pdfrb/model/type/bead"
+
+      # Web Capture / spider (s14.10, PDF 1.3, deprecated 2.0).
+      autoload :WebCaptureInfo, "pdfrb/model/type/web_capture_page_set"
+      autoload :WebCaptureCommand, "pdfrb/model/type/web_capture_command"
+      autoload :WebCaptureCommandSettings, "pdfrb/model/type/web_capture_command_settings"
+      autoload :WebCaptureImageSet, "pdfrb/model/type/web_capture_image_set"
+      autoload :WebCapturePageSet, "pdfrb/model/type/web_capture_page_set"
+
+      # Trapping (Adobe TechNote 5620).
+      autoload :TrapRegion, "pdfrb/model/type/trap_region"
     end
   end
 end
