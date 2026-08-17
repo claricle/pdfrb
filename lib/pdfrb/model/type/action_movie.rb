@@ -6,6 +6,7 @@ module Pdfrb
       # Movie action (s12.6.4.8). Deprecated in PDF 2.0 but still
       # appears in legacy PDFs. Plays/stops a Movie annotation.
       class ActionMovie < Action
+        arlington_object "ActionMovie"
         register_subtype :Movie
 
         def annotation; self[:Annotation]; end

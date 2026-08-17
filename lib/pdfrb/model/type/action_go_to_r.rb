@@ -6,6 +6,7 @@ module Pdfrb
       # Remote GoTo action (s12.6.4.3). Navigate to a destination in
       # another PDF file.
       class ActionGoToR < Action
+        arlington_object "ActionGoToR"
         register_subtype :GoToR
 
         def file_spec; self[:F]; end

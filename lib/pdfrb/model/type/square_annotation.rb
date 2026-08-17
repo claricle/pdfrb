@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Square / rectangle annotation (s12.5.6.8).
       class SquareAnnotation < MarkupAnnotation
+        arlington_object "AnnotSquare"
         def border_effect; self[:BE]; end
         def interior_color; self[:IC]; end
         def border_style; self[:BS]; end

@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Highlight annotation. /Subtype /Highlight.
       class HighlightAnnotation < TextMarkupAnnotation
+        arlington_object "AnnotHighlight"
       end
     end
   end

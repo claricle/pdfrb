@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Ink annotation (s12.5.6.13). Freehand scribble path(s).
       class InkAnnotation < MarkupAnnotation
+        arlington_object "AnnotInk"
         def ink_list; self[:InkList]; end
         def interior_color; self[:IC]; end
         def border_style; self[:BS]; end

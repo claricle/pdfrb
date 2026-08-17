@@ -6,6 +6,7 @@ module Pdfrb
       # GoToDp action (s12.6.4.2, PDF 2.0). Destination pointer variant
       # of GoTo that supports /DP (destination page) over a /D array.
       class ActionGoToDp < Action
+        arlington_object "ActionGoToDp"
         register_subtype :GoToDp
 
         def destination_page; self[:DP]; end

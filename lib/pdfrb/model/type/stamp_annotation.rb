@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Rubber-stamp annotation (s12.5.6.14).
       class StampAnnotation < MarkupAnnotation
+        arlington_object "AnnotStamp"
         def name; self[:Name]; end
         def interior_color; self[:IC]; end
         def rotation; self[:Rotate] || 0; end

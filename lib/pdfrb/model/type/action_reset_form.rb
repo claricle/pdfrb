@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Reset-form action (s12.7.6.3). Resets form fields to defaults.
       class ActionResetForm < Action
+        arlington_object "ActionResetForm"
         register_subtype :ResetForm
 
         def fields; self[:Fields]; end

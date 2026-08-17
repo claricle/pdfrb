@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Sound annotation (s12.5.6.18). Sound clip embedded in the page.
       class SoundAnnotation < MarkupAnnotation
+        arlington_object "AnnotSound"
         def sound; self[:Sound]; end
         def name; self[:Name]; end
 

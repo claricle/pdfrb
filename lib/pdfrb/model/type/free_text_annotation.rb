@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Free-text annotation (s12.5.6.6). Text shown directly on the page.
       class FreeTextAnnotation < MarkupAnnotation
+        arlington_object "AnnotFreeText"
         def default_appearance; self[:DA]; end
         def q; self[:Q]; end
         def rc; self[:RC]; end

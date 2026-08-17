@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Popup annotation (s12.5.6.14). Displays text/markup in a pop-up window.
       class PopupAnnotation < Annotation
+        arlington_object "AnnotPopup"
         def parent; self[:Parent]; end
         def open?; !!value[:Open]; end
 

@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Squiggly annotation. /Subtype /Squiggly.
       class SquigglyAnnotation < TextMarkupAnnotation
+        arlington_object "AnnotSquiggly"
       end
     end
   end

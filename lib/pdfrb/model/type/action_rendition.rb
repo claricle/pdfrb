@@ -6,6 +6,7 @@ module Pdfrb
       # Rendition action (s12.6.4.12). Controls multimedia rendition
       # on screen annotations.
       class ActionRendition < Action
+        arlington_object "ActionRendition"
         register_subtype :Rendition
 
         def rendition; self[:R]; end

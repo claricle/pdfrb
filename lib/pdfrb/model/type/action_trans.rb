@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Transition action (s12.4.3). Specifies page transition for slide-show.
       class ActionTrans < Action
+        arlington_object "ActionTransition"
         register_subtype :Trans
 
         def transition; self[:Trans]; end
