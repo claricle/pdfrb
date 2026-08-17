@@ -6,6 +6,7 @@ module Pdfrb
       # 3D Render Mode (s13.6.4, Table 318-319). Rendering style for
       # 3D objects (solid, wireframe, transparent, etc.).
       class ThreeDRenderMode < Pdfrb::Model::Cos::Dictionary
+        arlington_object "3DRenderMode"
         def type; self[:Type]; end
         def subtype; self[:Subtype]&.to_sym; end
         def auxiliary_color; self[:AC]; end

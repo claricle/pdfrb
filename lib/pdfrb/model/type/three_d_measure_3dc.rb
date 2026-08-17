@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # 3D Comment (3DC) measure (s13.6.4). A 3D measurement note.
       class ThreeDMeasure3DC < ThreeDMeasure
+        arlington_object "3DMeasure3DC"
         def text; self[:TRL]; end
         def anchor; self[:A1]; end
         def name; self[:N1]; end

@@ -8,6 +8,7 @@ module Pdfrb
       # colors, normal/rollover/down captions, etc. Often stored under
       # the widget's /MK key.
       class AppearanceCharacteristics < Pdfrb::Model::Cos::Dictionary
+        arlington_object "AppearanceCharacteristics"
         def background_color; self[:BG]; end
         def caption; self[:CA]; end
         def rollover_caption; self[:RC]; end

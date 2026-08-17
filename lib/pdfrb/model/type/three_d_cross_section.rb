@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # 3D Cross Section (s13.6.4). Plane cutaway view of a 3D model.
       class ThreeDCrossSection < Pdfrb::Model::Cos::Dictionary
+        arlington_object "3DCrossSection"
         def type; self[:Type]; end
         def center; self[:C]; end
         def orientation; self[:O]; end

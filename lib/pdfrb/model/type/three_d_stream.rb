@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # 3D Stream (s13.6.3). Carries a U3D or PRC binary 3D model.
       class ThreeDStream < Pdfrb::Model::Cos::Stream
+        arlington_object "3DStream"
         def type; self[:Type]; end
         def subtype; self[:Subtype]&.to_sym; end
         def views; self[:VA]; end

@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # 3D Background (s13.6.4). Background fill for a 3D view.
       class ThreeDBackground < Pdfrb::Model::Cos::Dictionary
+        arlington_object "3DBackground"
         def type; self[:Type]; end
         def subtype; self[:Subtype]&.to_sym; end
         def color_space; self[:CS]; end

@@ -6,6 +6,7 @@ module Pdfrb
       # 3D Animation Style (s13.6.3, Table 312-313). Animation control
       # for a 3D stream.
       class ThreeDAnimationStyle < Pdfrb::Model::Cos::Dictionary
+        arlington_object "3DAnimationStyle"
         def type; self[:Type]; end
         def subtype; self[:Subtype]&.to_sym; end
         def play_count; self[:PC] || 0; end

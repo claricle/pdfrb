@@ -394,6 +394,13 @@ module Pdfrb
 
       # Sound action (s12.6.4.11, deprecated 2.0).
       autoload :ActionSound, "pdfrb/model/type/action_sound"
+
+      # Document Security Store (ETSI EN 319 142-1 PAdES).
+      autoload :Dss, "pdfrb/model/type/dss"
+
+      # Document Part hierarchy (ISO 16612-2 PDF/VT).
+      autoload :DPartRoot, "pdfrb/model/type/d_part"
+      autoload :DPart, "pdfrb/model/type/d_part"
     end
   end
 end

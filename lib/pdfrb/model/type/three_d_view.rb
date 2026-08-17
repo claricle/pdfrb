@@ -6,6 +6,7 @@ module Pdfrb
       # 3D View (s13.6.4). A single camera/lighting/material configuration
       # for a 3D stream.
       class ThreeDView < Pdfrb::Model::Cos::Dictionary
+        arlington_object "3DView"
         def type; self[:Type]; end
         def external_name; self[:XN]; end
         def internal_name; self[:IN]; end

@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # 3D Lighting Scheme (s13.6.4, Table 320-321). Lighting preset.
       class ThreeDLightingScheme < Pdfrb::Model::Cos::Dictionary
+        arlington_object "3DLightingScheme"
         def type; self[:Type]; end
         def subtype; self[:Subtype]&.to_sym; end
 
