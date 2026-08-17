@@ -6,6 +6,7 @@ module Pdfrb
       # 3D Reference (s13.6.5). Indirect reference to a 3D stream
       # elsewhere in the document.
       class ThreeDReference < Pdfrb::Model::Cos::Dictionary
+        arlington_object "3DReference"
         def type; self[:Type]; end
         def target_stream; self[:Target]; end
 

@@ -6,6 +6,7 @@ module Pdfrb
       # 3D Activation (s13.6.2). Controls when a 3D stream becomes
       # active and how it's deactivated.
       class ThreeDActivation < Pdfrb::Model::Cos::Dictionary
+        arlington_object "3DActivation"
         def activation_mode; self[:A]&.to_sym; end
         def activation_instance; self[:AIS]&.to_sym; end
         def deactivation_mode; self[:D]&.to_sym; end

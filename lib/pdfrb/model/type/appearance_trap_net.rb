@@ -6,6 +6,7 @@ module Pdfrb
       # AppearanceTrapNet sub-dictionary (s7.7.3.3, Table 327). Per-
       # appearance-stream trap-net (ink-flattening) parameters.
       class AppearanceTrapNetSubDict < Pdfrb::Model::Cos::Dictionary
+        arlington_object "AppearanceTrapNet"
         def pos_h; self[:PosH]; end
         def pos_l; self[:PosL]; end
         def span_h_min; self[:SpanH]; end
