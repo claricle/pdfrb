@@ -4,6 +4,7 @@ module Pdfrb
   module Model
     module Type
       class WidgetAnnotation < Annotation
+        arlington_object "AnnotWidget"
         def field; self[:Parent]; end
         def appearance_stream; self[:AP]; end
         def highlight_mode; self[:H]; end
