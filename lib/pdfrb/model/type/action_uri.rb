@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # URI action (s12.6.4.7). Opens a URL in the browser.
       class ActionURI < Action
+        arlington_object "ActionURI"
         register_subtype :URI
 
         def uri; self[:URI]; end

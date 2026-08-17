@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Hide action (s12.6.4.10). Show/hide annotations.
       class ActionHide < Action
+        arlington_object "ActionHide"
         register_subtype :Hide
 
         def targets; self[:T]; end

@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Submit-form action (s12.7.6.2). Submits form values to a URL.
       class ActionSubmitForm < Action
+        arlington_object "ActionSubmitForm"
         register_subtype :SubmitForm
 
         def url; self[:F]; end

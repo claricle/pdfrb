@@ -6,6 +6,7 @@ module Pdfrb
       # File-attachment annotation (s12.5.6.15). Embedded file displayed
       # as a paper-clip icon.
       class FileAttachmentAnnotation < MarkupAnnotation
+        arlington_object "AnnotFileAttachment"
         def embedded_file; self[:FS]; end
         def name; self[:Name]; end
 

@@ -6,6 +6,7 @@ module Pdfrb
       # Screen annotation (s12.5.6.18). Holds media played via Action
       # triggers. /Subtype /Screen.
       class ScreenAnnotation < Annotation
+        arlington_object "AnnotScreen"
         def attachment_point; self[:AP]; end
         def media_type; self[:T]; end
         def actions; self[:AA]; end

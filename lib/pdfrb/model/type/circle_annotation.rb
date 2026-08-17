@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Circle / ellipse annotation (s12.5.6.8).
       class CircleAnnotation < MarkupAnnotation
+        arlington_object "AnnotCircle"
         def border_effect; self[:BE]; end
         def interior_color; self[:IC]; end
         def border_style; self[:BS]; end

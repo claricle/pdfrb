@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Launch action (s12.6.4.5). Launch an external application.
       class ActionLaunch < Action
+        arlington_object "ActionLaunch"
         register_subtype :Launch
 
         def file_spec; self[:F]; end

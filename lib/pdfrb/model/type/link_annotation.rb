@@ -4,6 +4,7 @@ module Pdfrb
   module Model
     module Type
       class LinkAnnotation < Annotation
+        arlington_object "AnnotLink"
         def action; self[:A]; end
         def destination; self[:Dest]; end
         def highlight_mode; self[:H]; end

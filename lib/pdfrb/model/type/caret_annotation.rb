@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Caret annotation (s12.5.6.11). Text-insertion indicator.
       class CaretAnnotation < MarkupAnnotation
+        arlington_object "AnnotCaret"
         def rd; self[:RD]; end
         def sy; self[:Sy]; end
 

@@ -6,6 +6,7 @@ module Pdfrb
       # Set OCG State action (s12.6.4.13). Toggle visibility of
       # optional-content groups.
       class ActionSetOCGState < Action
+        arlington_object "ActionSetOCGState"
         register_subtype :SetOCGState
 
         def state; self[:State]; end

@@ -6,6 +6,7 @@ module Pdfrb
       # Printer-mark annotation (s12.5.6.17). Marks page for trimming,
       # registration, etc.
       class PrinterMarkAnnotation < Annotation
+        arlington_object "AnnotPrinterMark"
         def mark_subtype; self[:MN]; end
       end
     end

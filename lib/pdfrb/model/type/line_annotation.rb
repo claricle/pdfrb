@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Line annotation (s12.5.6.7). Line between two coordinate pairs.
       class LineAnnotation < MarkupAnnotation
+        arlington_object "AnnotLine"
         def line; self[:L]; end
         def le; self[:LE]; end
         def line_endings; le; end
@@ -20,15 +21,17 @@ module Pdfrb
         def it; self[:IT]; end
 
         def start_point
-          return nil unless line.is_a?(Array) && line.size >= 2
+          l = line_array
+          return nil unless l && l.size >= 2
 
-          line[0..1]
+          l[0..1]
         end
 
         def end_point
-          return nil unless line.is_a?(Array) && line.size >= 4
+          l = line_array
+          return nil unless l && l.size >= 4
 
-          line[2..3]
+          l[2..3]
         end
 
         def has_caption?
@@ -37,6 +40,16 @@ module Pdfrb
 
         def has_measure?
           !!measure
+        end
+
+        private
+
+        def line_array
+          l = line
+          return l.to_a if l.is_a?(Pdfrb::Model::PdfArray)
+          return l if l.is_a?(::Array)
+
+          nil
         end
       end
     end

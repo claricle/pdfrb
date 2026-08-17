@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Polygon annotation (s12.5.6.9). Closed polygon shape.
       class PolygonAnnotation < MarkupAnnotation
+        arlington_object "AnnotPolygon"
         def vertices; self[:Vertices]; end
         def line_endings; self[:LE]; end
         def interior_color; self[:IC]; end

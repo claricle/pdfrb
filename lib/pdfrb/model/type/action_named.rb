@@ -6,6 +6,7 @@ module Pdfrb
       # Named action (s12.6.4.19). Pre-defined action by name (NextPage,
       # PrevPage, FirstPage, LastPage, Print, etc.).
       class ActionNamed < Action
+        arlington_object "ActionNamed"
         register_subtype :Named
 
         def action_name; self[:N]; end

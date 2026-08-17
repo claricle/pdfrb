@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Set-state action (deprecated in PDF 1.2, replaced by SetOCGState).
       class ActionSetState < Action
+        arlington_object "ActionSetState"
         register_subtype :SetState
 
         def state; self[:State]; end

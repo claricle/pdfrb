@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Polyline annotation (s12.5.6.9). Open polyline (not closed).
       class PolylineAnnotation < MarkupAnnotation
+        arlington_object "AnnotPolyLine"
         def vertices; self[:Vertices]; end
         def line_endings; self[:LE]; end
         def interior_color; self[:IC]; end

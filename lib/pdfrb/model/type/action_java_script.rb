@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # JavaScript action (s12.6.4.16). Execute JavaScript code.
       class ActionJavaScript < Action
+        arlington_object "ActionECMAScript"
         register_subtype :JavaScript
 
         def script; self[:JS]; end

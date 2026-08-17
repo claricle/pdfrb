@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Sticky note annotation (s12.5.6.10).
       class TextAnnotation < MarkupAnnotation
+        arlington_object "AnnotText"
         def state; self[:State]; end
         def state_model; self[:StateModel]; end
 

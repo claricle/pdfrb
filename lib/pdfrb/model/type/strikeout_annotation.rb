@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # StrikeOut annotation. /Subtype /StrikeOut.
       class StrikeOutAnnotation < TextMarkupAnnotation
+        arlington_object "AnnotStrikeOut"
       end
     end
   end
