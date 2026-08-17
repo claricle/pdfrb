@@ -7,6 +7,7 @@ module Pdfrb
       # /R = sampling rate, /C = channels, /B = bits/sample, /E =
       # encoding (Raw, Signed, MuLaw, ALaw).
       class Sound < Pdfrb::Model::Cos::Stream
+        arlington_object "SoundObject"
         def type; self[:Type]; end
         def sampling_rate; self[:R]; end
         def channels; self[:C] || 1; end

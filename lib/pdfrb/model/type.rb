@@ -401,6 +401,13 @@ module Pdfrb
       # Document Part hierarchy (ISO 16612-2 PDF/VT).
       autoload :DPartRoot, "pdfrb/model/type/d_part"
       autoload :DPart, "pdfrb/model/type/d_part"
+
+      # Additional actions on page objects (s12.6.3.16).
+      autoload :AddActionPageObject, "pdfrb/model/type/add_action_page_object"
+
+      # Border style (s12.5.4). BorderEffect lives in its own file.
+      autoload :BorderStyle, "pdfrb/model/type/border_style"
+      autoload :BorderEffect, "pdfrb/model/type/border_effect"
     end
   end
 end
