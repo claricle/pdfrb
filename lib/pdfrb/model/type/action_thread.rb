@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Thread action (s12.6.4.6). Navigate within an article thread.
       class ActionThread < Action
+        arlington_object "ActionThread"
         register_subtype :Thread
 
         def thread; self[:F]; end
