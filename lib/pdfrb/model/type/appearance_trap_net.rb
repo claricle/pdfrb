@@ -6,7 +6,7 @@ module Pdfrb
       # AppearanceTrapNet sub-dictionary (s7.7.3.3, Table 327). Per-
       # appearance-stream trap-net (ink-flattening) parameters.
       class AppearanceTrapNetSubDict < Pdfrb::Model::Cos::Dictionary
-        arlington_object "AppearanceTrapNet"
+        arlington_object "AppearanceTrapNetSubDict"
         def pos_h; self[:PosH]; end
         def pos_l; self[:PosL]; end
         def span_h_min; self[:SpanH]; end
@@ -19,8 +19,13 @@ module Pdfrb
       end
 
       # AppearanceTrapNet (s7.7.3.3). The trap-net dictionary that wraps
-      # appearance sub-dicts.
+      # appearance sub-dicts (/N, /R, /D).
       class AppearanceTrapNet < Pdfrb::Model::Cos::Dictionary
+        arlington_object "AppearanceTrapNet"
+        def normal; self[:N]; end
+        def rollover; self[:R]; end
+        def down; self[:D]; end
+
         def type; self[:Type]; end
         def version; self[:Version]; end
         def font_state_appearance; self[:FontStateAppearance]; end
@@ -41,6 +46,7 @@ module Pdfrb
       # AppearanceSubDict (s12.5.4). Sub-dictionary inside Appearance
       # entries /N, /R, /D that maps each appearance state to a stream.
       class AppearanceSubDict < Pdfrb::Model::Cos::Dictionary
+        arlington_object "AppearanceSubDict"
         def each_state(&block)
           return enum_for(:each_state) unless block
 
@@ -62,22 +68,6 @@ module Pdfrb
 
         def has_app_build?
           !!app_build
-        end
-      end
-
-      # Annotation Projection dict (s12.5.6.21). Projection annotation
-      # for spatial content.
-      class AnnotationProjectionDict < Pdfrb::Model::Cos::Dictionary
-        def ex_data; self[:ExData]; end
-      end
-
-      # ExData Projection dict (s12.5.6.21, Table 198). Holds the
-      # geospatial projection details used by Projection annotations.
-      class ExDataProjection < Pdfrb::Model::Cos::Dictionary
-        def type; self[:Type]; end
-
-        def project?
-          type == :ProjectedPDL
         end
       end
     end

@@ -201,6 +201,10 @@ module Pdfrb
       autoload :PrinterMarkSubDict, "pdfrb/model/type/transition"
       autoload :ScreenAnnotation, "pdfrb/model/type/screen_annotation"
       autoload :SoundAnnotation, "pdfrb/model/type/sound_annotation"
+      autoload :ThreeDAnnotation, "pdfrb/model/type/three_d_annotation"
+      autoload :MovieAnnotation, "pdfrb/model/type/movie_annotation"
+      autoload :ProjectionAnnotation, "pdfrb/model/type/projection_annotation"
+      autoload :TrapNetworkAnnotation, "pdfrb/model/type/trap_network_annotation"
 
       # Rich Media annotation family (s13.6).
       autoload :RichMediaAnnotation, "pdfrb/model/type/rich_media_annotation"
@@ -270,6 +274,7 @@ module Pdfrb
       autoload :ActionGoTo3DView, "pdfrb/model/type/action_go_to_3d_view"
       autoload :ActionGoToDp, "pdfrb/model/type/action_go_to_dp"
       autoload :ActionRichMediaExecute, "pdfrb/model/type/action_rich_media_execute"
+      autoload :ActionGoToE, "pdfrb/model/type/action_go_to_e"
       autoload :ActionNOP, "pdfrb/model/type/action_nop"
 
       # Signature family (s12.8).
@@ -286,8 +291,8 @@ module Pdfrb
       autoload :AppearanceSubDict, "pdfrb/model/type/appearance_trap_net"
       autoload :MediaClip, "pdfrb/model/type/media_clip"
       autoload :Rendition, "pdfrb/model/type/rendition"
-      autoload :ExDataProjection, "pdfrb/model/type/appearance_trap_net"
-      autoload :AnnotationProjectionDict, "pdfrb/model/type/appearance_trap_net"
+      autoload :ExDataProjection, "pdfrb/model/type/projection_annotation"
+      autoload :AnnotationProjectionDict, "pdfrb/model/type/projection_annotation"
 
       # Media offset / player / screen types.
       autoload :MediaOffsetTime, "pdfrb/model/type/media_offset"
@@ -404,6 +409,12 @@ module Pdfrb
 
       # Additional actions on page objects (s12.6.3.16).
       autoload :AddActionPageObject, "pdfrb/model/type/add_action_page_object"
+
+      # Additional actions on form fields / screen + widget annotations
+      # (s12.6.3.17).
+      autoload :AddActionFormField, "pdfrb/model/type/add_action_form_field"
+      autoload :AddActionScreenAnnotation, "pdfrb/model/type/add_action_screen_annotation"
+      autoload :AddActionWidgetAnnotation, "pdfrb/model/type/add_action_widget_annotation"
 
       # Border style (s12.5.4). BorderEffect lives in its own file.
       autoload :BorderStyle, "pdfrb/model/type/border_style"
