@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Collection field (s7.11.5). One column definition.
       class CollectionField < Pdfrb::Model::Cos::Dictionary
+        arlington_object "CollectionField"
         def name; self[:N]; end
         def field_type; self[:Subtype]; end
         def order; self[:O]; end

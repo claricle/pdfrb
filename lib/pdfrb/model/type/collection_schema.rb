@@ -6,6 +6,7 @@ module Pdfrb
       # Collection schema (s7.11.5). Defines the columns/fields shown
       # in the portfolio view.
       class CollectionSchema < Pdfrb::Model::Cos::Dictionary
+        arlington_object "CollectionSchema"
         def fields
           value.keys
         end

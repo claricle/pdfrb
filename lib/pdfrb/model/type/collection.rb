@@ -7,6 +7,7 @@ module Pdfrb
       # collection of embedded files with a presentation schema. Lives
       # on Catalog /Collection.
       class Collection < Pdfrb::Model::Cos::Dictionary
+        arlington_object "Collection"
         def schema; self[:Schema]; end
         def default_view; self[:View]; end
         def sort; self[:Sort]; end
