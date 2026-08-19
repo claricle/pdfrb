@@ -337,6 +337,10 @@ module Pdfrb
       autoload :CollectionSort, "pdfrb/model/type/collection_sort"
       autoload :CollectionField, "pdfrb/model/type/collection_field"
       autoload :CollectionItem, "pdfrb/model/type/collection_item"
+      autoload :CollectionColors, "pdfrb/model/type/collection_colors"
+      autoload :CollectionFolder, "pdfrb/model/type/collection_folder"
+      autoload :CollectionSplit, "pdfrb/model/type/collection_split"
+      autoload :CollectionSubitem, "pdfrb/model/type/collection_subitem"
 
       # Signature transform parameters (s12.8.2).
       autoload :MDPDict, "pdfrb/model/type/mdp_dict"
