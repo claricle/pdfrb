@@ -6,6 +6,7 @@ module Pdfrb
       # Crypt Filter (s7.6.5). Per-stream cipher filter spec — names
       # the cipher and authentication event.
       class CryptFilter < Pdfrb::Model::Cos::Dictionary
+        arlington_object "CryptFilter"
         def cipher_method; self[:CFM]&.to_sym; end
         def auth_event; self[:AuthEvent]&.to_sym; end
         def length; self[:Length]; end
@@ -27,6 +28,7 @@ module Pdfrb
       # Crypt Filter Map (s7.6.5, Table 26). Maps per-page crypt filter
       # names to the default CryptFilter used.
       class CryptFilterMap < Pdfrb::Model::Cos::Dictionary
+        arlington_object "CryptFilterMap"
         def filter_for(stream_name)
           value[stream_name.to_sym] || value[stream_name.to_s]
         end
@@ -41,6 +43,7 @@ module Pdfrb
       # Crypt Filter Public Key (s7.6.5, Table 26). Public-key analog
       # of CryptFilter.
       class CryptFilterPublicKey < Pdfrb::Model::Cos::Dictionary
+        arlington_object "CryptFilterPublicKey"
         def cipher_method; self[:CFM]&.to_sym; end
         def auth_event; self[:AuthEvent]&.to_sym; end
         def recipients; self[:Recipients]; end
@@ -49,6 +52,7 @@ module Pdfrb
       # Crypt Filter Public Key Map (s7.6.5, Table 26). Maps per-page
       # public-key crypt filters.
       class CryptFilterPublicKeyMap < Pdfrb::Model::Cos::Dictionary
+        arlington_object "CryptFilterPublicKeyMap"
         def filter_for(stream_name)
           value[stream_name.to_sym] || value[stream_name.to_s]
         end

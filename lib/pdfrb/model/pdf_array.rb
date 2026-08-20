@@ -8,6 +8,26 @@ module Pdfrb
     # when nested inside a typed Dictionary (field-driven).
     class PdfArray < Pdfrb::Model::Object
       include Enumerable
+      extend Cos::ArlingtonBacked
+
+      class << self
+        # ArlingtonBacked hook: array TSVs describe positional element
+        # types (keys "0", "1", ...), so keep the definition whole
+        # rather than merging per-field metadata.
+        def apply_arlington_definition(definition)
+          @arlington_definition = definition
+        end
+        private :apply_arlington_definition
+
+        def arlington_definition
+          @arlington_definition
+        end
+
+        # FieldDefinition for the element at +index+, per the TSV.
+        def element_field(index)
+          arlington_definition&.field_for(index.to_s)
+        end
+      end
 
       def initialize(arr = [], oid: 0, gen: 0, document: nil)
         super(Array(arr), oid: oid, gen: gen, document: document)
