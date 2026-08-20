@@ -13,6 +13,8 @@ module Pdfrb
       #     via Pdfrb::Arlington::Loader. Calls `define_field` under
       #     the hood with types translated to Ruby classes.
       class Dictionary < Pdfrb::Model::Object
+        extend ArlingtonBacked
+
         # ---- Per-class field registry ----
 
         # Shared type registry (s7.7 /Type symbol -> Dictionary
@@ -69,49 +71,19 @@ module Pdfrb
             own_fields.each { |n, f| yield n, f }
           end
 
-          # Pull field metadata from the named Arlington TSV. Idempotent.
-          # Silently no-ops when the Arlington layer or the TSV is
-          # unavailable, so hand-coded subclasses still work.
-          #
-          # Also registers +self+ in Pdfrb::Model::Type.arlington_registry
-          # under +name+ so field-link resolution can find this class
-          # when other Types reference it.
-          def arlington_object(name, version: "latest")
-            return if arlington_loaded_for?(name)
-            return unless arlington_available?
-
-            definition = Pdfrb::Arlington::Loader.object_definition(name, version: version)
-            return unless definition
-
-            arlington_mark_loaded(name)
-            Pdfrb::Model::Type.register_arlington(name, self) if Pdfrb::Model.const_defined?(:Type)
+          # Merge the TSV's field definitions into the class's field
+          # set (ArlingtonBacked#arlington_object hook).
+          def apply_arlington_definition(definition)
             definition.each_field do |field_def|
               define_field_from_arlington(field_def)
             end
           end
+          private :apply_arlington_definition
 
           def own_fields
             @own_fields ||= {}
           end
           private :own_fields
-
-          def arlington_loaded_for?(arlington_name)
-            @arlington_loaded_name == arlington_name
-          end
-          private :arlington_loaded_for?
-
-          def arlington_mark_loaded(name)
-            @arlington_loaded_name = name
-          end
-          private :arlington_mark_loaded
-
-          def arlington_available?
-            Pdfrb.const_defined?(:Arlington) &&
-              Pdfrb::Arlington.const_defined?(:Loader)
-          rescue StandardError
-            false
-          end
-          private :arlington_available?
 
           # Merge Arlington field metadata with any hand-coded
           # define_field declaration. Hand-coded fields win: if the

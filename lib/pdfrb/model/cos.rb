@@ -15,6 +15,7 @@ module Pdfrb
       autoload :StringEncoding, "pdfrb/model/cos/string_encoding"
       autoload :Dictionary, "pdfrb/model/cos/dictionary"
       autoload :Stream, "pdfrb/model/cos/stream"
+      autoload :ArlingtonBacked, "pdfrb/model/cos/arlington_backed"
     end
   end
 end

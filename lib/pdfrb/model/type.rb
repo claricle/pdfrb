@@ -311,6 +311,19 @@ module Pdfrb
       autoload :OutputIntentsContainer, "pdfrb/model/type/misc_helpers"
       autoload :CMapStream, "pdfrb/model/type/misc_helpers"
 
+      # Explicit destination arrays + maps (s12.3.2).
+      autoload :Destination, "pdfrb/model/type/destination"
+      autoload :DestinationXYZ, "pdfrb/model/type/destination"
+      autoload :DestinationFit, "pdfrb/model/type/destination"
+      autoload :DestinationFitH, "pdfrb/model/type/destination"
+      autoload :DestinationFitR, "pdfrb/model/type/destination"
+      autoload :DestinationXYZStruct, "pdfrb/model/type/destination"
+      autoload :DestinationFitStruct, "pdfrb/model/type/destination"
+      autoload :DestinationFitHStruct, "pdfrb/model/type/destination"
+      autoload :DestinationFitRStruct, "pdfrb/model/type/destination"
+      autoload :DestinationDict, "pdfrb/model/type/destination"
+      autoload :DestsMap, "pdfrb/model/type/destination"
+
       # Crypt filter (s7.6.5).
       autoload :CryptFilter, "pdfrb/model/type/crypt_filter"
       autoload :CryptFilterMap, "pdfrb/model/type/crypt_filter"
