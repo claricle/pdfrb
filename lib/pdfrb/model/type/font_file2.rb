@@ -6,6 +6,7 @@ module Pdfrb
       # TrueType font file stream (s7.8.3). Holds the TTF/OTF program.
       # Referenced by FontDescriptor /FontFile2.
       class FontFile2 < Pdfrb::Model::Cos::Stream
+        arlington_object "FontFile2"
         def length1; self[:Length1]; end
         def subtype; self[:Subtype]; end
 

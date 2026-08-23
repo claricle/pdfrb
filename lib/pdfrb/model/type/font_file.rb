@@ -6,6 +6,7 @@ module Pdfrb
       # Type 1 font file stream (s7.8.2). Holds the Type1 / Type1C
       # font program. Referenced by FontDescriptor /FontFile.
       class FontFile < Pdfrb::Model::Cos::Stream
+        arlington_object "FontFile"
         def length1; self[:Length1]; end
         def length2; self[:Length2]; end
         def length3; self[:Length3]; end

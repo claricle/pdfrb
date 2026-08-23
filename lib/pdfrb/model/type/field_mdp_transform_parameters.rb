@@ -6,6 +6,7 @@ module Pdfrb
       # Field MDP Transform Parameters (s12.7.6.5). Specifies which
       # fields are locked by a FieldMDP signature reference.
       class FieldMDPTransformParameters < Pdfrb::Model::Cos::Dictionary
+        arlington_object "FieldMDPTransformParameters"
         def type; self[:Type]; end
         def action; self[:Action]&.to_sym; end
         def fields; self[:Fields]; end

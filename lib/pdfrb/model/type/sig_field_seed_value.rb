@@ -6,6 +6,7 @@ module Pdfrb
       # Signature field seed value (s12.7.6.6). Constraints the signer
       # must obey when signing (cert issuers, hash algorithms, etc.).
       class SigFieldSeedValue < Pdfrb::Model::Cos::Dictionary
+        arlington_object "SigFieldSeedValue"
         def filter; self[:Filter]; end
         def sub_filter; self[:SubFilter]; end
         def digest_method; self[:DigestMethod]; end
