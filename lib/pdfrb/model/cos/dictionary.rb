@@ -172,7 +172,10 @@ module Pdfrb
               return raw[1..-2].split.then { |tokens| tokens.map { |t| arlington_scalar(t) } }
             end
 
-            arlington_scalar(raw)
+            scalar = arlington_scalar(raw)
+            return scalar.to_sym if scalar.is_a?(::String) && field_def.types_raw.include?("name")
+
+            scalar
           end
           private :arlington_default
 

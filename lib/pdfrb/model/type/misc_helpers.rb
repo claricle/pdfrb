@@ -71,6 +71,116 @@ module Pdfrb
           decoded_stream&.force_encoding(Encoding::BINARY)
         end
       end
+
+      # Gamma array [r g b] inside the CalRGB dict (s8.6.3.3).
+      class GammaArray < Pdfrb::Model::PdfArray
+        arlington_object "GammaArray"
+
+        def r; self[0]; end
+        def g; self[1]; end
+        def b; self[2]; end
+      end
+
+      # White point [X Y Z] inside Cal dicts (s8.6.3.1).
+      class WhitepointArray < Pdfrb::Model::PdfArray
+        arlington_object "WhitepointArray"
+
+        def x; self[0]; end
+        def y; self[1]; end
+        def z; self[2]; end
+      end
+
+      # Trailer /ID array [id1 id2] (s7.5.5): two 16-byte strings.
+      class TrailerIDArray < Pdfrb::Model::PdfArray
+        arlington_object "TrailerIDArray"
+
+        def id1; self[0]; end
+        def id2; self[1]; end
+      end
+
+      # Visibility expression array (s8.11.4.6):
+      # [operator operand*] with operators /And /Or /Not.
+      class VisibilityExpressionArray < Pdfrb::Model::PdfArray
+        arlington_object "VisibilityExpressionArray"
+
+        def operator; self[0]; end
+
+        def operands
+          rest = self[1..] || []
+          rest.is_a?(Pdfrb::Model::PdfArray) ? rest.to_a : rest
+        end
+
+        def and?; operator == :And; end
+        def or?; operator == :Or; end
+        def not?; operator == :Not; end
+      end
+
+      # FileSpec /RelatedFiles array (s7.11.3.2, deprecation era):
+      # alternating file-name strings and file streams.
+      class RelatedFilesArray < Pdfrb::Model::PdfArray
+        arlington_object "RelatedFilesArray"
+
+        def each_pair
+          return enum_for(:each_pair) unless block_given?
+
+          (0...size).step(2) do |i|
+            yield self[i], self[i + 1]
+          end
+        end
+      end
+
+      # RichMediaExecute /CMD /A arguments array (s13.6.9.6).
+      class RichMediaCommandArray < Pdfrb::Model::PdfArray
+        arlington_object "RichMediaCommandArray"
+      end
+
+      # UR transform permission name arrays (s7.6.5.9): lists of
+      # permitted operation names. One subclass per /Transform
+      # parameter entry.
+      class URTransformParamArray < Pdfrb::Model::PdfArray
+        arlington_object "URTransformParamDocumentArray"
+      end
+
+      class URTransformParamAnnotsArray < URTransformParamArray
+        arlington_object "URTransformParamAnnotsArray"
+      end
+
+      class URTransformParamEFArray < URTransformParamArray
+        arlington_object "URTransformParamEFArray"
+      end
+
+      class URTransformParamFormArray < URTransformParamArray
+        arlington_object "URTransformParamFormArray"
+      end
+
+      class URTransformParamSignatureArray < URTransformParamArray
+        arlington_object "URTransformParamSignatureArray"
+      end
+
+      # Generic catch-all array (Arlington _UniversalArray): any
+      # mix of PDF values.
+      class UniversalArray < Pdfrb::Model::PdfArray
+        arlington_object "_UniversalArray"
+      end
+
+      # Generic catch-all dictionary (Arlington _UniversalDictionary).
+      class UniversalDictionary < Pdfrb::Model::Cos::Dictionary
+        arlington_object "_UniversalDictionary"
+      end
+
+      # /OOAdditionalStms array [name stream]* (PDF 1.5 era
+      # object-order additional streams).
+      class OOAdditionalStmsArray < Pdfrb::Model::PdfArray
+        arlington_object "OOAdditionalStmsArray"
+
+        def each_pair
+          return enum_for(:each_pair) unless block_given?
+
+          (0...size).step(2) do |i|
+            yield self[i], self[i + 1]
+          end
+        end
+      end
     end
   end
 end

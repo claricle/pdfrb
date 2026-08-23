@@ -109,7 +109,7 @@ RSpec.describe "Parity batch 21 type specs" do
       )
       expect(annot.subject).to eq("Duplicate")
       expect(annot).to be_has_projection_data
-      expect(annot.reply_type).to eq("R") # Arlington default for /RT
+      expect(annot.reply_type).to eq(:R) # Arlington default for /RT
     end
   end
 
