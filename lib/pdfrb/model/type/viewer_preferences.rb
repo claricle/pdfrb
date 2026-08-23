@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # ViewerPreferences (s12.2, ISO 32000-2 7.7.2). Catalog /ViewerPreferences.
       class ViewerPreferences < Cos::Dictionary
+        arlington_object "ViewerPreferences"
         register_type :ViewerPreferences
 
         def type; self[:Type]; end

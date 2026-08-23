@@ -6,6 +6,7 @@ module Pdfrb
       # IconFit (s12.5.6.19). Controls positioning/scaling of a button
       # field's icon within its rectangle.
       class IconFit < Cos::Dictionary
+        arlington_object "IconFit"
         register_type :IconFit
 
         def type; self[:Type]; end

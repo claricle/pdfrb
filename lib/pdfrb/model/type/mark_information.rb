@@ -6,6 +6,7 @@ module Pdfrb
       # MarkInformation (s14.7.1). Catalog /MarkInfo — flags whether
       # the document is tagged and structural metadata is reliable.
       class MarkInformation < Cos::Dictionary
+        arlington_object "MarkInfo"
         register_type :MarkInfo
 
         def type; self[:Type]; end

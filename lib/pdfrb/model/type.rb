@@ -97,6 +97,7 @@ module Pdfrb
       autoload :VariableTextField, "pdfrb/model/type/variable_text_field"
       autoload :DocumentSecurityStore, "pdfrb/model/type/document_security_store"
       autoload :Measure, "pdfrb/model/type/measure"
+      autoload :GeospatialMeasure, "pdfrb/model/type/measure"
       autoload :OptionalContentConfiguration, "pdfrb/model/type/optional_content_config"
       autoload :MarkedContentReference, "pdfrb/model/type/marked_content_reference"
       autoload :AppearanceGenerator, "pdfrb/model/type/appearance_generator"
