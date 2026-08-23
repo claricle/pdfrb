@@ -6,6 +6,7 @@ module Pdfrb
       # EmbeddedFileParameterDictionary (s7.11.3.1). Per /EF entry
       # /Params dict — checksum, size, dates, mac creator.
       class EmbeddedFileParameter < Pdfrb::Model::Cos::Dictionary
+        arlington_object "EmbeddedFileParameter"
         def size; self[:Size]; end
         def creation_date; self[:CreationDate]; end
         def modification_date; self[:ModDate]; end

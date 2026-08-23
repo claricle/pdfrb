@@ -6,6 +6,7 @@ module Pdfrb
       # Namespace dictionary (s14.7.6.1, PDF 2.0). Namespaces for
       # structure element types in tagged PDF documents.
       class Namespace < Cos::Dictionary
+        arlington_object "Namespace"
         register_type :Namespace
 
         def type; self[:Type]; end

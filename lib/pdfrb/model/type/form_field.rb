@@ -4,6 +4,7 @@ module Pdfrb
   module Model
     module Type
       class Field < Cos::Dictionary
+        arlington_object "Field"
         register_type :Field
 
         def field_type; self[:FT]; end

@@ -4,6 +4,7 @@ module Pdfrb
   module Model
     module Type
       class TextField < Field
+        arlington_object "FieldTx"
         def max_len; self[:MaxLen]; end
         def value; self[:V]; end
         def rich_text_value; self[:RV]; end

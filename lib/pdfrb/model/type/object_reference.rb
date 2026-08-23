@@ -6,6 +6,7 @@ module Pdfrb
       # Object reference dict (s14.7.6). Used in structure trees to
       # refer to a content item without including it directly.
       class ObjectReference < Cos::Dictionary
+        arlington_object "ObjectReference"
         register_type :ObjRef
 
         def type; self[:Type]; end

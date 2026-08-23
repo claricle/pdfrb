@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Filespec RF dict (s7.11.2.3). Related files name tree.
       class FileSpecRF < Pdfrb::Model::Cos::Dictionary
+        arlington_object "FileSpecRF"
         def related_files; self[:Names]; end
 
         def each_related(&block)

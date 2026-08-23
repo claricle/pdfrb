@@ -7,6 +7,7 @@ module Pdfrb
       # pages in FullScreen mode. Lives on Page /Trans or on an
       # ActionTrans.
       class Transition < Pdfrb::Model::Cos::Dictionary
+        arlington_object "Transition"
         def type; self[:Type]; end
         def style; self[:S]&.to_sym; end
         def duration; self[:D]; end
@@ -38,6 +39,7 @@ module Pdfrb
       # Printer Mark sub-dictionary (s12.5.6.18). Per-printer-mark
       # sub-parameters.
       class PrinterMarkSubDict < Pdfrb::Model::Cos::Dictionary
+        arlington_object "AppearancePrinterMarkSubDict"
         def printer; self[:PRINTER]; end
         def credentials; self[:CREDS]; end
       end
@@ -45,6 +47,7 @@ module Pdfrb
       # ExData 3D Markup (s13.6.1). 3D scene metadata for Projection
       # annotations / 3D models.
       class ExData3DMarkup < Pdfrb::Model::Cos::Dictionary
+        arlington_object "ExData3DMarkup"
         def type; self[:Type]; end
         def v3d; self[:V3D]; end
 
@@ -56,6 +59,7 @@ module Pdfrb
       # ExData Markup Geo (s12.5.6.21). Geo-spatial markup attached to
       # a Projection annotation.
       class ExDataMarkupGeo < Pdfrb::Model::Cos::Dictionary
+        arlington_object "ExDataMarkupGeo"
         def type; self[:Type]; end
         def coordinate_path; self[:CoordinatePath]; end
 
