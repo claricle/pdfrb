@@ -6,6 +6,7 @@ module Pdfrb
       # PageLabel (s12.4.2). Catalog /PageLabels /Nums entry. Defines
       # how page numbers are displayed in the viewer.
       class PageLabel < Cos::Dictionary
+        arlington_object "PageLabel"
         register_type :PageLabel
 
         def type; self[:Type]; end

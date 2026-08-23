@@ -6,6 +6,7 @@ module Pdfrb
       # Lab color space dictionary (s8.6.3.4). CIE L*a*b*:
       # [/Lab <dict>].
       class Lab < Pdfrb::Model::Cos::Dictionary
+        arlington_object "LabDict"
         def white_point; self[:WhitePoint]; end
         def black_point; self[:BlackPoint]; end
         def range; self[:Range]; end

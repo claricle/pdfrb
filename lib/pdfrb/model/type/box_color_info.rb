@@ -7,6 +7,7 @@ module Pdfrb
       # visual guide lines for page boxes (crop, bleed, trim, art) in
       # the viewer. Lives on Page /BoxColorInfo.
       class BoxColorInfo < Pdfrb::Model::Cos::Dictionary
+        arlington_object "BoxColorInfo"
         def crop_box_style; self[:CropBox]; end
         def bleed_box_style; self[:BleedBox]; end
         def trim_box_style; self[:TrimBox]; end

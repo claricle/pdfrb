@@ -6,6 +6,7 @@ module Pdfrb
       # ICCBased Color Space (s8.6.5.5). Wrapper for the
       # [/ICCBased <stream-ref>] array form.
       class ICCBasedColorSpace < Pdfrb::Model::Cos::Stream
+        arlington_object "ICCProfileStream"
         def component_count; self[:N]; end
         def alternate; self[:Alternate]; end
         def range; self[:Range]; end

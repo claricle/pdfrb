@@ -103,7 +103,7 @@ RSpec.describe "Collection / Portfolio types" do
     it "exposes per-box styles" do
       bci = doc.add({ CropBox: { C: [1, 0, 0] } },
                     type: described_class)
-      expect(bci.crop_box_style).to eq(C: [1, 0, 0])
+      expect(bci.crop_box_style[:C]).to eq([1, 0, 0])
       expect(bci.empty?).to be false
     end
   end

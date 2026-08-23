@@ -27,6 +27,7 @@ module Pdfrb
       # Lab Range Array [a_min a_max b_min b_max]. Used inside the
       # Lab color space dict (s8.6.3.4).
       class LabRangeArray < Pdfrb::Model::PdfArray
+        arlington_object "LabRangeArray"
         def a_min; self[0]; end
         def a_max; self[1]; end
         def b_min; self[2]; end
