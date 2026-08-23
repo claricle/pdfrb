@@ -4,6 +4,7 @@ module Pdfrb
   module Model
     module Type
       class SignatureField < Field
+        arlington_object "FieldSig"
         def value; self[:V]; end
         def lock; self[:Lock]; end
         def seed_value; self[:SV]; end

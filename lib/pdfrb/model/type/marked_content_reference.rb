@@ -6,6 +6,7 @@ module Pdfrb
       # Marked-Content Reference (s14.7.6.2). Refers to a marked-content
       # sequence on a page by MCID.
       class MarkedContentReference < Cos::Dictionary
+        arlington_object "MarkedContentReference"
         register_type :MCR
 
         def type; self[:Type]; end

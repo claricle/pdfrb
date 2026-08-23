@@ -7,6 +7,7 @@ module Pdfrb
       # EmbeddedFile stream reference: /F (type 1), /UF (Unicode),
       # /DOS, /Mac, /Unix.
       class FileSpecEF < Pdfrb::Model::Cos::Dictionary
+        arlington_object "FileSpecEF"
         def primary_file; self[:F]; end
         def unicode_file; self[:UF]; end
         def dos_file; self[:DOS]; end
