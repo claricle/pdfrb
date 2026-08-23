@@ -71,6 +71,8 @@ module Pdfrb
       autoload :OptContentLanguage, "pdfrb/model/type/opt_content_ext"
       autoload :OptContentUsageApplication, "pdfrb/model/type/opt_content_ext"
       autoload :OptContentPageElement, "pdfrb/model/type/opt_content_page_element"
+      autoload :OptContentUser, "pdfrb/model/type/opt_content_ext"
+      autoload :OptContentZoom, "pdfrb/model/type/opt_content_ext"
 
       autoload :FileSpecification, "pdfrb/model/type/file_specification"
       autoload :FileSpecEF, "pdfrb/model/type/file_spec_ef"
@@ -150,6 +152,19 @@ module Pdfrb
       autoload :Pattern, "pdfrb/model/type/pattern"
       autoload :PatternTiling, "pdfrb/model/type/pattern_tiling"
       autoload :PatternShading, "pdfrb/model/type/pattern_shading"
+      autoload :PatternMap, "pdfrb/model/type/pattern"
+
+      # Shading family (s8.7.4).
+      autoload :ShadingCommon, "pdfrb/model/type/shading"
+      autoload :Shading, "pdfrb/model/type/shading"
+      autoload :ShadingType1, "pdfrb/model/type/shading"
+      autoload :ShadingType2, "pdfrb/model/type/shading"
+      autoload :ShadingType3, "pdfrb/model/type/shading"
+      autoload :ShadingType4, "pdfrb/model/type/shading"
+      autoload :ShadingType5, "pdfrb/model/type/shading"
+      autoload :ShadingType6, "pdfrb/model/type/shading"
+      autoload :ShadingType7, "pdfrb/model/type/shading"
+      autoload :ShadingMap, "pdfrb/model/type/shading"
 
       # Font family.
       autoload :Font, "pdfrb/model/type/font"
