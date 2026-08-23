@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Rich Media Content (s13.6.5). Top-level rich media assets bundle.
       class RichMediaContent < Pdfrb::Model::Cos::Dictionary
+        arlington_object "RichMediaContent"
         def type; self[:Type]; end
         def configurations; self[:Configurations]; end
         def assets; self[:Assets]; end

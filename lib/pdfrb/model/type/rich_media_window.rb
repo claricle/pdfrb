@@ -6,6 +6,7 @@ module Pdfrb
       # Rich Media Window (s13.6.1). Window dimensions and position
       # for windowed rich media.
       class RichMediaWindow < Pdfrb::Model::Cos::Dictionary
+        arlington_object "RichMediaWindow"
         def type; self[:Type]; end
         def width; self[:Width]; end
         def height; self[:Height]; end

@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Rich Media Deactivation (s13.6.1). Deactivation behaviour.
       class RichMediaDeactivation < Pdfrb::Model::Cos::Dictionary
+        arlington_object "RichMediaDeactivation"
         def type; self[:Type]; end
         def condition; self[:Condition]&.to_sym; end
 

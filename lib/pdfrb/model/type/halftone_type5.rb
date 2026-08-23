@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Type 5 halftone: a dictionary mapping colorant name → HalftoneType1.
       class HalftoneType5 < Halftone
+        arlington_object "HalftoneType5"
         def halftones; self[:Halftones]; end
         def default; self[:Default]; end
 

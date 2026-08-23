@@ -6,6 +6,7 @@ module Pdfrb
       # Rich Media Animation (s13.6.2). Playback control for
       # rich media instances.
       class RichMediaAnimation < Pdfrb::Model::Cos::Dictionary
+        arlington_object "RichMediaAnimation"
         def type; self[:Type]; end
         def subtype; self[:Subtype]&.to_sym; end
         def play_count; self[:PlayCount] || -1; end

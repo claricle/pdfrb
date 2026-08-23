@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Rich Media Cue Point (s13.6.6). Time marker in a media playback.
       class RichMediaCuePoint < Pdfrb::Model::Cos::Dictionary
+        arlington_object "RichMediaCuePoint"
         def type; self[:Type]; end
         def time; self[:Time]; end
         def name; self[:Name]; end

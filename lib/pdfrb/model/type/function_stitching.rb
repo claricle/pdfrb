@@ -6,6 +6,7 @@ module Pdfrb
       # Type 3 Stitching function (s8.9.5). Concatenates multiple
       # sub-functions over a stitched input domain.
       class FunctionStitching < Function
+        arlington_object "FunctionType3"
         def sub_functions; self[:Functions]; end
         def bounds; self[:Bounds]; end
         def encode; self[:Encode]; end

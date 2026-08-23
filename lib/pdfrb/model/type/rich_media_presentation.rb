@@ -6,6 +6,7 @@ module Pdfrb
       # Rich Media Presentation (s13.6.1). Visual presentation settings
       # for a RichMedia annotation (style, window, transparency, etc.).
       class RichMediaPresentation < Pdfrb::Model::Cos::Dictionary
+        arlington_object "RichMediaPresentation"
         def type; self[:Type]; end
         def style; self[:Style]&.to_sym; end
         def window; self[:Window]; end

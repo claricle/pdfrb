@@ -6,6 +6,7 @@ module Pdfrb
       # Type 1 halftone: a 1-bit tile sampled from a halftone screen
       # cell defined by frequency, angle, and spot function.
       class HalftoneType1 < Halftone
+        arlington_object "HalftoneType1"
         def frequency; self[:Frequency]; end
         def angle; self[:Angle]; end
         def spot_function; self[:SpotFunction]; end

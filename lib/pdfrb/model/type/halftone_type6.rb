@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Type 6 halftone: continuous-tone cell (PDF 1.4+).
       class HalftoneType6 < Halftone
+        arlington_object "HalftoneType6"
         def width; self[:Width]; end
         def height; self[:Height]; end
         def width2; self[:Width2]; end

@@ -6,6 +6,7 @@ module Pdfrb
       # Type 0 Sampled function (s8.9.3). N-dimensional lookup table
       # with interpolation. Carries sample data in the stream payload.
       class FunctionSampled < Pdfrb::Model::Cos::Stream
+        arlington_object "FunctionType0"
         def function_type; self[:FunctionType] || 0; end
 
         def domain; self[:Domain]; end
