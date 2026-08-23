@@ -6,6 +6,7 @@ module Pdfrb
       # Optional Content Configuration (s8.11.4.1). Per-view configuration
       # of OCG visibility, intent, and locking.
       class OptionalContentConfiguration < Cos::Dictionary
+        arlington_object "OptContentConfig"
         register_type :OCConfig
 
         def type; self[:Type]; end

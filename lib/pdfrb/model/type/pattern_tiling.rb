@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Type 1 tiling pattern (s8.7.3). Repeats a graphical cell.
       class PatternTiling < Pattern
+        arlington_object "PatternType1"
         def paint_type; self[:PaintType]; end
         def tiling_type; self[:TilingType]; end
         def bbox; self[:BBox]; end

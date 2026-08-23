@@ -6,6 +6,7 @@ module Pdfrb
       # Opt Content Page Element (s8.11). Marks page elements for
       # automatic optional-content group creation.
       class OptContentPageElement < Pdfrb::Model::Cos::Dictionary
+        arlington_object "OptContentPageElement"
         def subtype; self[:Subtype]&.to_sym; end
         def ocgs; self[:OCGs]; end
 
