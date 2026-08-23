@@ -324,6 +324,24 @@ module Pdfrb
       autoload :DestinationDict, "pdfrb/model/type/destination"
       autoload :DestsMap, "pdfrb/model/type/destination"
 
+      # Array-form color spaces + maps (s8.6).
+      autoload :ColorSpace, "pdfrb/model/type/color_space"
+      autoload :CalGrayColorSpace, "pdfrb/model/type/color_space"
+      autoload :CalRGBColorSpace, "pdfrb/model/type/color_space"
+      autoload :LabColorSpace, "pdfrb/model/type/color_space"
+      autoload :DeviceGrayColorSpace, "pdfrb/model/type/color_space"
+      autoload :DeviceRGBColorSpace, "pdfrb/model/type/color_space"
+      autoload :DeviceCMYKColorSpace, "pdfrb/model/type/color_space"
+      autoload :ICCBasedColorSpaceArray, "pdfrb/model/type/color_space"
+      autoload :IndexedColorSpace, "pdfrb/model/type/color_space"
+      autoload :SeparationColorSpace, "pdfrb/model/type/color_space"
+      autoload :DeviceNColorSpace, "pdfrb/model/type/color_space"
+      autoload :PatternColorSpace, "pdfrb/model/type/color_space"
+      autoload :BlackpointArray, "pdfrb/model/type/color_space"
+      autoload :ColorSpaceMap, "pdfrb/model/type/color_space"
+      autoload :ColorantsDict, "pdfrb/model/type/color_space"
+      autoload :BoxStyle, "pdfrb/model/type/color_space"
+
       # Crypt filter (s7.6.5).
       autoload :CryptFilter, "pdfrb/model/type/crypt_filter"
       autoload :CryptFilterMap, "pdfrb/model/type/crypt_filter"

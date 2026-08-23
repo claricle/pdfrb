@@ -164,11 +164,31 @@ module Pdfrb
           private :arlington_required?
 
           def arlington_default(field_def)
-            return nil if field_def.default_value.nil?
+            raw = field_def.default_value
+            return nil if raw.nil?
+            return raw unless raw.is_a?(::String)
 
-            field_def.default_value
+            if raw.start_with?("[") && raw.end_with?("]")
+              return raw[1..-2].split.then { |tokens| tokens.map { |t| arlington_scalar(t) } }
+            end
+
+            arlington_scalar(raw)
           end
           private :arlington_default
+
+          # TSV default cells are raw strings; convert per scalar
+          # shape so typed access returns Integer/Symbol/etc.
+          def arlington_scalar(token)
+            case token
+            when "true" then true
+            when "false" then false
+            when "null" then nil
+            when /\A-?\d+\z/ then Integer(token, 10)
+            when /\A-?\d+\.\d+\z/ then Float(token)
+            else token
+            end
+          end
+          private :arlington_scalar
 
           def arlington_version(field_def)
             field_def.since_version.to_s
