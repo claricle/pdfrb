@@ -6,6 +6,7 @@ module Pdfrb
       # Signature dictionary (s12.8.2). Carries the PKCS#7 / CMS
       # signature payload. Lives in a Signature field's /V entry.
       class Signature < Pdfrb::Model::Cos::Dictionary
+        arlington_object "Signature"
         def type; self[:Type]; end
         def filter; self[:Filter]; end
         def sub_filter; self[:SubFilter]; end
@@ -42,7 +43,9 @@ module Pdfrb
         end
 
         def has_byte_range?
-          byte_range.is_a?(Array) && byte_range.size == 4
+          range = byte_range
+          range = range.to_a if range.is_a?(Pdfrb::Model::PdfArray)
+          range.is_a?(::Array) && range.size == 4
         end
 
         private

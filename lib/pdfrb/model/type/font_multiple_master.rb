@@ -6,6 +6,7 @@ module Pdfrb
       # MultipleMaster Type 1 font (s9.6.2.3). Type 1 font with
       # additional design axes between masters. Deprecated in PDF 2.0.
       class FontMultipleMaster < Font
+        arlington_object "FontMultipleMaster"
         def subtype; self[:Subtype]&.to_sym; end
         def name; self[:Name]; end
         def first_char; self[:FirstChar]; end
@@ -37,6 +38,7 @@ module Pdfrb
       # The actual procedures live as streams under their names in a
       # Tiling pattern's Resources.
       class CharProcMap < Pdfrb::Model::Cos::Dictionary
+        arlington_object "CharProcMap"
         def entries
           value.each
         end

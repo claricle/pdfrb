@@ -6,6 +6,7 @@ module Pdfrb
       # Font Encoding dict (s9.6.1). Base encoding + per-glyph differences
       # table for Type 1 fonts.
       class FontEncoding < Pdfrb::Model::Cos::Dictionary
+        arlington_object "Encoding"
         def base_encoding; self[:BaseEncoding]&.to_sym; end
         def differences; self[:Differences]; end
 

@@ -6,6 +6,7 @@ module Pdfrb
       # Document Modification Detection and Prevention (DocMDP) —
       # s12.8.2.2. Restricts what edits are allowed after signing.
       class DocMDPTransformParameters < Pdfrb::Model::Cos::Dictionary
+        arlington_object "DocMDPTransformParameters"
         def type; self[:Type]; end
         def p; self[:P]; end
         def v; self[:V]; end

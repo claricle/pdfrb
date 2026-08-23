@@ -6,6 +6,7 @@ module Pdfrb
       # Signature field lock (s12.7.6.5). Specifies which fields are
       # locked after signing.
       class SigFieldLock < Pdfrb::Model::Cos::Dictionary
+        arlington_object "SigFieldLock"
         def action; self[:Action]&.to_sym; end
         def fields; self[:Fields]; end
 

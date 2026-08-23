@@ -6,6 +6,7 @@ module Pdfrb
       # CID Font Descriptor Metrics (s9.8.1, Table 117). Per-CIDFont
       # metrics used for embedded CIDFontType0/CIDFontType2.
       class CIDFontDescriptorMetrics < Pdfrb::Model::Cos::Dictionary
+        arlington_object "CIDFontDescriptorMetrics"
         def style; self[:Style]&.to_sym; end
         def cid_set; self[:CIDSet]; end
 

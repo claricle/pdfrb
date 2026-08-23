@@ -6,6 +6,7 @@ module Pdfrb
       # ToUnicode CMap stream (s9.10.3). Maps glyph codes to Unicode
       # strings for text extraction.
       class ToUnicodeCMapStream < Pdfrb::Model::Cos::Stream
+        arlington_object "ToUnicodeCMapStream"
         def type; self[:Type]; end
 
         def cmap_source

@@ -7,6 +7,7 @@ module Pdfrb
       # The /Reference entry on a Signature, with /TransformMethod /DocMDP
       # or /UR (Usage Rights).
       class MDPDict < Pdfrb::Model::Cos::Dictionary
+        arlington_object "MDPDict"
         def type; self[:Type]; end
         def transform_method; self[:TransformMethod]&.to_sym; end
         def transform_params; self[:TransformParams]; end
