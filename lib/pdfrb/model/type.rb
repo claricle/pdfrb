@@ -330,6 +330,28 @@ module Pdfrb
       autoload :DestOutputProfileRef, "pdfrb/model/type/misc_helpers"
       autoload :OutputIntentsContainer, "pdfrb/model/type/misc_helpers"
       autoload :CMapStream, "pdfrb/model/type/misc_helpers"
+      autoload :GammaArray, "pdfrb/model/type/misc_helpers"
+      autoload :WhitepointArray, "pdfrb/model/type/misc_helpers"
+      autoload :TrailerIDArray, "pdfrb/model/type/misc_helpers"
+      autoload :VisibilityExpressionArray, "pdfrb/model/type/misc_helpers"
+      autoload :RelatedFilesArray, "pdfrb/model/type/misc_helpers"
+      autoload :RichMediaCommandArray, "pdfrb/model/type/misc_helpers"
+      autoload :URTransformParamArray, "pdfrb/model/type/misc_helpers"
+      autoload :URTransformParamAnnotsArray, "pdfrb/model/type/misc_helpers"
+      autoload :URTransformParamEFArray, "pdfrb/model/type/misc_helpers"
+      autoload :URTransformParamFormArray, "pdfrb/model/type/misc_helpers"
+      autoload :URTransformParamSignatureArray, "pdfrb/model/type/misc_helpers"
+      autoload :UniversalArray, "pdfrb/model/type/misc_helpers"
+      autoload :UniversalDictionary, "pdfrb/model/type/misc_helpers"
+      autoload :OOAdditionalStmsArray, "pdfrb/model/type/misc_helpers"
+
+      # Stream filter /DecodeParms dictionaries (s7.4).
+      autoload :FlateDecodeParms, "pdfrb/model/type/filter_decode_parms"
+      autoload :LZWDecodeParms, "pdfrb/model/type/filter_decode_parms"
+      autoload :DCTDecodeParms, "pdfrb/model/type/filter_decode_parms"
+      autoload :CCITTFaxDecodeParms, "pdfrb/model/type/filter_decode_parms"
+      autoload :JBIG2DecodeParms, "pdfrb/model/type/filter_decode_parms"
+      autoload :CryptDecodeParms, "pdfrb/model/type/filter_decode_parms"
 
       # Explicit destination arrays + maps (s12.3.2).
       autoload :Destination, "pdfrb/model/type/destination"
