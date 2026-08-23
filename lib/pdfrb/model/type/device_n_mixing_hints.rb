@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # DeviceN Mixing Hints (s8.6.6.5). Per-colorant device hints.
       class DeviceNMixingHints < Pdfrb::Model::Cos::Dictionary
+        arlington_object "DeviceNMixingHints"
         def solidities; self[:Solidities]; end
         def dot_gain; self[:DotGain]; end
 

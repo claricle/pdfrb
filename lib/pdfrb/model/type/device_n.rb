@@ -3,13 +3,19 @@
 module Pdfrb
   module Model
     module Type
-      # DeviceN color space (s8.6.6.4). Multiple custom colorants mapped
-      # through a single tint-transform function. Generalises Separation.
+      # DeviceN attributes dictionary (s8.6.6.4, the 5th element of
+      # the DeviceN color space array). Names extra colorants and
+      # process/mixing hints.
       class DeviceN < Pdfrb::Model::Cos::Dictionary
-        def colorants; self[:Names]; end
-        def alternate_space; self[:AlternateSpace]; end
-        def tint_transform; self[:TintTransform]; end
-        def attributes; self[:Attributes]; end
+        arlington_object "DeviceNDict"
+        def subtype; self[:Subtype]&.to_sym; end
+        def colorants; self[:Colorants]; end
+        def process; self[:Process]; end
+        def mixing_hints; self[:MixingHints]; end
+
+        def nchannel?
+          subtype == :NChannel
+        end
 
         def colorant_count
           return 0 unless colorants

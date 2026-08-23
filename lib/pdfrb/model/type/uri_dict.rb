@@ -6,6 +6,7 @@ module Pdfrb
       # URI dict (s12.5.6.5). Catalog /URI dict for base URI and
       # retriever map.
       class URIDict < Pdfrb::Model::Cos::Dictionary
+        arlington_object "URI"
         def base; self[:Base]; end
         def retriever_map; self[:Map]; end
 

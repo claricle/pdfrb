@@ -12,6 +12,7 @@ module Pdfrb
       # Conforming readers MUST NOT interpret application-private
       # data; it survives round-trips and incremental updates intact.
       class PagePieceInfo < Pdfrb::Model::Cos::Dictionary
+        arlington_object "PagePiece"
         # The application-name key (e.g. :Adobe, :Pdfrb). Multiple
         # applications may each have their own entry in the same
         # /PieceInfo dict.

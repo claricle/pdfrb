@@ -7,11 +7,11 @@ module Pdfrb
       # mapped through a tint-transform function. Used for spot colors
       # like PANTONE 185 C.
       class Separation < Pdfrb::Model::Cos::Dictionary
-        def alternate_space; self[:AlternateSpace]; end
-        def tint_transform; self[:TintTransform]; end
-        def colorant_name; self[:Colorant]; end
-
-        def components; 1; end
+        arlington_object "Separation"
+        def color_space; self[:ColorSpace]; end
+        def device_colorant; self[:DeviceColorant]; end
+        def key; self[:Key]; end
+        def pages; self[:Pages]; end
 
         def resolved_tint_transform
           ref = tint_transform
