@@ -7,6 +7,7 @@ module Pdfrb
       # Maps +t+ ∈ [0,1] to C0 + (C1 - C0) * t^N.
       # Commonly used for 2-color linear gradients.
       class FunctionExponential < Function
+        arlington_object "FunctionType2"
         def c0; self[:C0]; end
         def c1; self[:C1]; end
         def exponent; self[:N] || 1; end

@@ -7,6 +7,7 @@ module Pdfrb
       # PostScript program in the stream payload that computes the
       # output values from input values.
       class FunctionPostScript < Pdfrb::Model::Cos::Stream
+        arlington_object "FunctionType4"
         def function_type; self[:FunctionType] || 4; end
 
         def domain; self[:Domain]; end

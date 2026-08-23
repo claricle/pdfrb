@@ -6,6 +6,7 @@ module Pdfrb
       # Rich Media Settings (s13.6.2). Top-level activation/deactivation
       # configuration for a RichMedia annotation.
       class RichMediaSettings < Pdfrb::Model::Cos::Dictionary
+        arlington_object "RichMediaSettings"
         def type; self[:Type]; end
         def activation; self[:Activation]; end
         def deactivation; self[:Deactivation]; end

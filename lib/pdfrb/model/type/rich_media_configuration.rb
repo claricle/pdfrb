@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Rich Media Configuration (s13.6.2). A media instance list.
       class RichMediaConfiguration < Pdfrb::Model::Cos::Dictionary
+        arlington_object "RichMediaConfiguration"
         def type; self[:Type]; end
         def instances; self[:Instances]; end
         def name; self[:Name]; end

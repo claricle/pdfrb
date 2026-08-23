@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Rich Media Activation (s13.6.1). Activation behaviour settings.
       class RichMediaActivation < Pdfrb::Model::Cos::Dictionary
+        arlington_object "RichMediaActivation"
         def type; self[:Type]; end
         def condition; self[:Condition]&.to_sym; end
         def configuration; self[:Configuration]; end

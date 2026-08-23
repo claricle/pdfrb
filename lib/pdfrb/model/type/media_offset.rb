@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Media Offset Time (s13.3.6.5). Time-based media offset.
       class MediaOffsetTime < Pdfrb::Model::Cos::Dictionary
+        arlington_object "MediaOffsetTime"
         def subtype; self[:S]&.to_sym; end
         def timespan; self[:T]; end
 
@@ -17,6 +18,7 @@ module Pdfrb
 
       # Media Offset Frame (s13.3.6.5). Frame-based media offset.
       class MediaOffsetFrame < Pdfrb::Model::Cos::Dictionary
+        arlington_object "MediaOffsetFrame"
         def subtype; self[:S]&.to_sym; end
         def frame_number; self[:F]; end
         def time; self[:T]; end
@@ -28,6 +30,7 @@ module Pdfrb
 
       # Media Offset Marker (s13.3.6.5). Marker-based media offset.
       class MediaOffsetMarker < Pdfrb::Model::Cos::Dictionary
+        arlington_object "MediaOffsetMarker"
         def subtype; self[:S]&.to_sym; end
         def marker_name; self[:M]; end
       end
@@ -35,6 +38,7 @@ module Pdfrb
       # Media Player Info (s13.3.5.5). Identifies which players can
       # render the rendition.
       class MediaPlayerInfo < Pdfrb::Model::Cos::Dictionary
+        arlington_object "MediaPlayerInfo"
         def player_identifier; self[:PID]; end
         def must_honor; self[:MH]; end
         def best_effort; self[:BE]; end
@@ -53,6 +57,7 @@ module Pdfrb
 
       # Media Players (s13.3.5.5). Player info lists.
       class MediaPlayers < Pdfrb::Model::Cos::Dictionary
+        arlington_object "MediaPlayers"
         def must_use; self[:MU]; end
         def alternate; self[:A]; end
         def never_use; self[:NU]; end
@@ -75,6 +80,7 @@ module Pdfrb
       # Media Screen Parameters (s13.3.5.4). Controls how media is
       # displayed on the screen annotation.
       class MediaScreenParameters < Pdfrb::Model::Cos::Dictionary
+        arlington_object "MediaScreenParameters"
         def must_honor; self[:MH]; end
         def best_effort; self[:BE]; end
         def fit; self[:FIT]; end
@@ -88,6 +94,7 @@ module Pdfrb
 
       # Media Criteria (s13.3.5.5). Constraints when selecting players.
       class MediaCriteria < Pdfrb::Model::Cos::Dictionary
+        arlington_object "MediaCriteria"
         def must_honor; self[:MH]; end
         def best_effort; self[:BE]; end
         def bit_rate; self[:Rate]; end

@@ -5,6 +5,7 @@ module Pdfrb
     module Type
       # Rich Media Instance (s13.6.3). A single playable instance.
       class RichMediaInstance < Pdfrb::Model::Cos::Dictionary
+        arlington_object "RichMediaInstance"
         def type; self[:Type]; end
         def subtype; self[:Subtype]&.to_sym; end
         def media_clip; self[:Asset]; end
