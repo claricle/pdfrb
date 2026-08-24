@@ -46,6 +46,20 @@ module Pdfrb
         end
       end
 
+      # Dest output profile dictionary (s7.9.6): the dictionary a
+      # DestOutputProfileRef points at. Carries ICC metadata and the
+      # colorant table for PDF/X output intent profiles.
+      class DestOutputProfile < Pdfrb::Model::Cos::Dictionary
+        arlington_object "DestOutputProfileRef"
+
+        def checksum; self[:CheckSum]; end
+        def colorant_table; self[:ColorantTable]; end
+        def icc_version; self[:ICCVersion]; end
+        def profile_color_space; self[:ProfileCS]; end
+        def profile_name; self[:ProfileName]; end
+        def urls; self[:URLs]; end
+      end
+
       # Output Intents array (s14.11.5). Container for the Catalog
       # /OutputIntents array — convenience wrapper that just forwards
       # to the type.
