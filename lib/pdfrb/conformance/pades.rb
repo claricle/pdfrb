@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/BlockLength
+# rubocop:disable-next Metrics/BlockLength
 module Pdfrb
   module Conformance
     # PAdES (ETSI EN 319 142-1) signature profile validation. Four
@@ -195,4 +195,3 @@ module Pdfrb
     end
   end
 end
-# rubocop:enable Metrics/BlockLength

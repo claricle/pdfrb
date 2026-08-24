@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/BlockLength
+# rubocop:disable-next Metrics/BlockLength
 module Pdfrb
   module Conformance
     # PDF/UA-1 deep tagging checks (ISO 14289-1 §7). Extends the
@@ -122,4 +122,3 @@ module Pdfrb
     end
   end
 end
-# rubocop:enable Metrics/BlockLength

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/BlockLength
+# rubocop:disable-next Metrics/BlockLength
 module Pdfrb
   module Conformance
     # PDF/VT conformance per ISO 16612-2. PDF/VT is the variable
@@ -125,4 +125,3 @@ module Pdfrb
     end
   end
 end
-# rubocop:enable Metrics/BlockLength
