@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/BlockLength
+# rubocop:disable-next Metrics/BlockLength
 module Pdfrb
   module Conformance
     # PDF/A-4 deep checks (ISO 19005-4). Builds on the SHARED + A4
@@ -91,4 +91,3 @@ module Pdfrb
     end
   end
 end
-# rubocop:enable Metrics/BlockLength

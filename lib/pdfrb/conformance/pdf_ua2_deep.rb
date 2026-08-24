@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/BlockLength
+# rubocop:disable-next Metrics/BlockLength
 module Pdfrb
   module Conformance
     # PDF/UA-2 (ISO 14289-2) deep checks. PDF/UA-2 is rooted in
@@ -90,4 +90,3 @@ module Pdfrb
     end
   end
 end
-# rubocop:enable Metrics/BlockLength

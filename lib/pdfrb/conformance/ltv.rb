@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/BlockLength
+# rubocop:disable-next Metrics/BlockLength
 module Pdfrb
   module Conformance
     # Long-Term Validation (LTV) per ETSI EN 319 102-1 Annex B. LTV
@@ -109,4 +109,3 @@ module Pdfrb
     end
   end
 end
-# rubocop:enable Metrics/BlockLength

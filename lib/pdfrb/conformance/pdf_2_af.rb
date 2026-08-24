@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/BlockLength
+# rubocop:disable-next Metrics/BlockLength
 module Pdfrb
   module Conformance
     # PDF 2.0 Associated Files (AF) validation per Application Note
@@ -182,4 +182,3 @@ module Pdfrb
     end
   end
 end
-# rubocop:enable Metrics/BlockLength
