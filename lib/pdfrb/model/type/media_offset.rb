@@ -108,6 +108,43 @@ module Pdfrb
           !!bit_rate
         end
       end
+
+      # Media play parameters (s13.3.2): controls for playing a
+      # rendition; /MH and /BE wrap the same set.
+      class MediaPlayParameters < Pdfrb::Model::Cos::Dictionary
+        arlington_object "MediaPlayParameters"
+
+        def players; self[:PL]; end
+        def must_honor; self[:MH]; end
+        def best_effort; self[:BE]; end
+      end
+
+      # Play parameter set for must-honor (s13.2.2): volume V,
+      # controls C, fit F, duration D, repeat count A, audio RC.
+      class MediaPlayParametersMH < Pdfrb::Model::Cos::Dictionary
+        arlington_object "MediaPlayParametersMH"
+
+        def volume; self[:V]; end
+        def fit; self[:F]; end
+        def duration; self[:D]; end
+        def repeat_count; self[:A]; end
+        def audio_rewrite; self[:RC]; end
+      end
+
+      # Play parameter set for best-effort (s13.2.2).
+      class MediaPlayParametersBE < MediaPlayParametersMH
+        arlington_object "MediaPlayParametersBE"
+      end
+
+      # Screen parameter set for MH/BE (s13.2.2): window W,
+      # background color B, opacity O, duration M, floating F.
+      class MediaScreenParametersMHBE < Pdfrb::Model::Cos::Dictionary
+        arlington_object "MediaScreenParametersMHBE"
+
+        def window; self[:W]; end
+        def background_color; self[:B]; end
+        def opacity; self[:O]; end
+      end
     end
   end
 end

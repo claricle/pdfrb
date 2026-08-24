@@ -26,6 +26,40 @@ module Pdfrb
           document.object(ref)
         end
       end
+
+      # Media rendition /S /MR (s13.3.5): plays a media clip.
+      class RenditionMedia < Rendition
+        arlington_object "RenditionMedia"
+
+        def must_honor; self[:MH]; end
+        def best_effort; self[:BE]; end
+        def media_permissions; self[:P]; end
+        def visible_on_page?; self[:SP] != false; end
+      end
+
+      # Selector rendition /S /SR (s13.3.5): picks among renditions.
+      class RenditionSelector < Rendition
+        arlington_object "RenditionSelector"
+
+        def must_honor; self[:MH]; end
+        def best_effort; self[:BE]; end
+        def renditions; self[:R]; end
+      end
+
+      # Must-honor parameter wrapper {C: params} (s13.2.2): the
+      # conforming reader must satisfy these or abort.
+      class RenditionMH < Pdfrb::Model::Cos::Dictionary
+        arlington_object "RenditionMH"
+
+        def parameters; self[:C]; end
+      end
+
+      # Best-effort parameter wrapper {C: params} (s13.2.2).
+      class RenditionBE < Pdfrb::Model::Cos::Dictionary
+        arlington_object "RenditionBE"
+
+        def parameters; self[:C]; end
+      end
     end
   end
 end
