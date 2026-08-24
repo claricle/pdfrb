@@ -51,6 +51,14 @@ module Pdfrb
           value[:R]
         end
       end
+
+      # First-bead variant (s7.10.2): the bead that starts a thread;
+      # carries the thread /T reference.
+      class BeadFirst < Bead
+        arlington_object "BeadFirst"
+
+        def thread; self[:T]; end
+      end
     end
   end
 end

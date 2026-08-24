@@ -63,6 +63,7 @@ module Pdfrb
 
       # CMapStream (s9.7.5.3). CMap stream definition embedded in a PDF.
       class CMapStream < Pdfrb::Model::Cos::Stream
+        arlington_object "CMapStream"
         def type; self[:Type]; end
         def base_font; self[:BaseFont]; end
         def encoding; self[:Encoding]; end

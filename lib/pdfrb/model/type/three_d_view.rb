@@ -36,6 +36,20 @@ module Pdfrb
           document.object(ref)
         end
       end
+
+      # 3DViewAddEntries (s13.6.2.8): extra keys a 3D view adds to
+      # the base view dictionary.
+      class ThreeDViewAddEntries < Pdfrb::Model::Cos::Dictionary
+        arlington_object "3DViewAddEntries"
+
+        def external_name; self[:XN]; end
+        def internal_name; self[:IN]; end
+        def background; self[:MS]; end
+        def matrix; self[:MA]; end
+        def camera_to_world; self[:C2W]; end
+        def u3d_path; self[:U3DPath]; end
+        def lighting_scheme; self[:CO]; end
+      end
     end
   end
 end
