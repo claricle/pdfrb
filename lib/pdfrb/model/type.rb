@@ -525,6 +525,30 @@ module Pdfrb
       autoload :AddActionScreenAnnotation, "pdfrb/model/type/add_action_screen_annotation"
       autoload :AddActionWidgetAnnotation, "pdfrb/model/type/add_action_widget_annotation"
 
+      # Geospatial support (s11.5) + number formats (s11.4).
+      autoload :GeographicCoordinateSystem, "pdfrb/model/type/geospatial"
+      autoload :ProjectedCoordinateSystem, "pdfrb/model/type/geospatial"
+      autoload :PointData, "pdfrb/model/type/geospatial"
+      autoload :Projection, "pdfrb/model/type/geospatial"
+      autoload :NumberFormat, "pdfrb/model/type/geospatial"
+
+      # OPI proxy dictionaries (s14.11.6, deprecated 2.0).
+      autoload :OPIVersion13Dict, "pdfrb/model/type/opi"
+      autoload :OPIVersion20Dict, "pdfrb/model/type/opi"
+
+      # RichMedia sizing/positioning (s13.6.9.5).
+      autoload :RichMediaParams, "pdfrb/model/type/rich_media_presentation"
+      autoload :RichMediaHeight, "pdfrb/model/type/rich_media_presentation"
+      autoload :RichMediaWidth, "pdfrb/model/type/rich_media_presentation"
+      autoload :RichMediaPosition, "pdfrb/model/type/rich_media_presentation"
+
+      # Structure tree maps + references (s14.7, s14.8).
+      autoload :RoleMap, "pdfrb/model/type/structure_attributes"
+      autoload :RoleMapNS, "pdfrb/model/type/structure_attributes"
+      autoload :StyleDict, "pdfrb/model/type/structure_attributes"
+      autoload :ClassMap, "pdfrb/model/type/structure_attributes"
+      autoload :StructureReference, "pdfrb/model/type/structure_attributes"
+
       # Requirements handlers (s7.9.2, Catalog /Requirements).
       autoload :Requirements3DMarkup, "pdfrb/model/type/requirements"
       autoload :RequirementsAcroFormInteract, "pdfrb/model/type/requirements"
