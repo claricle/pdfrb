@@ -357,6 +357,7 @@ module Pdfrb
       autoload :BorderArray, "pdfrb/model/type/misc_helpers"
       autoload :LabRangeArray, "pdfrb/model/type/misc_helpers"
       autoload :DestOutputProfileRef, "pdfrb/model/type/misc_helpers"
+      autoload :DestOutputProfile, "pdfrb/model/type/misc_helpers"
       autoload :OutputIntentsContainer, "pdfrb/model/type/misc_helpers"
       autoload :CMapStream, "pdfrb/model/type/misc_helpers"
       autoload :GammaArray, "pdfrb/model/type/misc_helpers"
