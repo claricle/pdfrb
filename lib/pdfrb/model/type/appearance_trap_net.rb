@@ -64,6 +64,7 @@ module Pdfrb
 
       # Signature Build Data Dict (s12.8.4). PPKLite build data.
       class SignatureBuildPropDict < Pdfrb::Model::Cos::Dictionary
+        arlington_object "SignatureBuildPropDict"
         def app_build; self[:App]; end
 
         def has_app_build?

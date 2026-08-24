@@ -525,6 +525,25 @@ module Pdfrb
       autoload :AddActionScreenAnnotation, "pdfrb/model/type/add_action_screen_annotation"
       autoload :AddActionWidgetAnnotation, "pdfrb/model/type/add_action_widget_annotation"
 
+      # Signature/certification extras + targets + extensions.
+      autoload :CertSeedValue, "pdfrb/model/type/signature_extras"
+      autoload :SubjectDN, "pdfrb/model/type/signature_extras"
+      autoload :DocTimeStamp, "pdfrb/model/type/signature_extras"
+      autoload :TimeStampDict, "pdfrb/model/type/signature_extras"
+      autoload :AuthCode, "pdfrb/model/type/signature_extras"
+      autoload :LegalAttestation, "pdfrb/model/type/signature_extras"
+      autoload :VRIMap, "pdfrb/model/type/signature_extras"
+      autoload :AFEmbeddedFileParameter, "pdfrb/model/type/signature_extras"
+      autoload :AFFileSpecEF, "pdfrb/model/type/signature_extras"
+      autoload :Target, "pdfrb/model/type/signature_extras"
+      autoload :TargetEmbedded, "pdfrb/model/type/signature_extras"
+      autoload :DevExtensions, "pdfrb/model/type/signature_extras"
+      autoload :GTSmDevExtensions, "pdfrb/model/type/signature_extras"
+      autoload :ISODevExtensions, "pdfrb/model/type/signature_extras"
+      autoload :Extensions, "pdfrb/model/type/signature_extras"
+      autoload :GTSProcStepsGroup, "pdfrb/model/type/signature_extras"
+      autoload :AppleSupplementalText, "pdfrb/model/type/signature_extras"
+
       # Geospatial support (s11.5) + number formats (s11.4).
       autoload :GeographicCoordinateSystem, "pdfrb/model/type/geospatial"
       autoload :ProjectedCoordinateSystem, "pdfrb/model/type/geospatial"
