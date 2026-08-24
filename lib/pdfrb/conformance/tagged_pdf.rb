@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/BlockLength
+# rubocop:disable-next Metrics/BlockLength
 module Pdfrb
   module Conformance
     # Tagged PDF validation per ISO 32000-1 §14.8 (and ISO 32000-2
@@ -179,4 +179,3 @@ module Pdfrb
     end
   end
 end
-# rubocop:enable Metrics/BlockLength

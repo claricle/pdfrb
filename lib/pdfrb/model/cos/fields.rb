@@ -41,7 +41,7 @@ module Pdfrb
           end
 
           def required?; !!@required; end
-          def default?;  !@default.nil?; end
+          def default?; !@default.nil?; end
           def has_allowed_values?; !@allowed_values.nil?; end
 
           # Resolve Symbol types via Dictionary.type_map. Returns an

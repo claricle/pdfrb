@@ -311,7 +311,7 @@ module Pdfrb
           end
         end
 
-        # rubocop:disable Metrics/MethodLength
+        # rubocop:disable-next Metrics/MethodLength
         def assemble_ttf(tables)
           checksum_placeholder = [0].pack("N")
           num = tables.length
@@ -366,7 +366,6 @@ module Pdfrb
 
           out.force_encoding(Encoding::BINARY)
         end
-        # rubocop:enable Metrics/MethodLength
 
         # rubocop:disable Naming/MethodName
         # ---- Binary helpers ----
