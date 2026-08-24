@@ -54,6 +54,21 @@ module Pdfrb
         def small_cap?; flags&.anybits?(0x20000); end
         def force_bold?; flags&.anybits?(0x40000); end
       end
+
+      # Font descriptor for TrueType fonts (s9.6.6.2): allows
+      # /FontFile2 embedding.
+      class FontDescriptorTrueType < FontDescriptor
+        arlington_object "FontDescriptorTrueType"
+
+        def font_file2; self[:FontFile2]; end
+        def font_file3; self[:FontFile3]; end
+      end
+
+      # Font descriptor for Type 3 fonts (s9.6.6.2): never carries
+      # font-file keys.
+      class FontDescriptorType3 < FontDescriptor
+        arlington_object "FontDescriptorType3"
+      end
     end
   end
 end
