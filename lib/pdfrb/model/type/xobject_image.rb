@@ -64,6 +64,28 @@ module Pdfrb
           ((width * components * bits_per_component) + 7) / 8
         end
       end
+
+      # Image-mask image XObject /ImageMask true (s8.9.6.4):
+      # 1-bpp stencil painted with the current fill color.
+      class XObjectImageMask < Pdfrb::Model::Cos::Stream
+        arlington_object "XObjectImageMask"
+
+        def width; self[:Width]; end
+        def height; self[:Height]; end
+        def decode; self[:Decode]; end
+
+        # /Decode [0 1] = paint 1-bits; [1 0] = inverted.
+        def inverted?; decode && decode[0] == 1; end
+      end
+
+      # Soft-mask image XObject (s8.9.6.5): grayscale companion used
+      # as a shape/opacity mask via /SMask.
+      class XObjectImageSoftMask < Pdfrb::Model::Cos::Stream
+        arlington_object "XObjectImageSoftMask"
+
+        def color_space; self[:ColorSpace]; end
+        def matte; self[:Matte]; end
+      end
     end
   end
 end
