@@ -7,6 +7,7 @@ module Pdfrb
       # attributes — owner + per-owner attribute fields (Layout, Table,
       # List, PrintField, etc.).
       class StructureAttributes < Pdfrb::Model::Cos::Dictionary
+        arlington_object "StructureAttributesDict"
         def owner; self[:O]; end
         def namespace; self[:NS]; end
         def placement; self[:Placement]&.to_sym; end
@@ -38,6 +39,62 @@ module Pdfrb
         def has_namespace?
           !!namespace
         end
+      end
+
+      # Role map (s14.7.3, StructTreeRoot /RoleMap): custom element
+      # names mapped to standard structure types.
+      class RoleMap < Pdfrb::Model::Cos::Dictionary
+        arlington_object "RoleMap"
+
+        def [](custom_name)
+          value[custom_name.to_sym] || value[custom_name.to_s]
+        end
+
+        def custom_names
+          value.keys
+        end
+      end
+
+      # Namespaced role map (s14.7.3, /RoleMapNS): per-namespace role
+      # maps keyed by namespace URI.
+      class RoleMapNS < Pdfrb::Model::Cos::Dictionary
+        arlington_object "RoleMapNS"
+
+        def [](namespace)
+          value[namespace.to_sym] || value[namespace.to_s]
+        end
+      end
+
+      # Style dictionary (s14.9.2, /Styles entries): number-of-style
+      # to style-attributes mapping with an optional /Panose.
+      class StyleDict < Pdfrb::Model::Cos::Dictionary
+        arlington_object "StyleDict"
+
+        def panose; self[:Panose]; end
+      end
+
+      # Class map (s14.7.4, StructTreeRoot /ClassMap): reusable
+      # attribute-owner dictionaries shared by structure elements.
+      class ClassMap < Pdfrb::Model::Cos::Dictionary
+        arlington_object "ClassMap"
+
+        def [](class_name)
+          value[class_name.to_sym] || value[class_name.to_s]
+        end
+
+        def class_names
+          value.keys
+        end
+      end
+
+      # Reference structure element kid (s14.8.2.4, /Reference):
+      # points at content elsewhere via /F file, /Page, /ID.
+      class StructureReference < Pdfrb::Model::Cos::Dictionary
+        arlington_object "Reference"
+
+        def file; self[:F]; end
+        def page; self[:Page]; end
+        def ids; self[:ID]; end
       end
     end
   end
