@@ -32,6 +32,7 @@ module Pdfrb
       # ExData Projection dict (s12.5.6.21, Table 198). Holds the
       # geospatial projection details used by Projection annotations.
       class ExDataProjection < Pdfrb::Model::Cos::Dictionary
+        arlington_object "ExDataProjection"
         def type; self[:Type]; end
 
         def project?

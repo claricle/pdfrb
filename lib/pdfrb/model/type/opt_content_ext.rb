@@ -111,6 +111,21 @@ module Pdfrb
         def min; self[:min]; end
         def max; self[:max]; end
       end
+
+      # OCG /Usage dictionary (s8.11.4.4): wraps the per-context
+      # visibility entries.
+      class OptContentUsage < Pdfrb::Model::Cos::Dictionary
+        arlington_object "OptContentUsage"
+
+        def creator_info; self[:CreatorInfo]; end
+        def language; self[:Language]; end
+        def export; self[:Export]; end
+        def zoom; self[:Zoom]; end
+        def print; self[:Print]; end
+        def view; self[:View]; end
+        def user; self[:User]; end
+        def page_element; self[:PageElement]; end
+      end
     end
   end
 end

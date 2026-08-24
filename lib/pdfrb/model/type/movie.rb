@@ -24,6 +24,20 @@ module Pdfrb
           document.object(ref)
         end
       end
+
+      # Movie activation dictionary (s12.5.6.14, /A): playback
+      # parameters for a movie annotation.
+      class MovieActivation < Pdfrb::Model::Cos::Dictionary
+        arlington_object "MovieActivation"
+
+        def start; self[:Start]; end
+        def duration; self[:Duration]; end
+        def rate; self[:Rate]; end
+        def volume; self[:Volume]; end
+        def show_controls; self[:ShowControls]; end
+        def synchronous; self[:Synchronous]; end
+        def fw_scale; self[:FWScale]; end
+      end
     end
   end
 end
