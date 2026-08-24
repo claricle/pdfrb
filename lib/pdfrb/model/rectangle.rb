@@ -23,12 +23,12 @@ module Pdfrb
         end
       end
 
-      def width;  @urx - @llx; end
+      def width; @urx - @llx; end
       def height; @ury - @lly; end
-      def left;   @llx; end
+      def left; @llx; end
       def bottom; @lly; end
-      def right;  @urx; end
-      def top;    @ury; end
+      def right; @urx; end
+      def top; @ury; end
 
       def origin; [@llx, @lly]; end
       def corner; [@urx, @ury]; end
