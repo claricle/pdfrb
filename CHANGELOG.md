@@ -95,6 +95,323 @@ All notable changes to the pdfrb gem will be documented in this file.
 * Removed all `instance_variable_set/get`, `send` to private
   methods, `respond_to?` for type checks.
 
+## [0.7.39] — 2026-08-24
+
+### Added
+
+* `DestOutputProfile` dictionary — the TSV that
+  `DestOutputProfileRef` (an indirect-reference model) points at.
+  Completes Arlington TSV mapping: **612 of 614** non-alias TSVs
+  covered.
+
+## [0.7.38] — 2026-08-24
+
+### Added
+
+* Parity batch 36 — the final 31 TSVs: EncryptedPayload, Permissions,
+  FDDict, StreamDict, DictionaryOf{Dictionaries,Functions},
+  LinearizationParameterDict, FixedPrint, FloatingWindowParameters,
+  FontFileType1, Mac, MicrosoftWindowsLaunchParam,
+  MinimumBitDepth/MinimumScreenSize, NavNode, Navigator, PaperMetaData,
+  SlideShow, Solidities, SourceInformation, SpectralData, ViewParams,
+  DPMMetadataStream, Data; BeadFirst, ThreeDViewAddEntries,
+  MovieActivation, AppearancePrinterMarkDict, OptContentUsage;
+  mappings for CMapStream and ExDataProjection.
+
+### Fixed
+
+* Local/CI rubocop drift — lockfile now pins rubocop 1.90.0 (the
+  `~> 1.75` constraint let CI install newer rubocop than local);
+  converted single-statement disable/enable pairs to `disable-next`.
+
+## [0.7.37] — 2026-08-24
+
+### Added
+
+* Parity batch 35 — 18 TSVs: CertSeedValue, SubjectDN, DocTimeStamp,
+  TimeStampDict, AuthCode, LegalAttestation, VRIMap,
+  SignatureBuildPropDict mapping; AFEmbeddedFileParameter/AFFileSpecEF
+  (App Note 002); Target/TargetEmbedded (GoToE); DevExtensions family +
+  Extensions container; GTS_ProcStepsGroup; AAPL_ST.
+
+## [0.7.36] — 2026-08-24
+
+### Added
+
+* Parity batch 34 — 17 TSVs: geospatial family
+  (Geographic/ProjectedCoordinateSystem, PointData, Projection,
+  NumberFormat), OPI 1.3/2.0 proxy dicts, RichMedia params/sizing,
+  RoleMap/RoleMapNS/ClassMap/StyleDict, StructureAttributesDict,
+  StructureReference.
+
+## [0.7.35] — 2026-08-24
+
+### Added
+
+* Parity batch 33 — 16 TSVs: PostScript/passthrough/PrinterMark/
+  TrapNet form XObjects, stencil ImageMask, soft-mask image,
+  XObjectMap; FontFile3 subtype split (Type1C/CIDFontType0C/OpenType);
+  FontDescriptor TrueType/Type3 variants; SoftMaskAlpha/Luminosity,
+  GraphicsStateParameterMap, GroupAttributes.
+
+## [0.7.34] — 2026-08-24
+
+### Added
+
+* Parity batch 32 — media/rendition family complete (15 TSVs):
+  RenditionMedia/Selector, RenditionMH/BE, MediaClipData mapping +
+  MHBE, MediaClipSection(+MHBE), MediaDuration, MediaPermissions,
+  MediaPlayParameters(+MH/BE), MediaScreenParametersMHBE.
+
+## [0.7.33] — 2026-08-23
+
+### Added
+
+* Parity batch 31 — 20 TSVs: the six `/DecodeParms` dictionaries
+  (Flate with predictor defaults, LZW EarlyChange, DCT color
+  transform, CCITT group classification, JBIG2 globals, Crypt) and
+  14 simple array types (gamma/whitepoint/trailer-ID/visibility-
+  expression/related-files/RichMedia-command/UR-transform/universal).
+
+### Fixed
+
+* Name-typed Arlington defaults now materialize as Symbols.
+
+## [0.7.32] — 2026-08-23
+
+### Added
+
+* Parity batch 30 — Requirements handler family (28 TSVs, s7.9.2):
+  `RequirementsHandler` base + 27 per-feature subclasses.
+
+## [0.7.31] — 2026-08-23
+
+### Added
+
+* Parity batch 29 — 18 TSVs: form-field family (Field, Choice,
+  Text, Sig + Checkbox/Push/RadioButton), FileSpecEF/RF,
+  EmbeddedFileParameter, MarkedContentReference, ObjectReference,
+  Namespace (with its previously missing autoload), SoftwareIdentifier,
+  Transition, ExData3DMarkup/MarkupGeo, PrinterMarkSubDict.
+
+## [0.7.30] — 2026-08-23
+
+### Added
+
+* Parity batch 28 — 13 TSVs: ViewerPreferences, MarkInfo, IconFit,
+  PagePiece, URI, URLAlias, URTransformParameters, DeviceN family,
+  Separation, Measure→MeasureRL, new GeospatialMeasure.
+
+### Fixed
+
+* DeviceN/Separation accessors realigned with their TSV keys.
+
+## [0.7.29] — 2026-08-23
+
+### Added
+
+* Parity batch 27 — 19 TSVs: shading family (ShadingCommon module,
+  all seven ShadingTypes with stream-backed meshes, ShadingMap),
+  PatternMap, OptContentUser/Zoom, OC configuration + usage dicts.
+
+## [0.7.28] — 2026-08-23
+
+### Added
+
+* Parity batch 26 — 24 TSVs: font family (FontFile/2, CID fonts and
+  descriptors, MultipleMaster, Encoding, ToUnicodeCMap,
+  CIDFontDescriptorMetrics) and the full signature family (s12.8).
+
+### Fixed
+
+* `Signature#has_byte_range?` accepts field-wrapped PdfArray values.
+
+## [0.7.27] — 2026-08-23
+
+### Added
+
+* Parity batch 25 — 27 TSVs mapped 1:1: functions (Type 0/2/3/4),
+  halftones (1/5/6/10/16), RichMedia family, media offsets/players/
+  criteria.
+
+## [0.7.26] — 2026-08-23
+
+### Added
+
+* Parity batch 24 — color-space family (~20 TSVs): array-form
+  color spaces (CalGray/CalRGB/Lab/Device*/ICCBased/Indexed/
+  Separation/DeviceN/Pattern), BlackpointArray, ColorSpaceMap,
+  ColorantsDict, BoxStyle; mappings for Cal/ICC/BoxColorInfo/
+  PageLabel/LabRangeArray.
+
+### Fixed
+
+* Arlington default values are now type-converted (integers, floats,
+  booleans, arrays) instead of raw TSV strings.
+
+## [0.7.25] — 2026-08-20
+
+### Added
+
+* Parity batch 23 — destination family (11 TSVs): Destination base
+  with fit predicates, XYZ/Fit/FitH/FitR + structure variants,
+  DestinationDict, DestsMap; CryptFilter family mappings.
+* `Cos::ArlingtonBacked` — shared TSV binding extracted so
+  `PdfArray` subclasses gain positional `element_field` typing
+  alongside Dictionary's field merging.
+
+## [0.7.24] — 2026-08-19
+
+### Added
+
+* Parity batch 22 — Collection/Portfolio family complete (9 TSVs):
+  CollectionColors, CollectionFolder, CollectionSplit,
+  CollectionSubitem plus mappings on the five existing classes.
+
+## [0.7.23] — 2026-08-18
+
+### Added
+
+* Parity batch 21 — ActionGoToE, three AddAction dictionaries
+  (form-field/screen/widget trigger sets), ThreeD/Movie/Projection/
+  TrapNetwork annotations; AppearanceTrapNet mapping fix.
+
+## [0.7.22] — 2026-08-18
+
+### Added
+
+* Critical feature parity spec (27 examples) + `docs/USAGE.md`
+  cookbook + `docs/SEMVER.md` policy.
+
+## [0.7.21] — 2026-08-17
+
+### Added
+
+* Batch 20 — AddActionPageObject, BorderStyle; mappings for
+  BorderEffect, CIDSystemInfo, WidgetAnnotation, Movie, SoundObject.
+
+## [0.7.20] — 2026-08-17
+
+### Added
+
+* DSS (Document Security Store) + DPart types; mappings for 3D and
+  appearance types.
+
+## [0.7.19] — 2026-08-17
+
+### Added
+
+* `arlington_object` declarations on 41 existing annotation and
+  action types (enabled by the 0.7.18 merge fix).
+
+## [0.7.18] — 2026-08-16
+
+### Fixed
+
+* `arlington_object` / `define_field` merge: Arlington metadata now
+  merges with hand-coded fields instead of replacing them, and the
+  idempotency check compares against the parameter (anonymous
+  classes previously skipped loading silently).
+
+## [0.7.17] — 2026-08-16
+
+### Added
+
+* AddActionCatalog, AlternateImage, ActionSound types.
+
+## [0.7.16] — 2026-08-16
+
+### Added
+
+* Thread, Bead, WebCapture family, TrapRegion types.
+
+## [0.7.15] — 2026-08-14
+
+### Added
+
+* `Document#encryption` facade — `encrypt!`/`decrypt!` (40/128/256
+  bit) and `.permission_bits`.
+
+## [0.7.14] — 2026-08-14
+
+### Added
+
+* VRI, Thumbnail, Timespan, Viewport, UserProperty types.
+
+### Fixed
+
+* ArgumentError handling in signature verification on tampered DER.
+
+## [0.7.13] — 2026-08-14
+
+### Added
+
+* BoxFitter wired to Frame area tracking; Content::Processor
+  inline-image hook.
+
+## [0.7.12] — 2026-08-14
+
+### Fixed
+
+* `Frame#find_available_area` always returned the top-left corner
+  regardless of removed areas — rewrote with cursor tracking and
+  overlap detection; fixes Composer multi-page flow.
+
+## [0.7.11] — 2026-08-13
+
+### Fixed
+
+* GIF LZW next-code threshold; V5 user-password hash XOR.
+
+## [0.7.10] — 2026-08-11
+
+### Fixed
+
+* Release workflow reverted to metanorma/ci `rubygems-release.yml`
+  (the RubyGems trusted publisher is registered for that path).
+
+## [0.7.9] — 2026-08-11
+
+## [0.7.8] — 2026-08-10
+
+### Added
+
+* Parity batch 10 — CMS EnvelopedData public-key decryption,
+  inline-image parser (BI/ID/EI with abbreviation expansion),
+  forbidden-pattern cleanup.
+
+## [0.7.7] — 2026-08-10
+
+## [0.7.6] — 2026-08-09
+
+### Added
+
+* TIFF uncompressed decode, GIF LZW decode, complete sRGB ICC
+  profile with real MD5 ProfileID, polygon inscribed scan.
+
+## [0.7.5] — 2026-08-09
+
+## [0.7.4] — 2026-08-09
+
+### Added
+
+* Batch-7 deepening: V5Writer wired, PKI handler registered, real
+  glyph shaping and coverage reporting.
+
+## [0.7.3] — 2026-08-09
+
+## [0.7.2] — 2026-08-09
+
+### Added
+
+* Parity batches 4–6 — hyphenation, thumbnails, table spans and
+  multi-page tables, tagged-PDF validation, multi-revision
+  traversal, linearization-aware reader, PDF/A deep preflight,
+  PDF/X-6 and PDF/VT conformance, 17-module bulk TODO completion
+  across conformance/layout/encryption/fonts/images/color.
+
+## [0.7.1] — 2026-08-08
+
 ## [0.7.0] — 2026-08-08
 
 ### Added — Release infrastructure
