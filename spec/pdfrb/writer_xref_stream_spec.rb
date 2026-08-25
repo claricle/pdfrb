@@ -80,26 +80,30 @@ RSpec.describe "Object stream packing" do
   end
 
   it "produces smaller output than unpacked" do
-    text = "Lorem ipsum " * 50
-
-    plain_io = StringIO.new
-    Pdfrb::Document.new.tap do |doc|
-      font = doc.fonts.add("Helvetica")
-      doc.pages.add.canvas.text(text, at: [72, 720], font: font, size: 12)
-      doc.write(io: plain_io)
+    # Packing only wins once there are enough small non-stream
+    # objects to amortise the ObjStm overhead; 60 link annotations
+    # provide that (xref entries alone shrink the file).
+    build = lambda do |config|
+      io = StringIO.new
+      Pdfrb::Document.new(config: config).tap do |doc|
+        doc.pages.add
+        60.times do
+          doc.add({ Type: :Annot, Subtype: :Link, Rect: [0, 0, 10, 10],
+                    Border: [0, 0, 1] },
+                  type: Pdfrb::Model::Type::LinkAnnotation)
+        end
+        doc.write(io: io)
+      end
+      io.string.bytesize
     end
 
-    packed_io = StringIO.new
-    Pdfrb::Document.new(config: {
+    plain = build.call({})
+    packed = build.call({
       "writer.use_xref_stream" => true,
       "writer.pack_object_streams" => true,
-    }).tap do |doc|
-      font = doc.fonts.add("Helvetica")
-      doc.pages.add.canvas.text(text, at: [72, 720], font: font, size: 12)
-      doc.write(io: packed_io)
-    end
-
-    skip "packing should reduce size but depends on object count" if packed_io.string.bytesize >= plain_io.string.bytesize
+    })
+    expect(packed).to be < plain
+    expect(packed).to be < plain / 2
   end
 
   it "excludes streams from packing" do
