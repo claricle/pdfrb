@@ -62,11 +62,13 @@ module Pdfrb
           end
 
           # Iterate (name, Field) pairs across the inheritance chain.
+          # A subclass field with the same name shadows (replaces) the
+          # inherited one entirely.
           def each_field
             return enum_for(:each_field) unless block_given?
 
             if superclass <= Pdfrb::Model::Cos::Dictionary
-              superclass.each_field { |n, f| yield n, f }
+              superclass.each_field { |n, f| yield n, f unless own_fields.key?(n) }
             end
             own_fields.each { |n, f| yield n, f }
           end
