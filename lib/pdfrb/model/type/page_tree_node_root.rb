@@ -9,6 +9,15 @@ module Pdfrb
       # (some validation rules apply only to the root).
       class PageTreeNodeRoot < PageTreeNode
         arlington_object "PageTreeNodeRoot"
+
+        # The PageTreeNode TSV marks /Parent required; the root TSV
+        # omits the key entirely (the root must NOT have a parent),
+        # so neutralise the inherited requirement here.
+        define_field :Parent, type: Pdfrb::Model::Cos::Dictionary, required: false
+
+        def root?
+          true
+        end
       end
     end
   end
