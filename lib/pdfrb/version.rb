@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module Pdfrb
-  VERSION = "0.7.41"
+  VERSION = "0.7.42"
 end
