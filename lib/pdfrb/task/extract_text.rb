@@ -31,6 +31,18 @@ module Pdfrb
         block_given? ? document : results
       end
 
+      # Extract the text of a single page (see #call for the
+      # resolution strategy).
+      def call_single_page(page)
+        extractor = TextCollector.new(page.document, page)
+        begin
+          extractor.process(page.decoded_content)
+        rescue StandardError
+          # Malformed content stream — best effort, skip.
+        end
+        extractor.text
+      end
+
       # Internal: collects bytes from +Tj+ / +TJ+ / +'+ / +"'.
       # Tracks text-matrix y to insert line breaks at vertical moves.
       # Resolves glyph codes to Unicode via the active font's

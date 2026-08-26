@@ -137,9 +137,18 @@ File.binwrite("linearized.pdf", io.string)
 ## Encryption
 
 ```ruby
-doc = Pdfrb.open("input.pdf")
+doc = Pdfrb::Document.new
+doc.pages.add
+doc.encrypt!(user_password: "secret", owner_password: "owner", bits: 128)
 doc.write("encrypted.pdf")
-# Encryption configuration via document.config
+
+# Opening an encrypted document:
+doc = Pdfrb.open("encrypted.pdf",
+                 config: { "encryption.password" => "secret" })
+
+# Removing encryption from a parsed document:
+doc.decrypt!
+doc.write("decrypted.pdf")
 ```
 
 ## Merging PDFs

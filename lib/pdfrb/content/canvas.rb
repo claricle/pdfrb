@@ -64,7 +64,11 @@ module Pdfrb
         self
       end
 
-      def line(x1, y1, x2, y2)
+      def line(x1 = nil, y1 = nil, x2 = nil, y2 = nil, from: nil, to: nil)
+        if from && to
+          x1, y1 = from
+          x2, y2 = to
+        end
         move_to(x1, y1).line_to(x2, y2)
       end
 
@@ -189,8 +193,14 @@ module Pdfrb
         self
       end
 
-      def rectangle(x, y, width, height)
-        emit_op(Pdfrb::Content::Operator::Rectangle, x, y, width, height)
+      def rectangle(x = nil, y = nil, w = nil, h = nil,
+                    point: nil, width: nil, height: nil)
+        x, y = point if point
+        w = width if w.nil?
+        h = height if h.nil?
+        raise ArgumentError, "rectangle needs x, y, width and height" if [x, y, w, h].any?(&:nil?)
+
+        emit_op(Pdfrb::Content::Operator::Rectangle, x, y, w, h)
         self
       end
 
