@@ -12,6 +12,12 @@ module Pdfrb
     module Operator
       @registry = {}
 
+      # Referenced directly by the Parser for BI ... ID ... EI
+      # sequences; the remaining operator classes load via
+      # eager_load! / Operator[].
+      autoload :BeginInlineImage, "pdfrb/content/operators/inline_image"
+      autoload :EndInlineImage, "pdfrb/content/operators/inline_image"
+
       class << self
         attr_reader :registry
 

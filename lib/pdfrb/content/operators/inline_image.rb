@@ -29,8 +29,8 @@ module Pdfrb
           def invoke(processor, image = nil)
             processor.inline_image(image) if image
           end
-          register
         end
+        register
       end
 
       class EndInlineImage < Base
@@ -38,8 +38,8 @@ module Pdfrb
           def name; "EI"; end
 
           def invoke(_processor, *_operands); end
-          register
         end
+        register
       end
     end
   end

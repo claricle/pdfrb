@@ -78,9 +78,9 @@ module Pdfrb
       def marked_content_point(_tag, _properties = nil); end
 
       # Called when a BI/ID/EI inline image is encountered in the
-      # content stream. +image+ is a Hash with :header (the image
-      # dict keys, expanded from abbreviations) and :data (the raw
-      # byte payload). Subclasses override to render or extract.
+      # content stream. +image+ is a Content::InlineImage with the
+      # expanded header keys, the raw payload, and decoded_data /
+      # geometry accessors. Subclasses override to render or extract.
       def inline_image(_image); end
     end
   end
