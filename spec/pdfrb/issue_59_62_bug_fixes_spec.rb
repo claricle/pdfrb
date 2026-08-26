@@ -63,7 +63,7 @@ RSpec.describe "Issues #59-#62 bug fixes" do
         f.close
 
         resource = doc.fonts.add(f.path)
-        font_ref = doc.catalog.value[:Resources][:Font][resource]
+        font_ref = doc.pages.pages_root.value[:Resources][:Font][resource]
         font = doc.object(font_ref)
 
         base_font = font[:BaseFont].to_s
@@ -79,7 +79,7 @@ RSpec.describe "Issues #59-#62 bug fixes" do
       io = StringIO.new(otf)
       resource = doc.fonts.add(io)
 
-      font_ref = doc.catalog.value[:Resources][:Font][resource]
+      font_ref = doc.pages.pages_root.value[:Resources][:Font][resource]
       font = doc.object(font_ref)
       expect(font[:Subtype]).to eq(:Type1)
 
@@ -99,7 +99,7 @@ RSpec.describe "Issues #59-#62 bug fixes" do
       io = StringIO.new(ttf)
       resource = doc.fonts.add(io)
 
-      font_ref = doc.catalog.value[:Resources][:Font][resource]
+      font_ref = doc.pages.pages_root.value[:Resources][:Font][resource]
       font = doc.object(font_ref)
       expect(font[:Subtype]).to eq(:TrueType)
 

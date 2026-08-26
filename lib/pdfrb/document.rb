@@ -223,6 +223,7 @@ module Pdfrb
       target = io || (path && File.open(path, "wb"))
       raise ArgumentError, "write needs a path or io:" unless target
 
+      fonts.subset_fonts! if config["writer.subset_fonts"] != false
       Pdfrb::Writer.write(self, target)
       target.close if path && io.nil? && target.is_a?(IO)
       self

@@ -105,7 +105,7 @@ RSpec.describe Pdfrb::Document::Fonts do
     resource = doc.fonts.add(path)
     expect(resource).to be_a(Symbol)
 
-    font_ref = doc.catalog.value[:Resources][:Font][resource]
+    font_ref = doc.pages.pages_root.value[:Resources][:Font][resource]
     font = doc.object(font_ref)
     fd_ref = font.value[:FontDescriptor]
     expect(fd_ref).to be_a(Pdfrb::Model::Reference)

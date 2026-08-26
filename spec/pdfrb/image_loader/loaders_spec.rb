@@ -83,7 +83,7 @@ RSpec.describe Pdfrb::Document::Images do
   it "attaches the image to Catalog /Resources /XObject" do
     doc = Pdfrb::Document.new
     name = doc.images.add(JPEG_FIXTURE)
-    xobj = doc.catalog.value[:Resources][:XObject]
+    xobj = doc.pages.pages_root.value[:Resources][:XObject]
     expect(xobj[name]).to be_a(Pdfrb::Model::Reference)
   end
 end

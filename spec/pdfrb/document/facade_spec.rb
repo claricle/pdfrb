@@ -64,7 +64,7 @@ RSpec.describe Pdfrb::Document::Fonts do
 
   it "attaches the font to Catalog /Resources /Font" do
     name = doc.fonts.add("Helvetica")
-    font_ref = doc.catalog.value[:Resources][:Font][name]
+    font_ref = doc.pages.pages_root.value[:Resources][:Font][name]
     font = doc.object(font_ref)
     expect(font[:Subtype]).to eq(:Type1)
     expect(font[:BaseFont]).to eq(:Helvetica)

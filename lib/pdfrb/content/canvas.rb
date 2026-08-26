@@ -363,6 +363,7 @@ module Pdfrb
 
       def text(str, at:, font:, size:, char_spacing: nil, word_spacing: nil)
         @used_fonts[font] = size
+        @document&.fonts&.register_usage(font, str)
         encoded = encode_for_font(str.to_s, font)
         emit_op(Pdfrb::Content::Operator::BeginText)
         emit_op(Pdfrb::Content::Operator::SetTextMatrix, 1, 0, 0, 1, at[0], at[1])

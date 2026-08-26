@@ -142,10 +142,13 @@ module Pdfrb
 
       def register(name, shading_obj)
         @registry[name] = shading_obj
-        catalog = document.catalog
-        catalog.value[:Resources] ||= {}
-        catalog.value[:Resources][:Shading] ||= {}
-        catalog.value[:Resources][:Shading][name] =
+        document.catalog
+        # Attach to the page-tree root so every page inherits it
+        # (s7.7.3.2); the Catalog has no /Resources key in PDF.
+        root = document.pages.pages_root
+        root.value[:Resources] ||= {}
+        root.value[:Resources][:Shading] ||= {}
+        root.value[:Resources][:Shading][name] =
           Pdfrb::Model::Reference.new(shading_obj.oid, shading_obj.gen)
       end
 

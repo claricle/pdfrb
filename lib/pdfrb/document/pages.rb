@@ -26,11 +26,13 @@ module Pdfrb
         media_box ||= (width && height ? [0, 0, width, height] : [0, 0, 612, 792])
         root = pages_root
         contents = document.add({}, type: Pdfrb::Model::Cos::Stream)
+        # No eager /Resources: an empty page-level dict would override
+        # the inheritable root resources (s7.7.3.2). The canvas seeds
+        # one lazily when it attaches XObjects.
         page_hash = {
           Type: :Page,
           Parent: Pdfrb::Model::Reference.new(root.oid, root.gen),
           MediaBox: media_box,
-          Resources: {},
           Contents: Pdfrb::Model::Reference.new(contents.oid, 0)
         }
         page_hash[:BleedBox] = bleed_box if bleed_box
@@ -134,8 +136,9 @@ module Pdfrb
         end
       end
 
-      private
-
+      # The page-tree root (Catalog /Pages), seeding an empty tree if
+      # needed. Resources placed here are inherited by every page
+      # (s7.7.3.2).
       def pages_root
         catalog = document.catalog
         raise Pdfrb::Error, "Document has no Catalog" unless catalog
@@ -149,6 +152,8 @@ module Pdfrb
         catalog.value[:Pages] = Pdfrb::Model::Reference.new(root.oid, root.gen)
         root
       end
+
+      private
 
       def walk(node, &block)
         kids = node.is_a?(Pdfrb::Model::Cos::Dictionary) ? node.value[:Kids] : node[:Kids]

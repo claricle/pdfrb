@@ -9,6 +9,7 @@ module Pdfrb
     autoload :AFMParser, "pdfrb/font/afm_parser"
     autoload :CMap, "pdfrb/font/cmap"
     autoload :TrueType, "pdfrb/font/true_type"
+    autoload :CFF, "pdfrb/font/cff"
     autoload :Type1, "pdfrb/font/type1"
     autoload :Metrics, "pdfrb/font/metrics_helper"
     autoload :MetricsHelper, "pdfrb/font/metrics_helper"

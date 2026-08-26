@@ -122,7 +122,7 @@ RSpec.describe Pdfrb::Document::Shadings do
       from: [0, 0], to: [100, 0],
       stops: [[0.0, [:gray, 0]], [1.0, [:gray, 1]]]
     )
-    shading_dict = doc.catalog.value[:Resources][:Shading]
+    shading_dict = doc.pages.pages_root.value[:Resources][:Shading]
     expect(shading_dict[:Sh1]).to be_a(Pdfrb::Model::Reference)
   end
 
@@ -131,7 +131,7 @@ RSpec.describe Pdfrb::Document::Shadings do
       from: [0, 0], to: [100, 0],
       stops: [[0.0, [:rgb, 0, 0, 0]], [1.0, [:rgb, 1, 1, 1]]]
     )
-    ref = doc.catalog.value[:Resources][:Shading][:Sh1]
+    ref = doc.pages.pages_root.value[:Resources][:Shading][:Sh1]
     shading = doc.object(ref)
     expect(shading[:ShadingType]).to eq(2)
   end
@@ -141,7 +141,7 @@ RSpec.describe Pdfrb::Document::Shadings do
       from: [0, 0, 0], to: [50, 50, 100],
       stops: [[0.0, [:rgb, 0, 0, 0]], [1.0, [:rgb, 1, 1, 1]]]
     )
-    ref = doc.catalog.value[:Resources][:Shading][:Sh1]
+    ref = doc.pages.pages_root.value[:Resources][:Shading][:Sh1]
     shading = doc.object(ref)
     expect(shading[:ShadingType]).to eq(3)
   end
