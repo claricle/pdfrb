@@ -5,6 +5,7 @@ module Pdfrb
     autoload :GraphicsState, "pdfrb/content/graphics_state"
     autoload :Operator, "pdfrb/content/operator"
     autoload :Parser, "pdfrb/content/parser"
+    autoload :InlineImage, "pdfrb/content/inline_image"
     autoload :Processor, "pdfrb/content/processor"
     autoload :ColorSpace, "pdfrb/content/color_space"
     autoload :TransformationMatrix, "pdfrb/content/transformation_matrix"

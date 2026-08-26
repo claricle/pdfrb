@@ -39,10 +39,10 @@ RSpec.describe "Parity batch 10 deep specs" do
         o == Pdfrb::Content::Operator::BeginInlineImage
       end
       inline = operands.first
-      expect(inline[:header][:Width]).to eq(2)
-      expect(inline[:header][:Height]).to eq(2)
-      expect(inline[:header][:ColorSpace]).to eq(:G)
-      expect(inline[:header][:BitsPerComponent]).to eq(8)
+      expect(inline.width).to eq(2)
+      expect(inline.height).to eq(2)
+      expect(inline.header[:ColorSpace]).to eq(:G)
+      expect(inline.bits_per_component).to eq(8)
     end
 
     it "extracts raw image bytes between ID and EI" do
@@ -53,8 +53,8 @@ RSpec.describe "Parity batch 10 deep specs" do
       end
       inline = operands.first
       # Data includes the 4 pixel bytes (may have trailing separator).
-      expect(inline[:data]).not_to be_empty
-      expect(inline[:data]).to include([0].pack("C"))
+      expect(inline.data).not_to be_empty
+      expect(inline.data).to include([0].pack("C"))
     end
 
     it "handles streams without inline images unchanged" do

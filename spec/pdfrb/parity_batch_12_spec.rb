@@ -69,8 +69,8 @@ RSpec.describe "Parity batch 12 specs" do
 
       processor.process(stream)
       expect(processor.inline_seen).not_to be_nil
-      expect(processor.inline_seen[:header][:Width]).to eq(1)
-      expect(processor.inline_seen[:header][:Height]).to eq(1)
+      expect(processor.inline_seen.width).to eq(1)
+      expect(processor.inline_seen.height).to eq(1)
     end
 
     it "does not crash on streams without inline images" do

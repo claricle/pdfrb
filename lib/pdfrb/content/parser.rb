@@ -82,7 +82,7 @@ module Pdfrb
         # keyword from the data. Read raw bytes until "\nEI" or
         # " EI" terminator.
         data = read_inline_image_data
-        { header: header, data: data }
+        Pdfrb::Content::InlineImage.new(header: header, data: data)
       end
 
       # Map inline-image abbreviation keys to full PDF names per
