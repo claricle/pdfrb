@@ -138,7 +138,10 @@ RSpec.describe "docs/USAGE.md cookbook" do
   end
 
   it "extracting images" do
-    images = Pdfrb::Task::ExtractImages.call(Pdfrb.open(fixtures_path("simple-graphics.pdf")))
+    fixture = fixtures_path("simple-graphics.pdf")
+    skip "fixture corpus not pulled" unless File.exist?(fixture)
+
+    images = Pdfrb::Task::ExtractImages.call(Pdfrb.open(fixture))
     expect(images).to be_an(Array)
   end
 
