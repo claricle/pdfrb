@@ -65,8 +65,8 @@ RSpec.describe "Parity batch 23 destination + crypt specs" do
     it "Fit/FitH/FitR struct variants map their TSVs" do
       %i[DestinationFitStruct DestinationFitHStruct DestinationFitRStruct].each do |klass_name|
         klass = Pdfrb::Model::Type.const_get(klass_name)
-        expect(klass.arlington_definition).not_to be_nil, klass_name
-        expect(klass.element_field(0)).not_to be_nil, klass_name
+        expect(klass.arlington_definition).not_to be_nil, klass_name.to_s
+        expect(klass.element_field(0)).not_to be_nil, klass_name.to_s
       end
       dest = doc.add(["s1", :FitR, 0, 0, 100, 100],
                      type: Pdfrb::Model::Type::DestinationFitRStruct)
