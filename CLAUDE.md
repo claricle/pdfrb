@@ -105,6 +105,22 @@ These repos live outside the project tree but are the authoritative references. 
 | `~/src/pdfa/technote-pdfua1-001/` | PDF/UA-1 Technical Note 001 — `ActualText` on `Figure` structure elements. |
 | `~/src/pdfa/technote-pdfua1-002/` | PDF/UA-1 Technical Note 002 — `Reference` structure elements containing links. |
 
-## Work in progress
+## Status
 
-The gem is at 0.1.0 — foundation only (autoload tree, error hierarchy, constants, configuration). All remaining implementation work is tracked as individual TODO files in `TODO.general-rels/`. The master index is `TODO.general-rels/README.md`. Pick up work in dependency order; each TODO file's front-matter declares `depends_on`.
+Released on RubyGems (0.7.x, BSD-2-Clause). The full stack is
+implemented: reader/writer round-trip, content streams + Canvas,
+encryption (RC4/AES-256), signatures, layout/Composer, conformance
+validation (PDF/A, PDF/UA, PDF/X, PDF/VT), and the CLI.
+
+**Arlington TSV coverage is complete** — 612 of 614 non-alias TSVs
+map to `Model::Type::*` classes (only the two single-row OPI alias
+wrappers remain, deliberately). Every commit goes through
+PR + CI; the CHANGELOG records each release.
+
+Known depth gaps: CFF/OTF font subsetting (only TrueType subsets),
+veraPDF cross-check for PDF/A output. The original plan files live
+in `TODO.general-rels/` (~157 entries, mostly landed).
+
+`docs/USAGE.md` is the verified cookbook — `spec/pdfrb/usage_doc_spec.rb`
+executes every snippet, so keep both in sync when changing public
+APIs.

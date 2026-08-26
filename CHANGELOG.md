@@ -95,6 +95,74 @@ All notable changes to the pdfrb gem will be documented in this file.
 * Removed all `instance_variable_set/get`, `send` to private
   methods, `respond_to?` for type checks.
 
+## [0.7.44] — 2026-08-26
+
+### Added
+
+* Top-level `Pdfrb.open(path)` / `Pdfrb.parse(bytes_or_io)` module
+  functions.
+* `Document#encrypt!` / `#decrypt!` delegates;
+  `ExtractText.call_single_page(page)`.
+* `Canvas#rectangle(point:, width:, height:)` and
+  `Canvas#line(from:, to:)` keyword forms alongside positional.
+* Executable cookbook spec (`usage_doc_spec.rb`): every docs/USAGE.md
+  snippet runs against temp files.
+
+### Fixed
+
+* **Oid allocation on parsed documents** started at 1 regardless of
+  the xref, so mutating a reopened PDF overwrote existing objects —
+  `Task::Merge` dropped the target's original pages (1+2 -> 2).
+  Allocation now seeds past max(xref oid, trailer /Size).
+
+## [0.7.43] — 2026-08-26
+
+### Added
+
+* `Content::InlineImage` value object for BI/ID/EI sequences:
+  geometry accessors, s8.9.7 abbreviation expansion (color spaces
+  and filter names), components/expected_decoded_size, and
+  `decoded_data` applying the filter pipeline on demand.
+
+### Fixed
+
+* operators/inline_image.rb called `register` inside `class << self`
+  (receiver = the singleton class) — never legitimately executable;
+  moved to class-body level.
+* operators.rb autoloaded `:InlineImage` from a file defining
+  `Operator::BeginInlineImage` (namespace mismatch); correct
+  BeginInlineImage/EndInlineImage autoloads now live in operator.rb.
+
+## [0.7.42] — 2026-08-25
+
+### Fixed
+
+* Packing-size spec no longer skips: rebuilt with 60 small
+  annotations so object-stream packing wins decisively (~6.5KB ->
+  ~1.4KB). Suite is now 0 failures, 0 pending.
+
+## [0.7.41] — 2026-08-25
+
+### Added
+
+* Arlington conformance fixture walk is real: all 12 Annex H
+  fixtures validate through the typed field validator with zero
+  violations (previously a pending stub).
+
+### Fixed
+
+* `PageTreeNodeRoot` shadows the inherited required `/Parent` (the
+  root TSV omits the key; the root must not carry a parent).
+* `Dictionary.each_field` honors field shadowing: a subclass field
+  with the same name fully replaces the inherited one.
+
+## [0.7.40] — 2026-08-25
+
+### Added
+
+* CHANGELOG backfill for 0.7.1 through 0.7.39 (29 releases
+  reconstructed from tag history).
+
 ## [0.7.39] — 2026-08-24
 
 ### Added

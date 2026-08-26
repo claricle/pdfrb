@@ -31,7 +31,7 @@ https://github.com/gettalong/hexapdf[HexaPDF].
 gem install pdfrb
 ----
 
-== Usage (sketch — APIs land across the TODO sequence)
+== Usage
 
 [source,ruby]
 ----
@@ -39,14 +39,28 @@ require "pdfrb"
 
 # Read
 doc = Pdfrb.open("input.pdf")
-puts doc.catalog.pages.count
+puts doc.pages.count
+puts Pdfrb::Task::ExtractText.call_single_page(doc.pages.first)
 
 # Create
 doc = Pdfrb::Document.new
+font = doc.fonts.add("Helvetica")
 page = doc.pages.add
-page.canvas.text("Hello, PDF", at: [72, 720])
+page.canvas.text("Hello, PDF", at: [72, 720], font: font, size: 24)
+page.canvas.rectangle(point: [72, 700], width: 200, height: 50)
+page.canvas.stroke
 doc.write("hello.pdf")
+
+# Merge
+target = Pdfrb.open("base.pdf")
+Pdfrb::Task::Merge.call(target, Pdfrb.open("appendix.pdf"))
+target.write("merged.pdf")
 ----
+
+A full cookbook (tagged PDF, layers, forms, signatures, diff,
+conformance validation, linearization, encryption, CLI) lives in
+link:docs/USAGE.md[docs/USAGE.md] — every snippet there is executed
+by the test suite.
 
 == Architecture
 
