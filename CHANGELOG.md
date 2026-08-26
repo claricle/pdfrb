@@ -95,6 +95,35 @@ All notable changes to the pdfrb gem will be documented in this file.
 * Removed all `instance_variable_set/get`, `send` to private
   methods, `respond_to?` for type checks.
 
+## [0.7.46] — 2026-08-26
+
+### Added
+
+* `Pdfrb::Font::CFF` (TN5176): INDEX parse/serialize, DICT operand
+  parsing, File parser (charset formats 0/1/2, CharStrings, Private
+  DICT + Local Subrs), and a safe subsetter. `subset_otf` rebuilds
+  the OTF table directory around the subsetted 'CFF ' table;
+  embedded OTFs now ship as smaller /FontFile3 /OpenType streams.
+
+### Fixed
+
+* **Resources attached to the Catalog** — Fonts, Shadings, and
+  Images put /Resources on the Catalog, a key PDF does not define;
+  every written page carried unresolvable resources for viewers.
+  All three now attach to the page-tree root (inherited, s7.7.3.2),
+  and pages no longer seed an overriding empty /Resources dict.
+* **Subsetting was dead code** — `subset_fonts!` was never invoked,
+  so embedded fonts (TrueType and OTF) always shipped in full.
+  `Document#write` now runs it (config `writer.subset_fonts`), fed
+  by per-font codepoint usage recorded by `Canvas#text`.
+
+## [0.7.45] — 2026-08-26
+
+### Added
+
+* CHANGELOG entries for 0.7.40-0.7.44; verified README usage
+  section; current CLAUDE.md status (was still describing 0.1.0).
+
 ## [0.7.44] — 2026-08-26
 
 ### Added
