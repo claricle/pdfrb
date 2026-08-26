@@ -166,6 +166,14 @@ module Pdfrb
 
     def encryption; @encryption ||= Document::Encryption.new(self); end
 
+    def encrypt!(**)
+      encryption.encrypt!(**)
+    end
+
+    def decrypt!
+      encryption.decrypt!
+    end
+
     def info; @info ||= Document::Info.new(self); end
 
     def display; @display ||= Document::Display.new(self); end
@@ -306,6 +314,19 @@ module Pdfrb
 
       @xref, @trailer_dict = load_xref_and_trailer(io, sxref)
       @object_reader = Pdfrb::Source::ObjectReader.new(self, @xref) if @xref
+      seed_next_oid
+    end
+
+    # New/modified objects must not collide with objects loaded from
+    # the xref: continue allocating past the highest known oid (or
+    # the trailer /Size, whichever is larger).
+    def seed_next_oid
+      return if @xref.nil?
+
+      max_oid = @xref.entries.keys.max || 0
+      size = @trailer_dict && @trailer_dict[:Size]
+      size = size.to_i if size.respond_to?(:to_i)
+      @next_oid = [max_oid + 1, size.to_i, @next_oid].max
     end
 
     def load_xref_and_trailer(io, sxref)

@@ -58,6 +58,20 @@ module Pdfrb
   autoload :CLI, "pdfrb/cli"
 
   require "logger"
+  require "stringio"
+
+  class << self
+    # Open a PDF file (path or block over the file handle).
+    def open(path, **, &)
+      Document.open(path, **, &)
+    end
+
+    # Parse PDF bytes/IO into a Document.
+    def parse(io, **)
+      io = StringIO.new(io.b) if io.is_a?(String)
+      Document.new(io: io, **)
+    end
+  end
 
   def self.logger
     @logger ||= Logger.new($stderr, level: Logger::WARN)
