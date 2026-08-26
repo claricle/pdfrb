@@ -11,7 +11,7 @@ RSpec.describe Pdfrb::Document::Fonts do
       name = doc.fonts.add("Helvetica")
       expect(name).to eq(:F1)
 
-      ref = doc.catalog.value[:Resources][:Font][name]
+      ref = doc.pages.pages_root.value[:Resources][:Font][name]
       font = doc.object(ref)
       expect(font[:Subtype]).to eq(:Type1)
       expect(font[:BaseFont]).to eq(:Helvetica)
@@ -20,7 +20,7 @@ RSpec.describe Pdfrb::Document::Fonts do
 
     it "creates a FontDescriptor with AFM metrics" do
       doc.fonts.add("Times-Roman")
-      font_ref = doc.catalog.value[:Resources][:Font][:F1]
+      font_ref = doc.pages.pages_root.value[:Resources][:Font][:F1]
       font = doc.object(font_ref)
 
       fd_ref = font.value[:FontDescriptor]
@@ -46,7 +46,7 @@ RSpec.describe Pdfrb::Document::Fonts do
 
     it "does not set encoding for Symbol and ZapfDingbats" do
       doc.fonts.add("Symbol")
-      font_ref = doc.catalog.value[:Resources][:Font][:F1]
+      font_ref = doc.pages.pages_root.value[:Resources][:Font][:F1]
       font = doc.object(font_ref)
       expect(font[:Encoding]).to be_nil
     end
@@ -115,7 +115,7 @@ RSpec.describe Pdfrb::Document::Fonts do
       skip "test font not available" unless File.file?(ttf_path)
 
       resource = doc.fonts.add(ttf_path)
-      font_ref = doc.catalog.value[:Resources][:Font][resource]
+      font_ref = doc.pages.pages_root.value[:Resources][:Font][resource]
       font_dict = doc.object(font_ref)
       base_font = font_dict.value[:BaseFont].to_s
       expect(base_font).to match(/\A[A-Z]{6}\+RiboseLogoType-Alternate\z/)

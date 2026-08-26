@@ -51,7 +51,7 @@ RSpec.describe Pdfrb::Task::Optimize do
                         type: Pdfrb::Model::Cos::Stream)
       stream2.stream = payload.dup
 
-      resources = page.value[:Resources]
+      resources = page.value[:Resources] = {}
       resources[:XObject] = {
         Fm1: Pdfrb::Model::Reference.new(stream1.oid, 0),
         Fm2: Pdfrb::Model::Reference.new(stream2.oid, 0),
@@ -83,6 +83,7 @@ RSpec.describe Pdfrb::Task::Optimize do
       3.times do |i|
         stream = dedup_doc.add({ Subtype: :Form }, type: Pdfrb::Model::Cos::Stream)
         stream.stream = payload.dup
+        dedup_page.value[:Resources] ||= {}
         dedup_page.value[:Resources][:XObject] ||= {}
         dedup_page.value[:Resources][:XObject][:"Fm#{i}"] =
           Pdfrb::Model::Reference.new(stream.oid, 0)
@@ -93,6 +94,7 @@ RSpec.describe Pdfrb::Task::Optimize do
 
       nodup_doc = Pdfrb::Document.new
       nodup_page = nodup_doc.pages.add
+      nodup_page.value[:Resources] = {}
       3.times do |i|
         stream = nodup_doc.add({ Subtype: :Form }, type: Pdfrb::Model::Cos::Stream)
         stream.stream = payload.dup

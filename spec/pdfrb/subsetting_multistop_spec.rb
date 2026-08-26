@@ -50,7 +50,7 @@ RSpec.describe "Multi-stop gradient support" do
       from: [0, 0], to: [100, 0],
       stops: [[0.0, [:rgb, 1, 0, 0]], [1.0, [:rgb, 0, 0, 1]]]
     )
-    ref = doc.catalog.value[:Resources][:Shading][name]
+    ref = doc.pages.pages_root.value[:Resources][:Shading][name]
     shading = doc.object(ref)
     func_ref = shading[:Function]
     func = doc.object(func_ref)
@@ -66,7 +66,7 @@ RSpec.describe "Multi-stop gradient support" do
         [1.0, [:rgb, 0, 0, 1]],
       ]
     )
-    ref = doc.catalog.value[:Resources][:Shading][name]
+    ref = doc.pages.pages_root.value[:Resources][:Shading][name]
     shading = doc.object(ref)
     func_ref = shading[:Function]
     func = doc.object(func_ref)
@@ -87,7 +87,7 @@ RSpec.describe "Multi-stop gradient support" do
         [1.0, [:rgb, 0, 0, 1]],
       ]
     )
-    ref = doc.catalog.value[:Resources][:Shading][name]
+    ref = doc.pages.pages_root.value[:Resources][:Shading][name]
     shading = doc.object(ref)
     func_ref = shading[:Function]
     func = doc.object(func_ref)
@@ -106,7 +106,7 @@ RSpec.describe "Multi-stop gradient support" do
         [1.0, [:gray, 1]],
       ]
     )
-    ref = doc.catalog.value[:Resources][:Shading][name]
+    ref = doc.pages.pages_root.value[:Resources][:Shading][name]
     shading = doc.object(ref)
     func_ref = shading[:Function]
     func = doc.object(func_ref)

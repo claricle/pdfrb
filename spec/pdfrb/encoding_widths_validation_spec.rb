@@ -67,7 +67,7 @@ RSpec.describe "Font /Widths array" do
 
   it "populates /Widths from AFM metrics" do
     doc.fonts.add("Helvetica")
-    font_ref = doc.catalog.value[:Resources][:Font][:F1]
+    font_ref = doc.pages.pages_root.value[:Resources][:Font][:F1]
     font = doc.object(font_ref)
 
     expect(font.value[:FirstChar]).to eq(0)
@@ -78,7 +78,7 @@ RSpec.describe "Font /Widths array" do
 
   it "has non-zero width for space (0x20)" do
     doc.fonts.add("Helvetica")
-    font_ref = doc.catalog.value[:Resources][:Font][:F1]
+    font_ref = doc.pages.pages_root.value[:Resources][:Font][:F1]
     font = doc.object(font_ref)
 
     space_width = font.value[:Widths][0x20]
@@ -87,7 +87,7 @@ RSpec.describe "Font /Widths array" do
 
   it "has non-zero width for 'H' (0x48)" do
     doc.fonts.add("Helvetica")
-    font_ref = doc.catalog.value[:Resources][:Font][:F1]
+    font_ref = doc.pages.pages_root.value[:Resources][:Font][:F1]
     font = doc.object(font_ref)
 
     h_width = font.value[:Widths][0x48]
@@ -96,7 +96,7 @@ RSpec.describe "Font /Widths array" do
 
   it "widths are consistent with text_width measurement" do
     doc.fonts.add("Times-Roman")
-    font_ref = doc.catalog.value[:Resources][:Font][:F1]
+    font_ref = doc.pages.pages_root.value[:Resources][:Font][:F1]
     font = doc.object(font_ref)
 
     measured = doc.fonts.text_width("A", "Times-Roman", size: 1000)

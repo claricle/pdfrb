@@ -12,7 +12,7 @@ RSpec.describe "Font pipeline completeness" do
       io = StringIO.new(ttf)
       doc.fonts.add(io)
 
-      font_ref = doc.catalog.value[:Resources][:Font][:F1]
+      font_ref = doc.pages.pages_root.value[:Resources][:Font][:F1]
       font = doc.object(font_ref)
       expect(font.value.key?(:Widths)).to be true if font.value[:Widths]
     end
@@ -21,7 +21,7 @@ RSpec.describe "Font pipeline completeness" do
   describe "/ToUnicode CMap" do
     it "adds /ToUnicode to standard fonts" do
       doc.fonts.add("Helvetica")
-      font_ref = doc.catalog.value[:Resources][:Font][:F1]
+      font_ref = doc.pages.pages_root.value[:Resources][:Font][:F1]
       font = doc.object(font_ref)
 
       tu_ref = font.value[:ToUnicode]
@@ -38,7 +38,7 @@ RSpec.describe "Font pipeline completeness" do
       io = StringIO.new(ttf)
       doc.fonts.add(io)
 
-      font_ref = doc.catalog.value[:Resources][:Font][:F1]
+      font_ref = doc.pages.pages_root.value[:Resources][:Font][:F1]
       font = doc.object(font_ref)
       tu_ref = font.value[:ToUnicode]
       expect(tu_ref).to be_a(Pdfrb::Model::Reference)
@@ -46,7 +46,7 @@ RSpec.describe "Font pipeline completeness" do
 
     it "CMap maps WinAnsi byte 0x41 (A) to Unicode U+0041" do
       doc.fonts.add("Helvetica")
-      font_ref = doc.catalog.value[:Resources][:Font][:F1]
+      font_ref = doc.pages.pages_root.value[:Resources][:Font][:F1]
       font = doc.object(font_ref)
       tu_stream = doc.object(font.value[:ToUnicode])
       cmap_data = tu_stream.stream
@@ -57,7 +57,7 @@ RSpec.describe "Font pipeline completeness" do
 
     it "CMap maps WinAnsi byte 0xE9 (é) to Unicode U+00E9" do
       doc.fonts.add("Helvetica")
-      font_ref = doc.catalog.value[:Resources][:Font][:F1]
+      font_ref = doc.pages.pages_root.value[:Resources][:Font][:F1]
       font = doc.object(font_ref)
       tu_stream = doc.object(font.value[:ToUnicode])
       cmap_data = tu_stream.stream
@@ -89,21 +89,21 @@ RSpec.describe "Font pipeline completeness" do
   describe "Standard font /Widths from AFM" do
     it "space character (0x20) has non-zero width" do
       doc.fonts.add("Helvetica")
-      font_ref = doc.catalog.value[:Resources][:Font][:F1]
+      font_ref = doc.pages.pages_root.value[:Resources][:Font][:F1]
       font = doc.object(font_ref)
       expect(font.value[:Widths][0x20]).to be_positive
     end
 
     it "letter 'A' (0x41) has non-zero width" do
       doc.fonts.add("Times-Roman")
-      font_ref = doc.catalog.value[:Resources][:Font][:F1]
+      font_ref = doc.pages.pages_root.value[:Resources][:Font][:F1]
       font = doc.object(font_ref)
       expect(font.value[:Widths][0x41]).to be_positive
     end
 
     it "all 256 entries present" do
       doc.fonts.add("Courier")
-      font_ref = doc.catalog.value[:Resources][:Font][:F1]
+      font_ref = doc.pages.pages_root.value[:Resources][:Font][:F1]
       font = doc.object(font_ref)
       expect(font.value[:Widths].length).to eq(256)
       expect(font.value[:FirstChar]).to eq(0)

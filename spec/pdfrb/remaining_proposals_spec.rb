@@ -36,7 +36,8 @@ RSpec.describe "Font embedding failure warning" do
     io = StringIO.new(otf)
 
     doc.fonts.add(io)
-    font_ref = doc.catalog.value[:Resources][:Font][:F1]
+    # Fonts attach to the page-tree root (inherited, s7.7.3.2).
+    font_ref = doc.pages.pages_root.value[:Resources][:Font][:F1]
     font = doc.object(font_ref)
     expect(font[:Subtype]).to eq(:Type1)
   end

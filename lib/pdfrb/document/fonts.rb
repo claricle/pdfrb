@@ -61,6 +61,15 @@ module Pdfrb
       end
 
       def used_codepoints(resource); @used_codepoints[resource]; end
+
+      # Record that +text+ was drawn with +font_dict+ so the
+      # write-time subsetter knows which codepoints each embedded
+      # font must retain.
+      def register_usage(font_dict, text)
+        resource = @font_dicts.key(font_dict)
+        track(resource, text) if resource
+      end
+
       def encoding_for(resource); @encodings[resource]; end
 
       def encode_text(text, resource)
@@ -144,21 +153,7 @@ module Pdfrb
           next if codepoints.empty?
 
           begin
-            ttf = Pdfrb::Font::TrueType::File.new(data)
-            subsetter = Pdfrb::Font::TrueType::Subsetter.new(ttf)
-            subset = subsetter.subset(codepoints.to_a)
-            dict = @font_dicts[resource]
-            next unless dict
-
-            desc_ref = dict.value[:FontDescriptor]
-            next unless desc_ref
-
-            desc = desc_ref.is_a?(Pdfrb::Model::Reference) ? document.object(desc_ref) : desc_ref
-            next unless desc
-
-            fd_stream = document.add({ Length: subset.bytesize }, type: Pdfrb::Model::Cos::Stream)
-            fd_stream.stream = subset
-            desc.value[:FontFile2] = Pdfrb::Model::Reference.new(fd_stream.oid, fd_stream.gen)
+            subset_font(resource, data, codepoints)
           rescue StandardError
             next
           end
@@ -481,12 +476,51 @@ module Pdfrb
         }, type: subtype == :TrueType ? Pdfrb::Model::Type::FontTrueType : Pdfrb::Model::Type::FontType1)
       end
 
+      # Build the subsetted font bytes for +resource+ and replace the
+      # descriptor's font-file stream (FontFile2 for TrueType
+      # outlines, FontFile3/OpenType for CFF).
+      def subset_font(resource, data, codepoints)
+        subset, font_file_key =
+          if data.byteslice(0, 4) == "OTTO".b
+            # CFF outlines: map codepoints to glyph IDs via the OTF
+            # cmap (it addresses CFF glyphs too), subset the 'CFF '
+            # table, and rebuild the OTF container.
+            cmap = Pdfrb::Font::TrueType::File.new(data).cmap
+            gids = codepoints.filter_map { |cp| cmap.glyph_id_for(cp) }.uniq
+            [Pdfrb::Font::CFF::Subsetter.subset_otf(data, gids), :FontFile3]
+          else
+            ttf = Pdfrb::Font::TrueType::File.new(data)
+            subsetter = Pdfrb::Font::TrueType::Subsetter.new(ttf)
+            [subsetter.subset(codepoints.to_a), :FontFile2]
+          end
+        dict = @font_dicts[resource]
+        return unless dict
+
+        desc_ref = dict.value[:FontDescriptor]
+        return unless desc_ref
+
+        desc = desc_ref.is_a?(Pdfrb::Model::Reference) ? document.object(desc_ref) : desc_ref
+        return unless desc
+
+        fd_stream = document.add({ Length: subset.bytesize }, type: Pdfrb::Model::Cos::Stream)
+        fd_stream.stream = subset
+        if font_file_key == :FontFile3
+          fd_stream.value[:Subtype] = :OpenType
+          fd_stream.value[:Length1] = subset.bytesize
+        end
+        desc.value[font_file_key] = Pdfrb::Model::Reference.new(fd_stream.oid, fd_stream.gen)
+      end
+
+      # Fonts attach to the page-tree ROOT's /Resources so every page
+      # inherits them (s7.7.3.2 resource inheritance). Attaching to
+      # the Catalog instead — as this used to — produced a stray key
+      # no viewer honours, leaving written pages without fonts.
       def attach_to_resources(resource, font_dict)
         ref = Pdfrb::Model::Reference.new(font_dict.oid, font_dict.gen)
-        catalog = document.catalog
-        catalog.value[:Resources] ||= {}
-        catalog.value[:Resources][:Font] ||= {}
-        catalog.value[:Resources][:Font][resource] = ref
+        root = document.pages.pages_root
+        root.value[:Resources] ||= {}
+        root.value[:Resources][:Font] ||= {}
+        root.value[:Resources][:Font][resource] = ref
       end
     end
   end

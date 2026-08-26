@@ -47,10 +47,11 @@ module Pdfrb
 
       def attach_to_resources(name, image)
         ref = Pdfrb::Model::Reference.new(image.oid, image.gen)
-        catalog = document.catalog
-        catalog.value[:Resources] ||= {}
-        catalog.value[:Resources][:XObject] ||= {}
-        catalog.value[:Resources][:XObject][name] = ref
+        # Page-tree root so every page inherits it (s7.7.3.2).
+        root = document.pages.pages_root
+        root.value[:Resources] ||= {}
+        root.value[:Resources][:XObject] ||= {}
+        root.value[:Resources][:XObject][name] = ref
       end
     end
   end
