@@ -109,4 +109,27 @@ RSpec.describe "PDF/A generation" do
     doc.enable_pdf_a!(part: 4, conformance: "B")
     expect(doc.version).to eq("2.0")
   end
+
+  describe "round-trip sweep (fixtures through pdfrb, parsed by veraPDF)" do
+    let(:check) { Pdfrb::Task::VeraPdfCrossCheck }
+    let(:fixtures_dir) do
+      File.join(__dir__, "..", "..", "fixtures",
+                "pdf-core-examples", "AnnexH-Examples")
+    end
+
+    it "produces structurally parseable output for every fixture" do
+      skip "fixture corpus not pulled" unless Dir.exist?(fixtures_dir)
+      skip "verapdf not installed" unless check.available?
+
+      Dir.glob(File.join(fixtures_dir, "*.pdf")).each do |path|
+        doc = Pdfrb.open(path)
+        io = StringIO.new
+        doc.write(io: io)
+
+        result = check.call(io.string, flavour: "1b")
+        expect(result.raw).to include('jobEndStatus="normal"'),
+                              "#{File.basename(path)}: veraPDF could not parse the round-tripped output"
+      end
+    end
+  end
 end
