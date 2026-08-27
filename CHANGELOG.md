@@ -2,6 +2,43 @@
 
 All notable changes to the pdfrb gem will be documented in this file.
 
+## [0.8.0] — 2026-08-27
+
+### Added
+
+* **veraPDF cross-check** — `Pdfrb::Task::VeraPdfCrossCheck` runs the
+  veraPDF binary and parses the XML report (flavour map, per-failure
+  clause/message/context); `rake verapdf` checks PDF/A compliance
+  locally (`brew install verapdf`), and a macOS CI job runs it on
+  every push/PR.
+* **`Document#enable_pdf_a!(part:, conformance:)`** — GTS_PDFA1
+  OutputIntent with the embedded sRGB ICC profile, pdfaid XMP
+  identification, Title, and the right PDF version (2.0 for part 4).
+* XMP `Packet#pdfa_id=` / `pdfa_part` / `pdfa_conformance`.
+* `rexml` as a runtime dependency.
+
+### Fixed
+
+* **Trailer /ID** (ISO 32000-1 s14.4): deterministic fingerprint now
+  emitted in classic and xref-stream trailers.
+* **PDF/A 6.2.2**: pages carry an explicit /Resources copied from
+  the tree root at write time (inherited-only fails validation).
+* **XMP parseability**: the pdfaid namespace was emitted after
+  rdf:Description's closed tag, producing invalid XML.
+* **/Widths units** (6.2.11.5.1): hmtx advances scale into the
+  1000-unit glyph space; unitsPerEm != 1000 fonts previously wrote
+  raw units.
+* **TrueType subsetting end-to-end**: the subsetter was unreachable
+  (missing autoload) and broken once reached — Encoding::BINARY
+  namespace bug, each_value on an Array, Head method called on raw
+  bytes, and a stub .notdef-only cmap. It now takes codepoints,
+  resolves gids via the font cmap, and emits a real format-4 cmap;
+  the subset stream replaces the add-time stream in place instead
+  of orphaning the full font.
+
+Result: a PDF/A-2b document embedding Arial Unicode (23MB) passes
+veraPDF with a <1MB subset and the text round-trips.
+
 ## [Unreleased]
 
 ### Added — Parity batches 4-9
