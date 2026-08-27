@@ -34,5 +34,8 @@ jobs:
           bundler-cache: true
       - name: Install veraPDF
         run: brew install verapdf
+      - name: Pull fixture corpus
+        run: CLARICLE_CI_PAT_TOKEN=${{ secrets.CLARICLE_CI_PAT_TOKEN }} bundle exec rake fixtures:pull
+        continue-on-error: true
       - name: PDF/A cross-check
         run: bundle exec rake verapdf
