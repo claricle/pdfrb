@@ -11,5 +11,6 @@ module Pdfrb
     autoload :MemoryProfile, "pdfrb/task/memory_profile"
     autoload :RegenerateAppearances, "pdfrb/task/regenerate_appearances"
     autoload :Thumbnail, "pdfrb/task/thumbnail"
+    autoload :VeraPdfCrossCheck, "pdfrb/task/vera_pdf_cross_check"
   end
 end

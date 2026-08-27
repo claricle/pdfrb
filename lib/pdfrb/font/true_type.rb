@@ -16,6 +16,7 @@ module Pdfrb
       autoload :Glyf, "pdfrb/font/true_type/glyf"
       autoload :Kern, "pdfrb/font/true_type/kern"
       autoload :Wrapper, "pdfrb/font/true_type/wrapper"
+      autoload :Subsetter, "pdfrb/font/true_type/subsetter"
     end
   end
 end

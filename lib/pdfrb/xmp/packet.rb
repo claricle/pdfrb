@@ -21,6 +21,7 @@ module Pdfrb
         @pdf = Schemas::PDF.new
         @xmp = Schemas::XMPBasic.new
         @rights = Schemas::XMPRights.new
+        @pdfaid = nil
       end
 
       def title=(value); @dc.title = Array(value); end
@@ -43,6 +44,15 @@ module Pdfrb
       def creator_tool=(value); @xmp.creator_tool = value; end
       def creator_tool; @xmp.creator_tool; end
 
+      # PDF/A identification (ISO 19005-1 s6.7.11 / 19005-2 s6.6.4):
+      # part (e.g. 2) and conformance level ("A", "B", "U").
+      def pdfa_id=(value)
+        @pdfaid = { part: Integer(value[:part]), conformance: value[:conformance].to_s }
+      end
+
+      def pdfa_part; @pdfaid && @pdfaid[:part]; end
+      def pdfa_conformance; @pdfaid && @pdfaid[:conformance]; end
+
       def to_xmp
         XMP_BEGIN + rdf_body + XMP_END
       end
@@ -56,8 +66,10 @@ module Pdfrb
           '<rdf:Description rdf:about=""',
           '    xmlns:dc="http://purl.org/dc/elements/1.1/"',
           '    xmlns:pdf="http://ns.adobe.com/pdf/1.3/"',
-          '    xmlns:xmp="http://ns.adobe.com/xap/1.0/">',
+          '    xmlns:xmp="http://ns.adobe.com/xap/1.0/"',
         ]
+        lines << '    xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/"' if has_pdfa?
+        lines << ">"
         lines += schema_lines
         lines << "</rdf:Description>"
         lines << "</rdf:RDF>"
@@ -70,7 +82,19 @@ module Pdfrb
         parts += dc_lines if has_dc?
         parts += pdf_lines if has_pdf?
         parts += xmp_lines if has_xmp?
+        parts += pdfa_lines if has_pdfa?
         parts
+      end
+
+      def has_pdfa?
+        !@pdfaid.nil?
+      end
+
+      def pdfa_lines
+        [
+          "  <pdfaid:part>#{@pdfaid[:part]}</pdfaid:part>",
+          "  <pdfaid:conformance>#{@pdfaid[:conformance]}</pdfaid:conformance>",
+        ]
       end
 
       def has_dc?

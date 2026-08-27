@@ -23,3 +23,16 @@ jobs:
         continue-on-error: true
       - name: Run tests
         run: bundle exec rake
+
+  verapdf:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+      - name: Install veraPDF
+        run: brew install verapdf
+      - name: PDF/A cross-check
+        run: bundle exec rake verapdf

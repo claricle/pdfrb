@@ -21,6 +21,9 @@ module Pdfrb
     autoload :AssociatedFiles, "pdfrb/document/associated_files"
     autoload :Colors, "pdfrb/document/colors"
     autoload :Display, "pdfrb/document/display"
+    autoload :PdfA, "pdfrb/document/pdf_a"
+    include PdfA
+
     autoload :Form, "pdfrb/document/form"
     autoload :GraphicsState, "pdfrb/document/graphics_state"
     autoload :Layers, "pdfrb/document/layers"

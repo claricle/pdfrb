@@ -18,10 +18,13 @@ module Pdfrb
         attr_reader :ttf, :glyph_ids
 
         # @param ttf [Pdfrb::Font::TrueType::File] parsed TTF source.
-        # @param glyph_ids [Array<Integer>] used glyph IDs.
-        def initialize(ttf, glyph_ids)
+        # @param codepoints [Array<Integer>] used Unicode codepoints;
+        #   glyph IDs are resolved via the font's cmap.
+        def initialize(ttf, codepoints)
           @ttf = ttf
-          @glyph_ids = ([NOTDEF_GID] + glyph_ids).sort.uniq
+          @codepoint_gids = codepoints.map { |cp| [cp, ttf.cmap.glyph_id_for(cp)] }
+            .reject { |_cp, gid| gid.nil? || gid.zero? }
+          @glyph_ids = ([NOTDEF_GID] + @codepoint_gids.map(&:last)).sort.uniq
         end
 
         # Returns the subset font bytes.
@@ -104,7 +107,8 @@ module Pdfrb
         end
 
         def loca_format
-          head_table.long_loca? ? :long : :short
+          # head_table is the raw bytes; parse for indexToLocFormat.
+          @ttf.head.long_loca? ? :long : :short
         end
 
         # Get byte range [start, end) for a glyph in the glyf table.
@@ -167,7 +171,7 @@ module Pdfrb
             pad_to_even(data)
           end
           @glyf_end = data.bytesize
-          data.force_encoding(Encoding::BINARY)
+          data.force_encoding(::Encoding::BINARY)
         end
 
         def composite?(glyph_data)
@@ -214,55 +218,48 @@ module Pdfrb
           else
             offsets.each { |o| data << [o / 2].pack("n") }
           end
-          data.force_encoding(Encoding::BINARY)
+          data.force_encoding(::Encoding::BINARY)
         end
 
         def build_cmap
-          # Build a simple format 4 cmap with used codepoints.
-          # Map Unicode → new glyph IDs.
-          pairs = {}
-          @resolved.each do |old_gid|
-            glyph_map[old_gid]
-            # We don't have a reverse cmap (gid → unicode); skip for now.
-            # A real impl would use the original cmap to build this.
+          # One segment per kept codepoint (idDelta maps code to the
+          # remapped gid), plus the mandatory 0xFFFF terminator.
+          pairs = @codepoint_gids.map do |cp, old_gid|
+            [cp, glyph_map[old_gid]]
+          end.sort
+
+          segments = pairs.map do |cp, new_gid|
+            [cp, cp, ((new_gid - cp) & 0xFFFF)]
           end
+          segments << [0xFFFF, 0xFFFF, 1]
 
-          # Emit a minimal format 4 cmap with just .notdef.
-          build_format4_cmap(pairs)
-        end
-
-        def build_format4_cmap(_mapping)
-          1
-          search_range = 2
-          entry_selector = 0
-          range_shift = 0
-
+          seg_count = segments.length
           buf = +""
-          buf << [0].pack("n")       # format 0 placeholder; we'll emit format 4
-          buf = +""
-          buf << [4, 0].pack("nn")   # format=4, length placeholder
+          buf << [4, 0].pack("nn") # format=4, length placeholder
           buf << [0].pack("n") # language
-          seg_count = 1
-          buf << [seg_count * 2].pack("n") # segCountX2
-          buf << [search_range].pack("n")
-          buf << [entry_selector].pack("n")
-          buf << [range_shift].pack("n")
-          buf << [0xFFFF].pack("n")   # endCode
-          buf << [0].pack("n")        # reservedPad
-          buf << [0xFFFF].pack("n")   # startCode
-          buf << [0].pack("n")        # idDelta
-          buf << [0].pack("n")        # idRangeOffset
+          buf << [seg_count * 2].pack("n")
+          search_range = (2**Math.log2(seg_count).floor) * 2
+          entry_selector = Math.log2(search_range / 2).to_i
+          range_shift = (seg_count * 2) - search_range
+          buf << [search_range, entry_selector, range_shift].pack("nnn")
+          zero = [0].pack("n")
+          segments.each { |end_c, _, _| buf << [end_c].pack("n") }
+          buf << zero # reservedPad
+          segments.each { |_, start_c, _| buf << [start_c].pack("n") }
+          # idDelta first pass then idRangeOffset zeros: format 4
+          # requires the four arrays in sequence, so delta and offset
+          # loops cannot merge with the startCode loop.
+          # rubocop:disable Style/CombinableLoops
+          segments.each { |_, _, delta| buf << [delta].pack("n") }
+          segments.each { buf << zero } # idRangeOffset: delta only
+          # rubocop:enable Style/CombinableLoops
 
-          length = buf.bytesize
-          buf[2, 2] = [length].pack("n")
+          buf[2, 2] = [buf.bytesize].pack("n")
 
-          # Wrap in cmap table structure
           cmap = +""
-          cmap << [0, 1, 1].pack("nnn") # version, numTables, platform=1
-          cmap << [0].pack("n") # encoding=0
-          cmap << [12].pack("N") # offset to subtable
+          cmap << [0, 1, 3, 1, 12].pack("nnnnN") # version, 1 table, (3,1) Unicode BMP
           cmap << buf
-          cmap.force_encoding(Encoding::BINARY)
+          cmap.force_encoding(::Encoding::BINARY)
         end
 
         def build_hmtx
@@ -272,7 +269,7 @@ module Pdfrb
             lsb = @ttf.hmtx.lsb(old_gid)
             buf << [advance, lsb].pack("nn")
           end
-          buf.force_encoding(Encoding::BINARY)
+          buf.force_encoding(::Encoding::BINARY)
         end
 
         def build_maxp
@@ -364,7 +361,7 @@ module Pdfrb
             end
           end
 
-          out.force_encoding(Encoding::BINARY)
+          out.force_encoding(::Encoding::BINARY)
         end
 
         # rubocop:disable Naming/MethodName
