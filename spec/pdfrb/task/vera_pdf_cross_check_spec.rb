@@ -83,8 +83,11 @@ RSpec.describe Pdfrb::Task::VeraPdfCrossCheck do
 end
 
 RSpec.describe "PDF/A generation" do
+  def new_document
+    Pdfrb::Document.new
+  end
   it "installs the OutputIntent, XMP identification, and title" do
-    doc = described_class.new
+    doc = new_document
     doc.enable_pdf_a!(part: 2, conformance: "B")
 
     expect(doc.version).to eq("1.7")
@@ -102,7 +105,7 @@ RSpec.describe "PDF/A generation" do
   end
 
   it "uses PDF 2.0 for part 4" do
-    doc = described_class.new
+    doc = new_document
     doc.enable_pdf_a!(part: 4, conformance: "B")
     expect(doc.version).to eq("2.0")
   end
