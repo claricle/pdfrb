@@ -16,6 +16,10 @@ Pdfrb::Document.prepend(Module.new do
   private
 
   def sync_xmp_metadata!
+    # PDF/A files must carry an XMP metadata stream even without a
+    # document title; sync whenever a PDF/A identification is set.
+    return sync_pdfa_metadata! if pdfa_part
+
     info = trailer&.[](:Info)
     return unless info
 
@@ -25,6 +29,24 @@ Pdfrb::Document.prepend(Module.new do
     title = info_obj.value[:Title]
     return unless title
 
+    packet = begin
+      xmp
+    rescue StandardError
+      nil
+    end
+    return unless packet
+
+    xmp_data = packet.to_xmp
+    stream = add(
+      { Type: :Metadata, Subtype: :XML, Length: xmp_data.bytesize },
+      type: Pdfrb::Model::Cos::Stream
+    )
+    stream.stream = xmp_data
+    catalog.value[:Metadata] =
+      Pdfrb::Model::Reference.new(stream.oid, stream.gen)
+  end
+
+  def sync_pdfa_metadata!
     packet = begin
       xmp
     rescue StandardError

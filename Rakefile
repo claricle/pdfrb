@@ -9,6 +9,36 @@ RuboCop::RakeTask.new
 
 task default: %i[spec rubocop]
 
+desc "Cross-check PDF/A output against veraPDF (needs verapdf on PATH)"
+task :verapdf do
+  require "pdfrb"
+  require "stringio"
+  check = Pdfrb::Task::VeraPdfCrossCheck
+  abort "verapdf not found on PATH (brew install verapdf)" unless check.available?
+
+  font = [
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
+  ].find { |path| File.file?(path) }
+  abort "no system TTF found" unless font
+
+  doc = Pdfrb::Document.new
+  doc.enable_pdf_a!(part: 2, conformance: "B")
+  font_obj = doc.fonts.add(font)
+  doc.pages.add.canvas.text("veraPDF cross-check", at: [72, 720],
+                                                   font: font_obj, size: 24)
+  io = StringIO.new
+  doc.write(io: io)
+
+  result = check.call(io.string, flavour: :a2b)
+  puts "profile:    #{result.profile}"
+  puts "checks:     #{result.passed_checks} passed, #{result.failed_checks} failed"
+  puts "size:       #{io.string.bytesize} bytes"
+  result.failures.each { |f| puts "  #{f.clause}: #{f.message}" }
+  abort "NOT PDF/A-2b COMPLIANT" unless result.compliant?
+  puts "PDF/A-2b COMPLIANT"
+end
+
 namespace :arlington do
   desc "Re-vendor the Arlington TSVs from ~/src/pdfa/arlington-pdf-model/tsv/latest"
   task :refresh do

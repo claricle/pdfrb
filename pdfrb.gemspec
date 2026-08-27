@@ -43,5 +43,6 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "benchmark", "~> 0.4"
   spec.add_dependency "logger", "~> 1.6"
+  spec.add_dependency "rexml", "~> 3.3"
   spec.add_dependency "thor"
 end

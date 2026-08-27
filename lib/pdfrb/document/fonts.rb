@@ -44,8 +44,15 @@ module Pdfrb
           @pending_io_data = nil
         end
         @pending_subtype = nil
-        if @afm_metrics[resource] && font_dict&.value&.[](:Widths)
-          font_dict.value[:Widths] = @afm_metrics[resource][:widths]
+        metrics = @afm_metrics[resource]
+        if metrics && font_dict&.value&.[](:Widths)
+          # /Widths live in the 1000-unit glyph space (s9.2.4); TTF
+          # hmtx advances are in unitsPerEm units, so scale. AFM
+          # metrics already carry 1000-unit widths (upem defaults to
+          # 1000 there, making this a no-op for standard fonts).
+          scale = 1000.0 / (metrics[:units_per_em] || 1000)
+          font_dict.value[:Widths] =
+            metrics[:widths].map { |w| (w * scale).round }
         end
         @registry[name] = resource
         resource
@@ -490,8 +497,8 @@ module Pdfrb
             [Pdfrb::Font::CFF::Subsetter.subset_otf(data, gids), :FontFile3]
           else
             ttf = Pdfrb::Font::TrueType::File.new(data)
-            subsetter = Pdfrb::Font::TrueType::Subsetter.new(ttf)
-            [subsetter.subset(codepoints.to_a), :FontFile2]
+            subsetter = Pdfrb::Font::TrueType::Subsetter.new(ttf, codepoints.to_a)
+            [subsetter.subset, :FontFile2]
           end
         dict = @font_dicts[resource]
         return unless dict
@@ -502,13 +509,20 @@ module Pdfrb
         desc = desc_ref.is_a?(Pdfrb::Model::Reference) ? document.object(desc_ref) : desc_ref
         return unless desc
 
-        fd_stream = document.add({ Length: subset.bytesize }, type: Pdfrb::Model::Cos::Stream)
-        fd_stream.stream = subset
-        if font_file_key == :FontFile3
-          fd_stream.value[:Subtype] = :OpenType
-          fd_stream.value[:Length1] = subset.bytesize
+        # Reuse the add-time stream object in place rather than
+        # allocating a replacement — a second stream would leave the
+        # full original orphaned in the file (doubling output size).
+        fd_stream = desc.value[font_file_key]
+        fd_stream = document.object(fd_stream) if fd_stream.is_a?(Pdfrb::Model::Reference)
+        if fd_stream.is_a?(Pdfrb::Model::Cos::Stream)
+          fd_stream.stream = subset
+          fd_stream.value[:Length] = subset.bytesize
+          fd_stream.value.delete(:Filter)
+          if font_file_key == :FontFile3
+            fd_stream.value[:Subtype] = :OpenType
+            fd_stream.value[:Length1] = subset.bytesize
+          end
         end
-        desc.value[font_file_key] = Pdfrb::Model::Reference.new(fd_stream.oid, fd_stream.gen)
       end
 
       # Fonts attach to the page-tree ROOT's /Resources so every page

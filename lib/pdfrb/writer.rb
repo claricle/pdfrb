@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "digest"
 require "zlib"
 
 module Pdfrb
@@ -317,6 +318,42 @@ module Pdfrb
     def dispatch_before_write
       document.dispatch_message(:before_write)
       compress_content_streams if document.config["writer.compress_streams"]
+      normalize_page_resources
+      seed_file_identifier
+    end
+
+    # PDF/A (ISO 19005-2, 6.2.2) requires every page whose content
+    # references resources to carry an EXPLICIT /Resources entry;
+    # inherited-only resources fail validation. Copy the page-tree
+    # root's resources onto pages that lack their own.
+    def normalize_page_resources
+      root = document.catalog && document.object(document.catalog.value[:Pages])
+      return unless root.is_a?(Pdfrb::Model::Cos::Dictionary)
+
+      inherited = root.value[:Resources]
+      return if inherited.nil?
+
+      Array(root.value[:Kids]).each do |kid_ref|
+        page = kid_ref.is_a?(Pdfrb::Model::Reference) ? document.object(kid_ref) : kid_ref
+        next unless page.is_a?(Pdfrb::Model::Cos::Dictionary)
+        next if page.value.key?(:Resources)
+
+        page.value[:Resources] = inherited
+      end
+    end
+
+    # ISO 32000-1 s14.4: the trailer shall carry a /ID file
+    # identifier. Derived deterministically from the catalog
+    # serialization + object census so identical content yields
+    # identical identifiers.
+    def seed_file_identifier
+      existing = document.trailer || {}
+      return if existing[:ID]
+
+      fingerprint = +@serializer.serialize(document.catalog.value)
+      each_indirect_object { |obj| fingerprint << obj.oid.to_s << "," }
+      digest = ::Digest::MD5.digest(fingerprint)
+      existing[:ID] = [digest, digest]
     end
 
     def version
