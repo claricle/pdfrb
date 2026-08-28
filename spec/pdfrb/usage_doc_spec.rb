@@ -169,6 +169,28 @@ RSpec.describe "docs/USAGE.md cookbook" do
     expect(Pdfrb.parse(StringIO.new(bytes)).pages.count).to eq(1)
   end
 
+  it "PDF/A generation with veraPDF validation" do
+    font_path = [
+      "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+      "/System/Library/Fonts/Supplemental/Arial.ttf",
+    ].find { |f| File.exist?(f) }
+    skip "no system TTF available" unless font_path
+
+    doc = Pdfrb::Document.new
+    doc.enable_pdf_a!(part: 2, conformance: "B")
+    font = doc.fonts.add(font_path)
+    doc.pages.add.canvas.text("Archived", at: [72, 720], font: font, size: 24)
+    path = tmp("archival.pdf")
+    doc.write(path)
+
+    check = Pdfrb::Task::VeraPdfCrossCheck
+    skip "verapdf not installed" unless check.available?
+
+    result = check.call(path, flavour: :a2b)
+    expect(result.failures).to eq([])
+    expect(result).to be_compliant
+  end
+
   def fixtures_path(name)
     File.expand_path("../fixtures/pdf-core-examples/AnnexH-Examples/#{name}", __dir__)
   end

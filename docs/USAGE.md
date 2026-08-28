@@ -110,6 +110,20 @@ puts "Fonts added: #{report.font_diff[:added]}"
 puts "Equivalent: #{report.equivalent?}"
 ```
 
+## PDF/A Generation
+
+```ruby
+doc = Pdfrb::Document.new
+doc.enable_pdf_a!(part: 2, conformance: "B") # sRGB OutputIntent + pdfaid XMP
+font = doc.fonts.add("/path/to/font.ttf")    # PDF/A requires embedded fonts
+doc.pages.add.canvas.text("Archived", at: [72, 720], font: font, size: 24)
+doc.write("archival.pdf")
+
+# Validate with veraPDF (brew install verapdf):
+result = Pdfrb::Task::VeraPdfCrossCheck.call("archival.pdf", flavour: :a2b)
+puts result.compliant? ? "PASS" : result.failures.map(&:message)
+```
+
 ## Conformance Validation
 
 ```ruby
