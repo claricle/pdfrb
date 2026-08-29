@@ -329,7 +329,7 @@ module Pdfrb
 
       max_oid = @xref.entries.keys.max || 0
       size = @trailer_dict && @trailer_dict[:Size]
-      size = size.to_i if size.respond_to?(:to_i)
+      size = size.to_i if size.is_a?(Numeric)
       @next_oid = [max_oid + 1, size.to_i, @next_oid].max
     end
 

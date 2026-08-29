@@ -89,19 +89,7 @@ module Pdfrb
       # Resources /XObject dictionary (s7.8.3): name -> XObject.
       class XObjectMap < Pdfrb::Model::Cos::Dictionary
         arlington_object "XObjectMap"
-
-        def [](name)
-          value[name.to_sym] || value[name.to_s]
-        end
-
-        def add(name, xobject)
-          value[name.to_sym] = xobject
-          name.to_sym
-        end
-
-        def names
-          value.keys
-        end
+        include NameMap
       end
     end
   end

@@ -16,25 +16,9 @@ module Pdfrb
       # to patterns.
       class PatternMap < Pdfrb::Model::Cos::Dictionary
         arlington_object "PatternMap"
+        include NameMap
 
-        def [](name)
-          value[name.to_sym] || value[name.to_s]
-        end
-
-        def add(name, pattern)
-          value[name.to_sym] = pattern
-          name.to_sym
-        end
-
-        def each_pattern(&)
-          return enum_for(:each_pattern) unless block_given?
-
-          value.each(&)
-        end
-
-        def names
-          value.keys
-        end
+        alias each_pattern each_entry
       end
     end
   end

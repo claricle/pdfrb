@@ -168,49 +168,23 @@ module Pdfrb
       # defaults /DefaultGray, /DefaultRGB, /DefaultCMYK.
       class ColorSpaceMap < Pdfrb::Model::Cos::Dictionary
         arlington_object "ColorSpaceMap"
-
-        def [](name)
-          value[name.to_sym] || value[name.to_s]
-        end
-
-        def add(name, color_space)
-          value[name.to_sym] = color_space
-          name.to_sym
-        end
+        include NameMap
 
         def default_gray; self[:DefaultGray]; end
         def default_rgb; self[:DefaultRGB]; end
         def default_cmyk; self[:DefaultCMYK]; end
 
-        def each_color_space(&)
-          return enum_for(:each_color_space) unless block_given?
-
-          value.each(&)
-        end
-
-        def names
-          value.keys
-        end
+        alias each_color_space each_entry
       end
 
       # Colorants dictionary (s8.6.6.5, DeviceN /Colorants). Maps
       # individual colorant names to Separation spaces.
       class ColorantsDict < Pdfrb::Model::Cos::Dictionary
         arlington_object "ColorantsDict"
+        include NameMap
 
-        def [](name)
-          value[name.to_sym] || value[name.to_s]
-        end
-
-        def each_colorant(&)
-          return enum_for(:each_colorant) unless block_given?
-
-          value.each(&)
-        end
-
-        def colorant_names
-          value.keys
-        end
+        alias each_colorant each_entry
+        alias colorant_names names
       end
 
       # Box style dictionary (s7.11.4, BoxColorInfo entries). Guides

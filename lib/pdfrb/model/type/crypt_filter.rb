@@ -29,9 +29,9 @@ module Pdfrb
       # names to the default CryptFilter used.
       class CryptFilterMap < Pdfrb::Model::Cos::Dictionary
         arlington_object "CryptFilterMap"
-        def filter_for(stream_name)
-          value[stream_name.to_sym] || value[stream_name.to_s]
-        end
+        include NameMap
+
+        alias filter_for []
 
         def each_filter(&)
           return enum_for(:each_filter) unless block_given?
@@ -53,9 +53,9 @@ module Pdfrb
       # public-key crypt filters.
       class CryptFilterPublicKeyMap < Pdfrb::Model::Cos::Dictionary
         arlington_object "CryptFilterPublicKeyMap"
-        def filter_for(stream_name)
-          value[stream_name.to_sym] || value[stream_name.to_s]
-        end
+        include NameMap
+
+        alias filter_for []
       end
     end
   end

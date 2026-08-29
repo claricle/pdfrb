@@ -111,25 +111,9 @@ module Pdfrb
       # map living on the (page or) catalog.
       class DestsMap < Pdfrb::Model::Cos::Dictionary
         arlington_object "DestsMap"
+        include NameMap
 
-        def [](name)
-          value[name.to_sym] || value[name.to_s]
-        end
-
-        def add(name, destination)
-          value[name.to_sym] = destination
-          name.to_sym
-        end
-
-        def each_destination(&)
-          return enum_for(:each_destination) unless block_given?
-
-          value.each(&)
-        end
-
-        def names
-          value.keys
-        end
+        alias each_destination each_entry
       end
     end
   end

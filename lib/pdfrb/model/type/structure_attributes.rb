@@ -45,24 +45,16 @@ module Pdfrb
       # names mapped to standard structure types.
       class RoleMap < Pdfrb::Model::Cos::Dictionary
         arlington_object "RoleMap"
+        include NameMap
 
-        def [](custom_name)
-          value[custom_name.to_sym] || value[custom_name.to_s]
-        end
-
-        def custom_names
-          value.keys
-        end
+        alias custom_names names
       end
 
       # Namespaced role map (s14.7.3, /RoleMapNS): per-namespace role
       # maps keyed by namespace URI.
       class RoleMapNS < Pdfrb::Model::Cos::Dictionary
         arlington_object "RoleMapNS"
-
-        def [](namespace)
-          value[namespace.to_sym] || value[namespace.to_s]
-        end
+        include NameMap
       end
 
       # Style dictionary (s14.9.2, /Styles entries): number-of-style
@@ -77,14 +69,9 @@ module Pdfrb
       # attribute-owner dictionaries shared by structure elements.
       class ClassMap < Pdfrb::Model::Cos::Dictionary
         arlington_object "ClassMap"
+        include NameMap
 
-        def [](class_name)
-          value[class_name.to_sym] || value[class_name.to_s]
-        end
-
-        def class_names
-          value.keys
-        end
+        alias class_names names
       end
 
       # Reference structure element kid (s14.8.2.4, /Reference):
