@@ -22,7 +22,7 @@ module Pdfrb
 
           arr = ocgs.is_a?(Pdfrb::Model::PdfArray) ? ocgs.to_a : ocgs
           arr.each do |ref|
-            obj = ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+            obj = document.resolve(ref)
             yield obj if obj
           end
         end
@@ -90,7 +90,7 @@ module Pdfrb
 
           arr = ocgs.is_a?(Pdfrb::Model::PdfArray) ? ocgs.to_a : ocgs
           arr.each do |ref|
-            obj = ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+            obj = document.resolve(ref)
             yield obj if obj
           end
         end

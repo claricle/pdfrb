@@ -31,7 +31,7 @@ module Pdfrb
         # @return [Symbol] resource name (e.g. :Sh1)
         def register_on(document, page)
           shading_obj = document.add(to_dict, type: Pdfrb::Model::Cos::Dictionary)
-          ref = Pdfrb::Model::Reference.new(shading_obj.oid, shading_obj.gen)
+          ref = shading_obj.ref
           resources = ensure_resources(document, page)
           shading_dict = resources.value[:Shading]
           if shading_dict.nil?

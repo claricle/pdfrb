@@ -15,8 +15,7 @@ module Pdfrb
         document.pages.each_with_index do |page, idx|
           xobjects = xobject_map(page, document)
           xobjects&.each do |name, ref|
-            stream = ref.is_a?(Pdfrb::Model::Reference) ?
-                       document.object(ref) : ref
+            stream = document.resolve(ref)
             next unless stream.is_a?(Pdfrb::Model::Cos::Stream)
             next unless stream.value[:Subtype] == :Image
 

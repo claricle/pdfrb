@@ -33,11 +33,11 @@ module Pdfrb
           return enum_for(:each_ocg) unless block_given?
           return unless ocfgs && document
 
-          arr = ocfgs.is_a?(Pdfrb::Model::Reference) ? document.object(ocfgs) : ocfgs
+          arr = document.resolve(ocfgs)
           return unless arr.is_a?(Array) || arr.is_a?(Pdfrb::Model::PdfArray)
 
           arr.each do |ref|
-            obj = ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+            obj = document.resolve(ref)
             yield obj if obj
           end
         end

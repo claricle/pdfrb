@@ -45,12 +45,12 @@ module Pdfrb
               Descent: -200,
               CapHeight: 700,
               StemV: 80,
-              FontFile2: Pdfrb::Model::Reference.new(font_stream.oid, 0)
+              FontFile2: font_stream.ref
             },
             type: Pdfrb::Model::Type::FontDescriptor
           )
           font_dict.value[:FontDescriptor] =
-            Pdfrb::Model::Reference.new(descriptor.oid, 0)
+            descriptor.ref
         end
 
         font_dict

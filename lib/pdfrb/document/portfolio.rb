@@ -100,9 +100,9 @@ module Pdfrb
             },
             type: Pdfrb::Model::Cos::Dictionary
           )
-          filespec.value[:EF] = Pdfrb::Model::Reference.new(ef.oid, ef.gen)
+          filespec.value[:EF] = ef.ref
           filespec.value[:AFRelationship] = :Unspecified
-          Pdfrb::Model::Reference.new(filespec.oid, filespec.gen)
+          filespec.ref
         end
       end
 
@@ -112,7 +112,7 @@ module Pdfrb
           type: Pdfrb::Model::Cos::Stream
         )
         embedded.stream = item.file_bytes
-        Pdfrb::Model::Reference.new(embedded.oid, embedded.gen)
+        embedded.ref
       end
     end
   end

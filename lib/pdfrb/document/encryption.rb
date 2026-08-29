@@ -176,7 +176,7 @@ module Pdfrb
       def register(encrypt_hash, user_password:, prebuilt_handler: nil)
         dict = document.add(encrypt_hash,
                             type: Pdfrb::Model::Type::EncryptionStandard)
-        ref = Pdfrb::Model::Reference.new(dict.oid, dict.gen)
+        ref = dict.ref
         trailer = document.trailer
         if trailer.is_a?(Pdfrb::Model::Cos::Dictionary)
           trailer.value[:Encrypt] = ref

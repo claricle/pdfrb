@@ -239,7 +239,7 @@ module Pdfrb
       def build_trailer(xref_offset)
         root = @document.catalog
         root_ref = if root.is_a?(Pdfrb::Model::Object) && root.indirect?
-                     Pdfrb::Model::Reference.new(root.oid, root.gen)
+                     root.ref
                    end
         size = [@document.next_oid || 1, 2].max
 

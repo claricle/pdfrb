@@ -23,7 +23,7 @@ module Pdfrb
           ref = value[:Sound]
           return nil unless ref && document
 
-          ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          document.resolve(ref)
         end
 
         # /Volume — optional, -1.0 to 1.0 (default 1.0).
@@ -52,7 +52,7 @@ module Pdfrb
           ref = value[:Next]
           return nil unless ref && document
 
-          ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          document.resolve(ref)
         end
       end
     end

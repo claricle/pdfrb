@@ -98,7 +98,7 @@ module Pdfrb
 
         fields = acroform[:Fields] || []
         fields.each do |ref|
-          obj = ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          obj = document.resolve(ref)
           yield obj if obj
         end
       end
@@ -165,13 +165,13 @@ module Pdfrb
         fields = acroform[:Fields]
         return nil unless fields
 
-        field_ref = Pdfrb::Model::Reference.new(field.oid, field.gen)
+        field_ref = field.ref
         fields.delete_if { |r| r == field_ref || (r.is_a?(Pdfrb::Model::Reference) && r.oid == field.oid) }
 
         # Remove widget annotation from page /Annots
         page_ref = field.value[:P]
         if page_ref
-          page = page_ref.is_a?(Pdfrb::Model::Reference) ? document.object(page_ref) : page_ref
+          page = document.resolve(page_ref)
           annots = page&.value&.[](:Annots)
           annots&.delete_if { |r| r == field_ref || (r.is_a?(Pdfrb::Model::Reference) && r.oid == field.oid) }
         end
@@ -219,7 +219,7 @@ module Pdfrb
         page_ref = field.value[:P]
         return unless page_ref
 
-        page = page_ref.is_a?(Pdfrb::Model::Reference) ? document.object(page_ref) : page_ref
+        page = document.resolve(page_ref)
         return unless page
 
         name = register_form_on_page(page, form_stream)
@@ -248,7 +248,7 @@ module Pdfrb
                  end
         return nil unless target
 
-        target.is_a?(Pdfrb::Model::Reference) ? document.object(target) : target
+        document.resolve(target)
       end
 
       def dictionary?(value)
@@ -278,7 +278,7 @@ module Pdfrb
         resources = page.value[:Resources] = Pdfrb::Model::Cos::Dictionary.new({}) unless resources.is_a?(Pdfrb::Model::Cos::Dictionary)
         xobjects = resources.value[:XObject] || {}
         name = unique_xobject_name(xobjects)
-        xobjects[name] = Pdfrb::Model::Reference.new(form_stream.oid, form_stream.gen)
+        xobjects[name] = form_stream.ref
         resources.value[:XObject] = xobjects
         name
       end
@@ -306,7 +306,7 @@ module Pdfrb
             Subtype: :Widget,
             T: name,
             Rect: rect,
-            P: Pdfrb::Model::Reference.new(page.oid, page.gen),
+            P: page.ref,
             FT: :Tx,
           },
           type: Pdfrb::Model::Type::Annotation
@@ -317,7 +317,7 @@ module Pdfrb
 
       def add_annot_to_page(page, widget)
         annots = page.value[:Annots]
-        ref = Pdfrb::Model::Reference.new(widget.oid, widget.gen)
+        ref = widget.ref
         if annots.nil?
           page.value[:Annots] = [ref]
         elsif annots.is_a?(::Array)
@@ -330,7 +330,7 @@ module Pdfrb
       def register_field(field)
         acroform = document.catalog.value[:AcroForm]
         fields = acroform[:Fields]
-        ref = Pdfrb::Model::Reference.new(field.oid, field.gen)
+        ref = field.ref
         fields << ref
       end
     end

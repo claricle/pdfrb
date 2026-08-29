@@ -47,7 +47,7 @@ module Pdfrb
           type: Pdfrb::Model::Cos::Stream
         )
         stream.stream = bytes
-        [:ICCBased, Pdfrb::Model::Reference.new(stream.oid, stream.gen)]
+        [:ICCBased, stream.ref]
       end
 
       # ---- Header construction ----

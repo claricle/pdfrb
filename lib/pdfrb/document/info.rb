@@ -63,7 +63,7 @@ module Pdfrb
 
         info = document.add({}, type: Pdfrb::Model::Cos::Dictionary)
         if document.trailer
-          document.trailer[:Info] = Pdfrb::Model::Reference.new(info.oid, info.gen)
+          document.trailer[:Info] = info.ref
         end
         info
       end

@@ -16,7 +16,7 @@ module Pdfrb
           tu_stream = build_tounicode(document, ttf)
           font_file = embed_font_file(document, ttf_data)
 
-          fd.value[:FontFile2] = Pdfrb::Model::Reference.new(font_file.oid, font_file.gen)
+          fd.value[:FontFile2] = font_file.ref
 
           document.add(
             {
@@ -26,8 +26,8 @@ module Pdfrb
               FirstChar: 0,
               LastChar: 255,
               Widths: widths,
-              FontDescriptor: Pdfrb::Model::Reference.new(fd.oid, fd.gen),
-              ToUnicode: Pdfrb::Model::Reference.new(tu_stream.oid, tu_stream.gen),
+              FontDescriptor: fd.ref,
+              ToUnicode: tu_stream.ref,
               Encoding: :WinAnsiEncoding,
             },
             type: Pdfrb::Model::Type::FontTrueType

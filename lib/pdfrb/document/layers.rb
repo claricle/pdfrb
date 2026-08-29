@@ -26,7 +26,7 @@ module Pdfrb
           { Type: :OCG, Name: name },
           type: Pdfrb::Model::Cos::Dictionary
         )
-        ref = Pdfrb::Model::Reference.new(ocg.oid, ocg.gen)
+        ref = ocg.ref
         @groups << { ref: ref, ocg: ocg, default_on: default_on }
         ocg
       end

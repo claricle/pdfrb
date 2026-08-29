@@ -73,7 +73,7 @@ module Pdfrb
 
           arr = refs.is_a?(Pdfrb::Model::PdfArray) ? refs.value : refs
           arr = [arr] unless arr.is_a?(::Array)
-          arr.filter_map { |r| r.is_a?(Pdfrb::Model::Reference) ? document.object(r) : r }
+          arr.filter_map { |r| document.resolve(r) }
         end
       end
     end

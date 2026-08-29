@@ -531,7 +531,7 @@ module Pdfrb
         )
         r = @stream.value[:Resources] || {}
         eg = r[:ExtGState] || {}
-        eg[name] = Pdfrb::Model::Reference.new(gs.oid, gs.gen)
+        eg[name] = gs.ref
         r[:ExtGState] = eg
         @stream.value[:Resources] = r
         name

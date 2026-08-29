@@ -5,6 +5,9 @@ require "stringio"
 module Pdfrb
   class Document
     class Fonts
+      autoload :Subsetting, "pdfrb/document/fonts/subsetting"
+      include Subsetting
+
       STANDARDS = %w[
         Helvetica Helvetica-Bold Helvetica-Oblique Helvetica-BoldOblique
         Times-Roman Times-Bold Times-Italic Times-BoldItalic
@@ -152,21 +155,6 @@ module Pdfrb
         desc&.value&.key?(:FontFile2)
       end
 
-      def subset_fonts!
-        @font_streams.each do |resource, data|
-          next unless valid_font_data?(data)
-
-          codepoints = @used_codepoints[resource]
-          next if codepoints.empty?
-
-          begin
-            subset_font(resource, data, codepoints)
-          rescue StandardError
-            next
-          end
-        end
-      end
-
       class << self
         def loaders; @loaders ||= []; end
         def register_loader(loader); loaders.unshift(loader); end
@@ -178,13 +166,13 @@ module Pdfrb
 
         widths = Array.new(256, DEFAULT_WIDTH)
         tu_stream = build_tounicode(doc)
-        tu_ref = Pdfrb::Model::Reference.new(tu_stream.oid, tu_stream.gen)
+        tu_ref = tu_stream.ref
         fd = doc.add({
           Type: :FontDescriptor, FontName: name.to_sym, Flags: 32,
           FontBBox: [0, 0, 1000, 1000], ItalicAngle: 0,
           Ascent: 800, Descent: -200, CapHeight: 700, StemV: 80
         }, type: Pdfrb::Model::Cos::Dictionary)
-        fd_ref = Pdfrb::Model::Reference.new(fd.oid, fd.gen)
+        fd_ref = fd.ref
         font_hash = {
           Type: :Font, Subtype: :Type1, BaseFont: name.to_sym,
           FirstChar: 0, LastChar: 255, Widths: widths,
@@ -399,18 +387,6 @@ module Pdfrb
         name.to_s.gsub(/[\s()\[\]<>{}\/%]+/, "-")
       end
 
-      # Generate a deterministic 6-letter subset tag from the font bytes
-      # so re-embedding the same font produces the same prefix. Format
-      # is six uppercase ASCII letters derived from the SHA-1 of the
-      # first 1 KB of the font file (per PDF spec s9.6.4).
-      def subset_tag_for(font_bytes)
-        require "digest"
-        digest = Digest::SHA1.digest(font_bytes.byteslice(0, 1024) || "")
-        digest.byteslice(0, 6).bytes.each_with_object(+"") do |b, s|
-          s << ((b % 26) + 65).chr
-        end
-      end
-
       def true_type_subtype(data)
         magic = data&.byteslice(0, 4)
         # Per PDF spec s9.6.2 + s9.9: magic distinguishes the two
@@ -444,14 +420,14 @@ module Pdfrb
 
       def default_font(name)
         tu_stream = self.class.build_tounicode(document)
-        tu_ref = Pdfrb::Model::Reference.new(tu_stream.oid, tu_stream.gen)
+        tu_ref = tu_stream.ref
 
         fd = document.add({
           Type: :FontDescriptor, FontName: name.to_sym, Flags: 32,
           FontBBox: [0, 0, 1000, 1000], ItalicAngle: 0,
           Ascent: 800, Descent: -200, CapHeight: 700, StemV: 80
         }, type: Pdfrb::Model::Cos::Dictionary)
-        fd_ref = Pdfrb::Model::Reference.new(fd.oid, fd.gen)
+        fd_ref = fd.ref
 
         if @pending_io_data && valid_font_data?(@pending_io_data)
           font_file = document.add(
@@ -466,11 +442,11 @@ module Pdfrb
             font_file.value[:Subtype] = :OpenType
             font_file.value[:Length1] = @pending_io_data.bytesize
             fd.value[:FontFile3] =
-              Pdfrb::Model::Reference.new(font_file.oid, font_file.gen)
+              font_file.ref
           else
             font_file.value[:Length1] = @pending_io_data.bytesize
             fd.value[:FontFile2] =
-              Pdfrb::Model::Reference.new(font_file.oid, font_file.gen)
+              font_file.ref
           end
         end
 
@@ -483,58 +459,12 @@ module Pdfrb
         }, type: subtype == :TrueType ? Pdfrb::Model::Type::FontTrueType : Pdfrb::Model::Type::FontType1)
       end
 
-      # Build the subsetted font bytes for +resource+ and replace the
-      # descriptor's font-file stream (FontFile2 for TrueType
-      # outlines, FontFile3/OpenType for CFF).
-      def subset_font(resource, data, codepoints)
-        subset, font_file_key =
-          if data.byteslice(0, 4) == "OTTO".b
-            # CFF outlines: map codepoints to glyph IDs via the OTF
-            # cmap (it addresses CFF glyphs too), subset the 'CFF '
-            # table, and rebuild the OTF container.
-            cmap = Pdfrb::Font::TrueType::File.new(data).cmap
-            gids = codepoints.filter_map { |cp| cmap.glyph_id_for(cp) }.uniq
-            [Pdfrb::Font::CFF::Subsetter.subset_otf(data, gids), :FontFile3]
-          else
-            ttf = Pdfrb::Font::TrueType::File.new(data)
-            subsetter = Pdfrb::Font::TrueType::Subsetter.new(ttf, codepoints.to_a)
-            [subsetter.subset, :FontFile2]
-          end
-        dict = @font_dicts[resource]
-        return unless dict
-
-        desc_ref = dict.value[:FontDescriptor]
-        return unless desc_ref
-
-        desc = desc_ref.is_a?(Pdfrb::Model::Reference) ? document.object(desc_ref) : desc_ref
-        return unless desc
-
-        # Reuse the add-time stream object in place rather than
-        # allocating a replacement — a second stream would leave the
-        # full original orphaned in the file (doubling output size).
-        fd_stream = desc.value[font_file_key]
-        fd_stream = document.object(fd_stream) if fd_stream.is_a?(Pdfrb::Model::Reference)
-        if fd_stream.is_a?(Pdfrb::Model::Cos::Stream)
-          fd_stream.stream = subset
-          fd_stream.value[:Length] = subset.bytesize
-          fd_stream.value.delete(:Filter)
-          if font_file_key == :FontFile3
-            fd_stream.value[:Subtype] = :OpenType
-            fd_stream.value[:Length1] = subset.bytesize
-          end
-        end
-      end
-
       # Fonts attach to the page-tree ROOT's /Resources so every page
       # inherits them (s7.7.3.2 resource inheritance). Attaching to
       # the Catalog instead — as this used to — produced a stray key
       # no viewer honours, leaving written pages without fonts.
       def attach_to_resources(resource, font_dict)
-        ref = Pdfrb::Model::Reference.new(font_dict.oid, font_dict.gen)
-        root = document.pages.pages_root
-        root.value[:Resources] ||= {}
-        root.value[:Resources][:Font] ||= {}
-        root.value[:Resources][:Font][resource] = ref
+        document.pages.attach_resource(:Font, resource, font_dict.ref)
       end
     end
   end

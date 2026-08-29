@@ -19,7 +19,7 @@ module Pdfrb
           ref = value[:T]
           return nil unless ref && document
 
-          ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          document.resolve(ref)
         end
 
         # /N — required indirect next Bead.
@@ -27,7 +27,7 @@ module Pdfrb
           ref = value[:N]
           return nil unless ref && document
 
-          ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          document.resolve(ref)
         end
 
         # /V — required indirect previous Bead.
@@ -35,7 +35,7 @@ module Pdfrb
           ref = value[:V]
           return nil unless ref && document
 
-          ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          document.resolve(ref)
         end
 
         # /P — required indirect Page the bead sits on.
@@ -43,7 +43,7 @@ module Pdfrb
           ref = value[:P]
           return nil unless ref && document
 
-          ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          document.resolve(ref)
         end
 
         # /R — required rectangle on the page.

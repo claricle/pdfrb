@@ -52,7 +52,7 @@ module Pdfrb
                           v = field[:V]
                           next unless v
 
-                          v_obj = v.is_a?(Pdfrb::Model::Reference) ? doc.object(v) : v
+                          v_obj = doc.resolve(v)
                           next if v_obj && ALLOWED_SIGNATURE_TYPES.include?(v_obj[:Type]&.to_sym)
 
                           vs << Violation.new(
@@ -81,7 +81,7 @@ module Pdfrb
                           v = field[:V]
                           next unless v
 
-                          v_obj = v.is_a?(Pdfrb::Model::Reference) ? doc.object(v) : v
+                          v_obj = doc.resolve(v)
                           has_timestamp = v_obj && (
                             v_obj[:Type]&.to_sym == :DocTimeStamp ||
                               (v_obj[:ByteRange] && timestamp_in_signature?(v_obj))
@@ -134,7 +134,7 @@ module Pdfrb
                         # protecting the DSS.
                         has_archival = signature_fields(doc).any? do |field|
                           v = field[:V]
-                          v_obj = v.is_a?(Pdfrb::Model::Reference) ? doc.object(v) : v
+                          v_obj = doc.resolve(v)
                           v_obj && v_obj[:Type]&.to_sym == :DocTimeStamp
                         end
                         next nil if has_archival
@@ -173,7 +173,7 @@ module Pdfrb
         return [] unless fields.is_a?(::Array)
 
         fields.filter_map do |ref|
-          obj = ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          obj = document.resolve(ref)
           next nil unless obj
 
           obj[:FT]&.to_sym == :Sig ? obj : nil

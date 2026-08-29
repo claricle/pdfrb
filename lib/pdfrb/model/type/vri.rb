@@ -53,7 +53,7 @@ module Pdfrb
           ref = value[:TS]
           return nil unless ref && document
 
-          ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          document.resolve(ref)
         end
 
         private

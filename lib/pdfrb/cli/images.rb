@@ -18,7 +18,7 @@ module Pdfrb
 
           xo = xo.value if xo.is_a?(Pdfrb::Model::Cos::Dictionary)
           xo&.each do |name, ref|
-            obj = ref.is_a?(Pdfrb::Model::Reference) ? doc.object(ref) : ref
+            obj = doc.resolve(ref)
             next unless obj&.value&.[](:Subtype) == :Image
 
             count += 1

@@ -27,6 +27,13 @@ module Pdfrb
         @document = document
       end
 
+      # The indirect reference denoting this object. The single
+      # seam for "a reference to this" — callers never construct
+      # Reference.new(obj.oid, obj.gen) by hand.
+      def ref
+        Pdfrb::Model::Reference.new(oid, gen)
+      end
+
       # True when this object is referenced indirectly (oid > 0).
       def indirect?
         @oid > 0

@@ -195,7 +195,7 @@ module Pdfrb
 
       def set_appearance(field, form, state_name = :Normal)
         form_stream = form.stream
-        ref = Pdfrb::Model::Reference.new(form_stream.oid, form_stream.gen)
+        ref = form_stream.ref
 
         ap = field.value[:AP]
         if ap.nil?

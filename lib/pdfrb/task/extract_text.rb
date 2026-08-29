@@ -148,7 +148,7 @@ module Pdfrb
           return nil unless fonts.is_a?(::Hash)
 
           entry = fonts[name] || fonts[name.to_sym] || fonts[name.to_s]
-          entry.is_a?(Pdfrb::Model::Reference) ? @document.object(entry) : entry
+          @document.resolve(entry)
         end
       end
       private_constant :FontResolver

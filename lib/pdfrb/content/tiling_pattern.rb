@@ -51,7 +51,7 @@ module Pdfrb
           yield canvas
         end
 
-        ref = Pdfrb::Model::Reference.new(pattern_stream.oid, pattern_stream.gen)
+        ref = pattern_stream.ref
         register_in_resources(document, page, ref)
       end
 

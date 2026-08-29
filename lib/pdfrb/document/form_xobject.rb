@@ -50,7 +50,7 @@ module Pdfrb
         resources = page.value[:Resources]
         resources = {} unless resources.is_a?(::Hash)
         xobjects = resources[:XObject] || {}
-        xobjects[@name] = Pdfrb::Model::Reference.new(@stream.oid, @stream.gen)
+        xobjects[@name] = @stream.ref
         resources[:XObject] = xobjects
         page.value[:Resources] = resources
       end

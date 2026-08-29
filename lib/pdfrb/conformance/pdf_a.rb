@@ -65,7 +65,7 @@ module Pdfrb
                           next unless fonts
 
                           fonts.each_value do |ref|
-                            f = ref.is_a?(Pdfrb::Model::Reference) ? doc.object(ref) : ref
+                            f = doc.resolve(ref)
                             next unless f
                             next if f[:FontDescriptor]
 

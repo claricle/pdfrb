@@ -17,7 +17,7 @@ module Pdfrb
 
           arr = targets.is_a?(Array) ? targets : [targets]
           arr.each do |ref|
-            obj = ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+            obj = document.resolve(ref)
             yield obj if obj
           end
         end

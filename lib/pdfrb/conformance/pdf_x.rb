@@ -94,7 +94,7 @@ module Pdfrb
 
                           fonts_hash = fonts.is_a?(Pdfrb::Model::Cos::Dictionary) ? fonts.value : fonts
                           fonts_hash&.each_value do |ref|
-                            font = ref.is_a?(Pdfrb::Model::Reference) ? doc.object(ref) : ref
+                            font = doc.resolve(ref)
                             next unless font
 
                             fd = font[:FontDescriptor]
@@ -174,7 +174,7 @@ module Pdfrb
 
         intents = [intents] unless intents.is_a?(::Array)
         intents.any? do |ref|
-          obj = ref.is_a?(Pdfrb::Model::Reference) ? doc.object(ref) : ref
+          obj = doc.resolve(ref)
           obj && obj.value[:S] == :GTS_PDFX
         end
       end
@@ -257,7 +257,7 @@ module Pdfrb
                           else [intents]
                           end
           has_pdfx = intents_array.any? do |i|
-            obj = i.is_a?(Pdfrb::Model::Reference) ? doc.object(i) : i
+            obj = doc.resolve(i)
             obj && obj[:S] == :GTS_PDFX
           end
           next nil if has_pdfx

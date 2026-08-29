@@ -21,7 +21,7 @@ module Pdfrb
           ref = value[:F]
           return nil unless ref && document
 
-          ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          document.resolve(ref)
         end
 
         # /I — optional DocInfo dict with article metadata.
@@ -29,7 +29,7 @@ module Pdfrb
           ref = value[:I]
           return nil unless ref && document
 
-          resolved = ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          resolved = document.resolve(ref)
           return nil unless resolved
 
           Pdfrb::Model::Type::Info.new(resolved.value) if resolved.value.is_a?(::Hash)
@@ -40,7 +40,7 @@ module Pdfrb
           ref = value[:Metadata]
           return nil unless ref && document
 
-          ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          document.resolve(ref)
         end
       end
     end

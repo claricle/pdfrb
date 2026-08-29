@@ -31,9 +31,9 @@ module Pdfrb
         # one lazily when it attaches XObjects.
         page_hash = {
           Type: :Page,
-          Parent: Pdfrb::Model::Reference.new(root.oid, root.gen),
+          Parent: root.ref,
           MediaBox: media_box,
-          Contents: Pdfrb::Model::Reference.new(contents.oid, 0)
+          Contents: contents.ref
         }
         page_hash[:BleedBox] = bleed_box if bleed_box
         page_hash[:TrimBox] = trim_box if trim_box
@@ -42,7 +42,7 @@ module Pdfrb
         page = document.add(page_hash, type: Pdfrb::Model::Type::Page)
         page.value[:Rotate] = rotate if rotate.nonzero?
         kids = (root.value[:Kids] ||= [])
-        kids << Pdfrb::Model::Reference.new(page.oid, page.gen)
+        kids << page.ref
         root.value[:Count] = (root.value[:Count] || 0) + 1
         page
       end
@@ -57,7 +57,8 @@ module Pdfrb
 
       def count
         raw = pages_root[:Count]
-        resolved = raw.is_a?(Pdfrb::Model::Reference) ? document.object(raw)&.value : raw
+        resolved = document.resolve(raw)
+        resolved = resolved.value if resolved.is_a?(Pdfrb::Model::Object)
         case resolved
         when Integer then resolved
         when Numeric then resolved.to_i
@@ -136,6 +137,17 @@ module Pdfrb
         end
       end
 
+      # Attach +ref+ under +category+ (e.g. :Font, :XObject,
+      # :Shading) in the page-tree root's /Resources, where every
+      # page inherits it (s7.7.3.2). The single seam for resource
+      # placement — placement policy changes land here.
+      def attach_resource(category, name, ref)
+        root = pages_root
+        root.value[:Resources] ||= {}
+        root.value[:Resources][category] ||= {}
+        root.value[:Resources][category][name] = ref
+      end
+
       # The page-tree root (Catalog /Pages), seeding an empty tree if
       # needed. Resources placed here are inherited by every page
       # (s7.7.3.2).
@@ -149,7 +161,7 @@ module Pdfrb
         # No /Pages yet — seed an empty tree.
         root = document.add({ Type: :Pages, Kids: [], Count: 0 },
                             type: Pdfrb::Model::Type::PageTreeNode)
-        catalog.value[:Pages] = Pdfrb::Model::Reference.new(root.oid, root.gen)
+        catalog.value[:Pages] = root.ref
         root
       end
 
@@ -163,8 +175,7 @@ module Pdfrb
         kids = kids.value if kids.is_a?(Pdfrb::Model::Cos::Dictionary) && !kids.is_a?(::Hash)
 
         Array(kids).each do |kid_ref|
-          kid = kid_ref.is_a?(Pdfrb::Model::Reference) ?
-                  document.object(kid_ref) : kid_ref
+          kid = document.resolve(kid_ref)
           next unless kid
 
           type = kid.is_a?(Pdfrb::Model::Cos::Dictionary) ? kid.value[:Type] : nil
@@ -181,7 +192,7 @@ module Pdfrb
       def ref_to(page)
         return page if page.is_a?(Pdfrb::Model::Reference)
 
-        Pdfrb::Model::Reference.new(page.oid, page.gen)
+        page.ref
       end
     end
   end
