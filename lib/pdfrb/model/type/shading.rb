@@ -116,25 +116,9 @@ module Pdfrb
       # to shadings.
       class ShadingMap < Pdfrb::Model::Cos::Dictionary
         arlington_object "ShadingMap"
+        include NameMap
 
-        def [](name)
-          value[name.to_sym] || value[name.to_s]
-        end
-
-        def add(name, shading)
-          value[name.to_sym] = shading
-          name.to_sym
-        end
-
-        def each_shading(&)
-          return enum_for(:each_shading) unless block_given?
-
-          value.each(&)
-        end
-
-        def names
-          value.keys
-        end
+        alias each_shading each_entry
       end
     end
   end

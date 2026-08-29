@@ -40,6 +40,8 @@ module Pdfrb
         end
       end
 
+      autoload :NameMap, "pdfrb/model/type/name_map"
+
       # Base semantic types.
       autoload :FileTrailer, "pdfrb/model/type/file_trailer"
       autoload :Catalog, "pdfrb/model/type/catalog"

@@ -38,19 +38,7 @@ module Pdfrb
       # ExtGState dictionaries.
       class GraphicsStateParameterMap < Pdfrb::Model::Cos::Dictionary
         arlington_object "GraphicsStateParameterMap"
-
-        def [](name)
-          value[name.to_sym] || value[name.to_s]
-        end
-
-        def add(name, parameters)
-          value[name.to_sym] = parameters
-          name.to_sym
-        end
-
-        def names
-          value.keys
-        end
+        include NameMap
       end
 
       # Transparency group /Group dictionary (s11.2.4.5): isolation

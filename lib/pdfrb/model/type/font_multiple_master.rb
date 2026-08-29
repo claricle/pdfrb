@@ -39,19 +39,10 @@ module Pdfrb
       # Tiling pattern's Resources.
       class CharProcMap < Pdfrb::Model::Cos::Dictionary
         arlington_object "CharProcMap"
-        def entries
-          value.each
-        end
+        include NameMap
 
-        def each_procedure(&block)
-          return enum_for(:each_procedure) unless block
-
-          value.each(&block)
-        end
-
-        def procedure_for(char_name)
-          value[char_name.to_sym] || value[char_name.to_s]
-        end
+        alias each_procedure each_entry
+        alias procedure_for []
 
         def has_glyph?(char_name)
           !!procedure_for(char_name)

@@ -208,14 +208,9 @@ module Pdfrb
       # colorant name -> ink solidity percentage.
       class Solidities < Pdfrb::Model::Cos::Dictionary
         arlington_object "Solidities"
+        include NameMap
 
-        def [](colorant)
-          value[colorant.to_sym] || value[colorant.to_s]
-        end
-
-        def colorant_names
-          value.keys
-        end
+        alias colorant_names names
       end
 
       # Source information (s14.10.2, /SourceInfo): provenance for

@@ -24,14 +24,9 @@ module Pdfrb
       # keyed by DN component (CN, O, C, ...).
       class SubjectDN < Pdfrb::Model::Cos::Dictionary
         arlington_object "SubjectDN"
+        include NameMap
 
-        def [](component)
-          value[component.to_sym] || value[component.to_s]
-        end
-
-        def components
-          value.keys
-        end
+        alias components names
       end
 
       # Document timestamp signature (s12.8.1, /DocTimeStamp): an
@@ -88,14 +83,9 @@ module Pdfrb
       # validation data for one signature.
       class VRIMap < Pdfrb::Model::Cos::Dictionary
         arlington_object "VRIMap"
+        include NameMap
 
-        def [](signature_hash)
-          value[signature_hash.to_sym] || value[signature_hash.to_s]
-        end
-
-        def signature_hashes
-          value.keys
-        end
+        alias signature_hashes names
       end
 
       # Associated-file embedded-file parameters (PDF 2.0 App Note
@@ -165,14 +155,9 @@ module Pdfrb
       # developer names to their DevExtensions entries.
       class Extensions < Pdfrb::Model::Cos::Dictionary
         arlington_object "Extensions"
+        include NameMap
 
-        def [](developer)
-          value[developer.to_sym] || value[developer.to_s]
-        end
-
-        def developers
-          value.keys
-        end
+        alias developers names
       end
 
       # GTS Procedural Steps group (prepress): identifies a
