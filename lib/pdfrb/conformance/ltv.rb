@@ -87,7 +87,7 @@ module Pdfrb
                         fields = Pdfrb::Conformance::Pades.signature_fields(doc)
                         has_archival = fields.any? do |field|
                           v = field[:V]
-                          v_obj = v.is_a?(Pdfrb::Model::Reference) ? doc.object(v) : v
+                          v_obj = doc.resolve(v)
                           v_obj && v_obj[:Type]&.to_sym == :DocTimeStamp
                         end
                         next nil if has_archival

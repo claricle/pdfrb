@@ -54,7 +54,7 @@ module Pdfrb
         filespec = document.files.add(data, name: filename,
                                             description: description,
                                             mime_type: mime_type)
-        ref = Pdfrb::Model::Reference.new(filespec.oid, filespec.gen)
+        ref = filespec.ref
         filespec.value[:AFRelationship] = relationship
         add_to_catalog(ref, relationship: relationship)
         ref
@@ -95,7 +95,7 @@ module Pdfrb
 
         refs = af.is_a?(::Array) ? af : [af]
         refs.filter_map do |ref|
-          obj = ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          obj = document.resolve(ref)
           obj if obj.is_a?(Pdfrb::Model::Cos::Dictionary)
         end
       end

@@ -31,7 +31,7 @@ module Pdfrb
 
           arr = refs.is_a?(Pdfrb::Model::PdfArray) ? refs.value : refs
           arr = [arr] unless arr.is_a?(::Array)
-          arr.filter_map { |r| r.is_a?(Pdfrb::Model::Reference) ? document.object(r) : r }
+          arr.filter_map { |r| document.resolve(r) }
         end
 
         # /CT — optional content type.
@@ -64,7 +64,7 @@ module Pdfrb
           arr = refs.is_a?(Pdfrb::Model::PdfArray) ? refs.value : refs
           arr = [arr] unless arr.is_a?(::Array)
           arr.filter_map do |r|
-            resolved = r.is_a?(Pdfrb::Model::Reference) ? document.object(r) : r
+            resolved = document.resolve(r)
             next nil unless resolved && resolved.value.is_a?(::Hash)
 
             Pdfrb::Model::Type::WebCaptureCommand.new(resolved.value)

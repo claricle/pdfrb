@@ -42,8 +42,8 @@ module Pdfrb
           {
             Type: :FileSpec,
             UF: name.to_s,
-            EF: { UF: Pdfrb::Model::Reference.new(ef_stream.oid, ef_stream.gen),
-                  F: Pdfrb::Model::Reference.new(ef_stream.oid, ef_stream.gen) },
+            EF: { UF: ef_stream.ref,
+                  F: ef_stream.ref },
           },
           type: Pdfrb::Model::Cos::Dictionary
         )
@@ -66,7 +66,7 @@ module Pdfrb
         return self unless names_array
 
         names_array.each_slice(2) do |name, ref|
-          resolved = ref.is_a?(Pdfrb::Model::Reference) ? @document.object(ref) : ref
+          resolved = @document.resolve(ref)
           yield(name.to_s, resolved) if resolved
         end
         self
@@ -100,7 +100,7 @@ module Pdfrb
         ef_tree = names[:EmbeddedFiles] ||= {}
         names_array = ef_tree[:Names] ||= []
         names_array << name
-        names_array << Pdfrb::Model::Reference.new(filespec.oid, filespec.gen)
+        names_array << filespec.ref
       end
 
       def embedded_files_names_array
@@ -117,7 +117,7 @@ module Pdfrb
       end
 
       def add_to_af(target, filespec, relationship)
-        ref = Pdfrb::Model::Reference.new(filespec.oid, filespec.gen)
+        ref = filespec.ref
         af_entry = if relationship
                      { Type: :AssociatedFile, AFRelationship: relationship,
                        File: ref }

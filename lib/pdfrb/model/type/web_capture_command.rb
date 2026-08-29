@@ -36,7 +36,7 @@ module Pdfrb
           ref = value[:S]
           return nil unless ref && document
 
-          resolved = ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          resolved = document.resolve(ref)
           return nil unless resolved
 
           Pdfrb::Model::Type::WebCaptureCommandSettings.new(resolved.value)

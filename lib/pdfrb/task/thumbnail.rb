@@ -29,7 +29,7 @@ module Pdfrb
           thumb = build_thumbnail(document, page, dpi: dpi, max_width: max_width)
           next unless thumb
 
-          page.value[:Thumb] = Pdfrb::Model::Reference.new(thumb.oid, thumb.gen)
+          page.value[:Thumb] = thumb.ref
           count += 1
         end
         count

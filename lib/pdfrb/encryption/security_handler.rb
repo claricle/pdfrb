@@ -21,8 +21,7 @@ module Pdfrb
         ref = trailer[:Encrypt]
         return nil unless ref
 
-        encrypt = ref.is_a?(Pdfrb::Model::Reference) ?
-                    document.object(ref) : ref
+        encrypt = document.resolve(ref)
         return nil unless encrypt
 
         filter = encrypt[:Filter] || :Standard

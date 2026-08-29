@@ -40,7 +40,7 @@ module Pdfrb
           stream = document.add({ Length: glyph.procedure.bytesize },
                                 type: Pdfrb::Model::Cos::Stream)
           stream.stream = glyph.procedure
-          char_procs[glyph.name.to_sym] = Pdfrb::Model::Reference.new(stream.oid, stream.gen)
+          char_procs[glyph.name.to_sym] = stream.ref
           widths[code] = glyph.width
           encoding[:Differences] << code << glyph.name.to_sym
         end

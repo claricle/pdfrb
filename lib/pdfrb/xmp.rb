@@ -43,7 +43,7 @@ Pdfrb::Document.prepend(Module.new do
     )
     stream.stream = xmp_data
     catalog.value[:Metadata] =
-      Pdfrb::Model::Reference.new(stream.oid, stream.gen)
+      stream.ref
   end
 
   def sync_pdfa_metadata!
@@ -61,6 +61,6 @@ Pdfrb::Document.prepend(Module.new do
     )
     stream.stream = xmp_data
     catalog.value[:Metadata] =
-      Pdfrb::Model::Reference.new(stream.oid, stream.gen)
+      stream.ref
   end
 end)

@@ -21,7 +21,7 @@ module Pdfrb
           ref = value[:DPartRootNode]
           return nil unless ref && document
 
-          resolved = ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          resolved = document.resolve(ref)
           return nil unless resolved && resolved.value.is_a?(::Hash)
 
           DPart.new(resolved.value)
@@ -57,7 +57,7 @@ module Pdfrb
           ref = value[:Parent]
           return nil unless ref && document
 
-          ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          document.resolve(ref)
         end
 
         # /DParts — array of arrays of child DParts. Mutually
@@ -71,7 +71,7 @@ module Pdfrb
           ref = value[:Start]
           return nil unless ref && document
 
-          ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          document.resolve(ref)
         end
 
         # /End — indirect ref to the last Page in this part.
@@ -79,7 +79,7 @@ module Pdfrb
           ref = value[:End]
           return nil unless ref && document
 
-          ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          document.resolve(ref)
         end
 
         def leaf?

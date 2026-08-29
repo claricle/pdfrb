@@ -35,13 +35,13 @@ module Pdfrb
         )
         catalog = document.catalog
         catalog.value[:StructTreeRoot] =
-          Pdfrb::Model::Reference.new(root_elem.oid, root_elem.gen)
+          root_elem.ref
         mark_info = catalog.value[:MarkInfo]
         if mark_info.nil?
           mark_info = document.add({ Marked: true },
                                    type: Pdfrb::Model::Cos::Dictionary)
           catalog.value[:MarkInfo] =
-            Pdfrb::Model::Reference.new(mark_info.oid, mark_info.gen)
+            mark_info.ref
         end
         @root = root_elem
       end
@@ -59,7 +59,7 @@ module Pdfrb
           page_ref = if page.is_a?(Pdfrb::Model::Reference)
                        page
                      else
-                       Pdfrb::Model::Reference.new(page.oid, page.gen)
+                       page.ref
                      end
           elem.value[:Pg] = page_ref
         end
@@ -166,7 +166,7 @@ module Pdfrb
           nums << page_idx
           nums << entries.length
           entries.each do |_mcid, elem| # rubocop:disable Style/HashEachMethods
-            nums << Pdfrb::Model::Reference.new(elem.oid, elem.gen)
+            nums << elem.ref
           end
         end
 
@@ -189,7 +189,7 @@ module Pdfrb
         return 0 unless page_ref
 
         document.pages.each_with_index do |page, idx|
-          page_obj = page.is_a?(Pdfrb::Model::Reference) ? document.object(page) : page
+          page_obj = document.resolve(page)
           return idx if page_obj == page_ref || page == page_ref
         end
         0
@@ -215,16 +215,16 @@ module Pdfrb
       def append_child(parent, child)
         children = parent.value[:K]
         if children.nil?
-          parent.value[:K] = [Pdfrb::Model::Reference.new(child.oid, child.gen)]
+          parent.value[:K] = [child.ref]
         elsif children.is_a?(::Array)
-          children << Pdfrb::Model::Reference.new(child.oid, child.gen)
+          children << child.ref
         else
           parent.value[:K] = [
             children,
-            Pdfrb::Model::Reference.new(child.oid, child.gen),
+            child.ref,
           ]
         end
-        child.value[:P] = Pdfrb::Model::Reference.new(parent.oid, parent.gen)
+        child.value[:P] = parent.ref
       end
 
       public

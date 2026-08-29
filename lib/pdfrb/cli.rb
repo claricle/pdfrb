@@ -158,7 +158,7 @@ module Pdfrb
       return unless fields
 
       fields.each do |ref|
-        field = ref.is_a?(Pdfrb::Model::Reference) ? doc.object(ref) : ref
+        field = doc.resolve(ref)
         next unless field
 
         name = field[:T] || "(unnamed)"
@@ -330,7 +330,7 @@ module Pdfrb
           O: o_entry, U: u_entry },
         type: Pdfrb::Model::Cos::Dictionary
       )
-      doc.trailer[:Encrypt] = Pdfrb::Model::Reference.new(encrypt_dict.oid, encrypt_dict.gen)
+      doc.trailer[:Encrypt] = encrypt_dict.ref
 
       # Set up the handler so Writer can encrypt per-object.
       handler = Pdfrb::Encryption::StandardSecurityHandler.new(
@@ -364,7 +364,7 @@ module Pdfrb
           O: o_entry, U: u_entry, OE: "".b, UE: "".b },
         type: Pdfrb::Model::Cos::Dictionary
       )
-      doc.trailer[:Encrypt] = Pdfrb::Model::Reference.new(encrypt_dict.oid, encrypt_dict.gen)
+      doc.trailer[:Encrypt] = encrypt_dict.ref
       doc.config["encryption.password"] = user_pw
     end
 

@@ -38,10 +38,10 @@ module Pdfrb
 
     def import_reference(ref, source_doc)
       cached = @mappings[ref.oid]
-      return Pdfrb::Model::Reference.new(cached.oid, cached.gen) if cached
+      return cached.ref if cached
 
       in_progress = @in_progress[ref.oid]
-      return Pdfrb::Model::Reference.new(in_progress.oid, in_progress.gen) if in_progress
+      return in_progress.ref if in_progress
 
       source_obj = source_doc.object(ref)
       return nil unless source_obj
@@ -58,7 +58,7 @@ module Pdfrb
       end
       @mappings[ref.oid] = stub
       @in_progress.delete(ref.oid)
-      Pdfrb::Model::Reference.new(stub.oid, stub.gen)
+      stub.ref
     end
 
     def import_hash(hash, source_doc)

@@ -43,12 +43,12 @@ module Pdfrb
 
         field = document.add(
           { Type: :Annot, Subtype: :Widget, FT: :Sig, T: "Signature1",
-            V: Pdfrb::Model::Reference.new(sig_dict.oid, sig_dict.gen),
+            V: sig_dict.ref,
             Rect: [0, 0, 0, 0] },
           type: Pdfrb::Model::Cos::Dictionary
         )
         catalog.value[:AcroForm][:Fields] <<
-          Pdfrb::Model::Reference.new(field.oid, field.gen)
+          field.ref
       end
 
       def serialize(document)

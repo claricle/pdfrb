@@ -109,7 +109,7 @@ module Pdfrb
           {
             FunctionType: 3,
             Domain: Pdfrb::Model::PdfArray.new([0, 1]),
-            Functions: functions.map { |f| Pdfrb::Model::Reference.new(f.oid, f.gen) },
+            Functions: functions.map(&:ref),
             Bounds: Pdfrb::Model::PdfArray.new(bounds),
             Encode: Pdfrb::Model::PdfArray.new(stops.each_cons(2).map { [0, 1] }.flatten),
           },
@@ -142,14 +142,7 @@ module Pdfrb
 
       def register(name, shading_obj)
         @registry[name] = shading_obj
-        document.catalog
-        # Attach to the page-tree root so every page inherits it
-        # (s7.7.3.2); the Catalog has no /Resources key in PDF.
-        root = document.pages.pages_root
-        root.value[:Resources] ||= {}
-        root.value[:Resources][:Shading] ||= {}
-        root.value[:Resources][:Shading][name] =
-          Pdfrb::Model::Reference.new(shading_obj.oid, shading_obj.gen)
+        document.pages.attach_resource(:Shading, name, shading_obj.ref)
       end
 
       def next_name

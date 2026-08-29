@@ -46,8 +46,7 @@ module Pdfrb
       encrypt_ref = trailer[:Encrypt]
       return {} unless encrypt_ref
 
-      encrypt_dict = encrypt_ref.is_a?(Pdfrb::Model::Reference) ?
-                        document.object(encrypt_ref) : encrypt_ref
+      encrypt_dict = document.resolve(encrypt_ref)
       return {} unless encrypt_dict
 
       handler = Pdfrb::Encryption::StandardSecurityHandler.new(
@@ -288,7 +287,7 @@ module Pdfrb
     def write_trailer(xref_pos, prev: nil)
       root = document.catalog
       root_ref = root && root.is_a?(Pdfrb::Model::Object) && root.indirect? ?
-                   Pdfrb::Model::Reference.new(root.oid, root.gen) : nil
+                   root.ref : nil
       size = [(@xref_offsets.keys.max || 0) + 1, document.next_oid || 1].max
 
       existing = document.trailer || {}
@@ -334,7 +333,7 @@ module Pdfrb
       return if inherited.nil?
 
       Array(root.value[:Kids]).each do |kid_ref|
-        page = kid_ref.is_a?(Pdfrb::Model::Reference) ? document.object(kid_ref) : kid_ref
+        page = document.resolve(kid_ref)
         next unless page.is_a?(Pdfrb::Model::Cos::Dictionary)
         next if page.value.key?(:Resources)
 
@@ -369,7 +368,7 @@ module Pdfrb
       root = document.catalog
       return nil unless root && root.indirect?
 
-      Pdfrb::Model::Reference.new(root.oid, root.gen)
+      root.ref
     end
 
     def trailer_hash_for_stream

@@ -24,7 +24,7 @@ module Pdfrb
 
           arr = sub_functions.is_a?(Pdfrb::Model::PdfArray) ? sub_functions.to_a : sub_functions
           arr.each do |ref|
-            obj = ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+            obj = document.resolve(ref)
             yield obj if obj
           end
         end

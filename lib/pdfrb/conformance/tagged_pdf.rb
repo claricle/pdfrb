@@ -145,7 +145,7 @@ module Pdfrb
         root_ref = document.catalog[:StructTreeRoot]
         return unless root_ref
 
-        root = root_ref.is_a?(Pdfrb::Model::Reference) ? document.object(root_ref) : root_ref
+        root = document.resolve(root_ref)
         return unless root
 
         first_kids = structure_kids(root, document)

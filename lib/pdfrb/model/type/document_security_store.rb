@@ -45,7 +45,7 @@ module Pdfrb
 
           arr = certs.is_a?(Pdfrb::Model::PdfArray) ? certs.to_a : certs
           arr.each do |ref|
-            obj = ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+            obj = document.resolve(ref)
             yield obj if obj
           end
         end

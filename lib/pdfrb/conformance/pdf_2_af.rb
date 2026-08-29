@@ -131,7 +131,7 @@ module Pdfrb
           af_value = af.is_a?(Pdfrb::Model::PdfArray) ? af.value : af
           entries = af_value.is_a?(::Array) ? af_value : [af_value]
           entries.each do |e|
-            resolved = e.is_a?(Pdfrb::Model::Reference) ? document.object(e) : e
+            resolved = document.resolve(e)
             yield container, resolved if resolved
           end
         end
@@ -153,7 +153,7 @@ module Pdfrb
           af_value = af.is_a?(Pdfrb::Model::PdfArray) ? af.value : af
           entries = af_value.is_a?(::Array) ? af_value : [af_value]
           entries.each do |e|
-            resolved = e.is_a?(Pdfrb::Model::Reference) ? document.object(e) : e
+            resolved = document.resolve(e)
             next unless resolved && resolved.value[:Type] == :FileSpec
 
             yield container, resolved

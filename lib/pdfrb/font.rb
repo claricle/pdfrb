@@ -10,6 +10,7 @@ module Pdfrb
     autoload :CMap, "pdfrb/font/cmap"
     autoload :TrueType, "pdfrb/font/true_type"
     autoload :CFF, "pdfrb/font/cff"
+    autoload :Sfnt, "pdfrb/font/sfnt"
     autoload :Type1, "pdfrb/font/type1"
     autoload :Metrics, "pdfrb/font/metrics_helper"
     autoload :MetricsHelper, "pdfrb/font/metrics_helper"

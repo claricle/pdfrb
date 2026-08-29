@@ -23,10 +23,10 @@ module Pdfrb
               if ref.nil?
                 new_stream = document.add({}, type: Pdfrb::Model::Cos::Stream)
                 new_stream.stream = ""
-                value[:Contents] = Pdfrb::Model::Reference.new(new_stream.oid, 0)
+                value[:Contents] = new_stream.ref
                 new_stream
               else
-                ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+                document.resolve(ref)
               end
             Pdfrb::Content::Canvas.new(stream, document: document)
           end
@@ -40,8 +40,7 @@ module Pdfrb
 
           streams = contents.is_a?(::Array) ? contents : [contents]
           streams.each_with_object(+"".b) do |ref_or_stream, buf|
-            stream = ref_or_stream.is_a?(Pdfrb::Model::Reference) ?
-                       document&.object(ref_or_stream) : ref_or_stream
+            stream = document&.resolve(ref_or_stream)
             next unless stream.is_a?(Pdfrb::Model::Cos::Stream)
 
             buf << stream.decoded_stream
@@ -182,12 +181,11 @@ module Pdfrb
           return enum_for(:each_annotation) unless block_given?
           return unless annotations && document
 
-          arr = annotations.is_a?(Pdfrb::Model::Reference) ?
-                  document.object(annotations) : annotations
+          arr = document.resolve(annotations)
           return unless arr.is_a?(Array) || arr.is_a?(Pdfrb::Model::PdfArray)
 
           arr.each do |entry|
-            obj = entry.is_a?(Pdfrb::Model::Reference) ? document.object(entry) : entry
+            obj = document.resolve(entry)
             yield obj if obj
           end
         end

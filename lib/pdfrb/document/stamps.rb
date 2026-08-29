@@ -19,7 +19,7 @@ module Pdfrb
       # @return [Symbol] the resource name (e.g., :St1).
       def stamp_everywhere(form_xobject, at: [0, 0])
         name = next_stamp_name
-        ref = Pdfrb::Model::Reference.new(form_xobject.oid, form_xobject.gen)
+        ref = form_xobject.ref
 
         document.pages.each do |page|
           register_xobject_in_resources(page, name, ref)
@@ -31,7 +31,7 @@ module Pdfrb
       # Stamp a Form XObject on a single page.
       def stamp_page(page, form_xobject, at: [0, 0])
         name = next_stamp_name
-        ref = Pdfrb::Model::Reference.new(form_xobject.oid, form_xobject.gen)
+        ref = form_xobject.ref
         register_xobject_in_resources(page, name, ref)
         emit_do_operator(page, name, at)
         name

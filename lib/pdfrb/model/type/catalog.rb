@@ -123,7 +123,7 @@ module Pdfrb
           return unless arr.is_a?(Array) || arr.is_a?(Pdfrb::Model::PdfArray)
 
           arr.each do |entry|
-            obj = entry.is_a?(Pdfrb::Model::Reference) ? document.object(entry) : entry
+            obj = document.resolve(entry)
             yield obj if obj
           end
         end

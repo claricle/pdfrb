@@ -42,7 +42,7 @@ module Pdfrb
         )
         catalog = document.catalog
         intents = catalog.value[:OutputIntents]
-        ref = Pdfrb::Model::Reference.new(intent.oid, intent.gen)
+        ref = intent.ref
         if intents.nil?
           catalog.value[:OutputIntents] = [ref]
         elsif intents.is_a?(::Array)
@@ -63,7 +63,7 @@ module Pdfrb
           type: Pdfrb::Model::Cos::Stream
         )
         stream.stream = profile.raw_data
-        ref = Pdfrb::Model::Reference.new(stream.oid, stream.gen)
+        ref = stream.ref
         add(ref, identifier: identifier, condition: condition, registry: registry, subtype: subtype)
       end
 
@@ -74,7 +74,7 @@ module Pdfrb
         return self unless intents
 
         intents.each do |ref|
-          obj = ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          obj = document.resolve(ref)
           yield obj if obj
         end
         self

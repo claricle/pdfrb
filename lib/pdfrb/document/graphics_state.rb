@@ -24,7 +24,7 @@ module Pdfrb
       def register(page, **params)
         gs = document.add({ Type: :ExtGState, **params },
                           type: Pdfrb::Model::Type::GraphicsStateParameter)
-        ref = Pdfrb::Model::Reference.new(gs.oid, gs.gen)
+        ref = gs.ref
 
         resources = ensure_resources(page)
         ext_gstate = resources.value[:ExtGState] || {}

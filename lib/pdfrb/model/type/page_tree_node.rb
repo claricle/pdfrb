@@ -32,11 +32,11 @@ module Pdfrb
           return enum_for(:each_child) unless block_given?
           return unless kids && document
 
-          arr = kids.is_a?(Pdfrb::Model::Reference) ? document.object(kids) : kids
+          arr = document.resolve(kids)
           return unless arr.is_a?(Array)
 
           arr.each do |kid_ref|
-            obj = kid_ref.is_a?(Pdfrb::Model::Reference) ? document.object(kid_ref) : kid_ref
+            obj = document.resolve(kid_ref)
             yield obj if obj
           end
         end

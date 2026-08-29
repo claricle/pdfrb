@@ -16,14 +16,14 @@ module Pdfrb
             Type: :Annot,
             Subtype: subtype,
             Rect: rect,
-            P: Pdfrb::Model::Reference.new(page.oid, page.gen),
+            P: page.ref,
             Contents: opts[:contents],
             F: opts[:flags] || 0
           }.compact,
           type: Pdfrb::Model::Type::Annotation
         )
         annots = (page.value[:Annots] ||= [])
-        annots << Pdfrb::Model::Reference.new(annot.oid, annot.gen)
+        annots << annot.ref
         annot
       end
 
@@ -45,7 +45,7 @@ module Pdfrb
             { Type: :Action, S: :URI, URI: uri },
             type: Pdfrb::Model::Type::Action
           )
-          annot.value[:A] = Pdfrb::Model::Reference.new(action.oid, action.gen)
+          annot.value[:A] = action.ref
         end
         annot
       end
@@ -55,7 +55,7 @@ module Pdfrb
         annot = document.add(
           {
             Type: :Annot, Subtype: :FreeText, Rect: rect,
-            P: Pdfrb::Model::Reference.new(page.oid, page.gen),
+            P: page.ref,
             Contents: contents
           },
           type: Pdfrb::Model::Type::FreeTextAnnotation
@@ -65,7 +65,7 @@ module Pdfrb
         da_parts << "#{color.join(' ')} rg" if color
         annot.value[:DA] = da_parts.join(" ") unless da_parts.empty?
         annots = (page.value[:Annots] ||= [])
-        annots << Pdfrb::Model::Reference.new(annot.oid, annot.gen)
+        annots << annot.ref
         annot
       end
 
@@ -75,13 +75,13 @@ module Pdfrb
           {
             Type: :Annot, Subtype: :Highlight,
             QuadPoints: quad_points,
-            P: Pdfrb::Model::Reference.new(page.oid, page.gen),
+            P: page.ref,
             Contents: contents
           }.compact,
           type: Pdfrb::Model::Type::HighlightAnnotation
         )
         annots = (page.value[:Annots] ||= [])
-        annots << Pdfrb::Model::Reference.new(annot.oid, annot.gen)
+        annots << annot.ref
         annot
       end
 
@@ -90,13 +90,13 @@ module Pdfrb
         annot = document.add(
           {
             Type: :Annot, Subtype: :Stamp, Rect: rect, Name: name,
-            P: Pdfrb::Model::Reference.new(page.oid, page.gen),
+            P: page.ref,
             Contents: contents
           }.compact,
           type: Pdfrb::Model::Type::StampAnnotation
         )
         annots = (page.value[:Annots] ||= [])
-        annots << Pdfrb::Model::Reference.new(annot.oid, annot.gen)
+        annots << annot.ref
         annot
       end
 
@@ -114,7 +114,7 @@ module Pdfrb
         return self unless annots
 
         annots.each do |ref|
-          a = ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          a = document.resolve(ref)
           yield a if a
         end
         self

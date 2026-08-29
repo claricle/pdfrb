@@ -88,6 +88,13 @@ module Pdfrb
     # Resolve a Reference to its Object. New/modified objects take
     # precedence over xref-loaded ones; otherwise consult the
     # ObjectReader (which caches per oid).
+    # Resolve a value to the object it denotes: References are
+    # dereferenced against this document; anything else is returned
+    # unchanged. The single seam for "give me the thing itself".
+    def resolve(value)
+      value.is_a?(Pdfrb::Model::Reference) ? object(value) : value
+    end
+
     def object(reference)
       return reference unless reference.is_a?(Pdfrb::Model::Reference)
 
@@ -430,9 +437,9 @@ module Pdfrb
 
     def seed_empty_structure
       pages = add({ Type: :Pages, Kids: [], Count: 0 })
-      catalog = add({ Type: :Catalog, Pages: Pdfrb::Model::Reference.new(pages.oid, 0) })
+      catalog = add({ Type: :Catalog, Pages: pages.ref })
       @catalog = catalog
-      @empty_trailer = { Size: @next_oid, Root: Pdfrb::Model::Reference.new(catalog.oid, 0) }
+      @empty_trailer = { Size: @next_oid, Root: catalog.ref }
     end
 
     def recover_or_raise(error)

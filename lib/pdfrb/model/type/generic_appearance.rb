@@ -31,7 +31,7 @@ module Pdfrb
             type: Pdfrb::Model::Cos::Stream
           )
           stream.stream = "q Q\n"
-          annotation[:AP] = { N: Pdfrb::Model::Reference.new(stream.oid, stream.gen) }
+          annotation[:AP] = { N: stream.ref }
           stream
         end
       end

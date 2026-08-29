@@ -20,7 +20,7 @@ module Pdfrb
           new_value[:Parent] = parent_ref(target)
           new_page = target.add(new_value, type: Pdfrb::Model::Type::Page)
           kids = pages_root(target).value[:Kids]
-          kids << Pdfrb::Model::Reference.new(new_page.oid, new_page.gen)
+          kids << new_page.ref
           pages_root(target).value[:Count] = (pages_root(target).value[:Count] || 0) + 1
         end
       end
@@ -30,7 +30,7 @@ module Pdfrb
         ref = target.catalog.value[:Pages] || begin
           root = target.add({ Type: :Pages, Kids: [], Count: 0 },
                             type: Pdfrb::Model::Type::PageTreeNode)
-          target.catalog.value[:Pages] = Pdfrb::Model::Reference.new(root.oid, 0)
+          target.catalog.value[:Pages] = root.ref
           target.catalog.value[:Pages]
         end
         target.object(ref)
@@ -39,7 +39,7 @@ module Pdfrb
 
       def parent_ref(target)
         root = pages_root(target)
-        Pdfrb::Model::Reference.new(root.oid, root.gen)
+        root.ref
       end
       private_class_method :parent_ref
     end

@@ -310,58 +310,7 @@ module Pdfrb
 
         # rubocop:disable-next Metrics/MethodLength
         def assemble_ttf(tables)
-          checksum_placeholder = [0].pack("N")
-          num = tables.length
-          search_range = power_of_2_floor(num) * 16
-          entry_selector = Math.log2(search_range / 16).to_i
-          range_shift = (num * 16) - search_range
-
-          header_size = 12
-          dir_size = num * 16
-          data_offset = header_size + dir_size
-
-          # Pad data_offset to 4 bytes
-          data_offset = (data_offset + 3) & ~3
-
-          out = +""
-          out << SFNT_VERSION.pack("N") # sfnt version
-          out << [num].pack("n")
-          out << [search_range].pack("n")
-          out << [entry_selector].pack("n")
-          out << [range_shift].pack("n")
-
-          # Sort tables by tag
-          sorted = tables.sort_by { |tag, _| tag }
-
-          # Calculate offsets
-          current = data_offset
-          offsets = {}
-          sorted.each do |tag, data|
-            offsets[tag] = current
-            current += data.bytesize
-            current = (current + 3) & ~3
-
-            # Directory
-            out << tag.to_s
-            out << checksum_placeholder # checksum (skip)
-            out << [offsets[tag]].pack("N")
-            out << [data.bytesize].pack("N")
-          end
-
-          # Pad to data_offset
-          while out.bytesize < data_offset
-            out << "\x00"
-          end
-
-          # Table data
-          sorted.each_value do |data|
-            out << data
-            while (out.bytesize % 4).nonzero?
-              out << "\x00"
-            end
-          end
-
-          out.force_encoding(::Encoding::BINARY)
+          Pdfrb::Font::Sfnt.rebuild(SFNT_VERSION.pack("N"), tables)
         end
 
         # rubocop:disable Naming/MethodName
@@ -382,11 +331,6 @@ module Pdfrb
         def pad_to_even(str); str << "\x00" if (str.bytesize % 2).nonzero?; end
 
         # rubocop:enable Naming/MethodName
-        def power_of_2_floor(n)
-          p = 1
-          while p * 2 <= n; p *= 2; end
-          p
-        end
       end
     end
   end

@@ -30,7 +30,7 @@ module Pdfrb
         stream.stream = profile.raw_data
         Pdfrb::Model::PdfArray.new([
                                      :ICCBased,
-                                     Pdfrb::Model::Reference.new(stream.oid, stream.gen),
+                                     stream.ref,
                                    ])
       end
 

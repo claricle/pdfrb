@@ -79,7 +79,7 @@ module Pdfrb
         d = catalog.value[:Dests]
         return nil unless d
 
-        d.is_a?(Pdfrb::Model::Reference) ? document.object(d) : d
+        document.resolve(d)
       end
 
       def resolved_name_tree
@@ -93,7 +93,7 @@ module Pdfrb
         d = names.is_a?(Pdfrb::Model::Cos::Dictionary) ? names.value[:Dests] : names[:Dests]
         return nil unless d
 
-        d.is_a?(Pdfrb::Model::Reference) ? document.object(d) : d
+        document.resolve(d)
       end
 
       def lookup_in_name_tree(node, name)
@@ -107,7 +107,7 @@ module Pdfrb
           arr = node.value[:Kids]
           arr = arr.to_a if arr.is_a?(Pdfrb::Model::PdfArray)
           arr.each do |kid_ref|
-            kid = kid_ref.is_a?(Pdfrb::Model::Reference) ? document.object(kid_ref) : kid_ref
+            kid = document.resolve(kid_ref)
             result = lookup_in_name_tree(kid, name)
             return result if result
           end
@@ -130,7 +130,7 @@ module Pdfrb
           arr = node.value[:Kids]
           arr = arr.to_a if arr.is_a?(Pdfrb::Model::PdfArray)
           arr.each do |kid_ref|
-            kid = kid_ref.is_a?(Pdfrb::Model::Reference) ? document.object(kid_ref) : kid_ref
+            kid = document.resolve(kid_ref)
             each_name_tree_key(kid, &block)
           end
         elsif node.is_a?(Hash) && node[:Names]

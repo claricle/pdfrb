@@ -29,16 +29,16 @@ module Pdfrb
           { Type: :Outlines },
           type: Pdfrb::Model::Cos::Dictionary
         )
-        root_ref = Pdfrb::Model::Reference.new(root.oid, root.gen)
+        root_ref = root.ref
 
         prev_dict = nil
         first_ref = nil
         @entries.each do |entry|
           dict = entry.build!(@document)
-          ref = Pdfrb::Model::Reference.new(dict.oid, dict.gen)
+          ref = dict.ref
 
           dict.value[:Parent] = root_ref
-          dict.value[:Prev] = Pdfrb::Model::Reference.new(prev_dict.oid, dict.gen) if prev_dict
+          dict.value[:Prev] = prev_dict.ref if prev_dict
           dict.value[:Next] = nil
           prev_dict&.value&.[]=(:Next, ref)
 
@@ -47,7 +47,7 @@ module Pdfrb
         end
 
         root.value[:First] = first_ref
-        root.value[:Last] = Pdfrb::Model::Reference.new(prev_dict.oid, prev_dict.gen) if prev_dict
+        root.value[:Last] = prev_dict.ref if prev_dict
         root.value[:Count] = @entries.length
 
         @document.catalog.value[:Outlines] = root_ref
@@ -78,11 +78,11 @@ module Pdfrb
           first_ref = nil
           @children.each do |child|
             child_dict = child.build!(document)
-            child_ref = Pdfrb::Model::Reference.new(child_dict.oid, child_dict.gen)
-            parent_ref = Pdfrb::Model::Reference.new(dict.oid, dict.gen)
+            child_ref = child_dict.ref
+            parent_ref = dict.ref
 
             child_dict.value[:Parent] = parent_ref
-            child_dict.value[:Prev] = Pdfrb::Model::Reference.new(prev_child_dict.oid, prev_child_dict.gen) if prev_child_dict
+            child_dict.value[:Prev] = prev_child_dict.ref if prev_child_dict
             child_dict.value[:Next] = nil
             prev_child_dict&.value&.[]=(:Next, child_ref)
 
@@ -91,7 +91,7 @@ module Pdfrb
           end
 
           dict.value[:First] = first_ref
-          dict.value[:Last] = Pdfrb::Model::Reference.new(prev_child_dict.oid, prev_child_dict.gen) if prev_child_dict
+          dict.value[:Last] = prev_child_dict.ref if prev_child_dict
           dict.value[:Count] = @children.length
         end
 

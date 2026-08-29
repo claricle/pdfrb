@@ -48,7 +48,7 @@ module Pdfrb
                   type: Pdfrb::Model::Cos::Stream)
         icc.stream = bytes
         output_intents.add(
-          Pdfrb::Model::Reference.new(icc.oid, icc.gen),
+          icc.ref,
           identifier: SRGB_IDENTIFIER,
           condition: "sRGB IEC61966-2.1",
           registry: SRGB_REGISTRY,

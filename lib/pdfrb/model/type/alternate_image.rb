@@ -16,7 +16,7 @@ module Pdfrb
           ref = value[:Image]
           return nil unless ref && document
 
-          ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          document.resolve(ref)
         end
 
         # /DefaultForPrinting — optional, default false. When true,
@@ -31,7 +31,7 @@ module Pdfrb
           ref = value[:OC]
           return nil unless ref && document
 
-          ref.is_a?(Pdfrb::Model::Reference) ? document.object(ref) : ref
+          document.resolve(ref)
         end
       end
     end

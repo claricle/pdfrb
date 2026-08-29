@@ -39,7 +39,7 @@ module Pdfrb
             Type: :Annot,
             Subtype: subtype,
             Rect: rect,
-            P: Pdfrb::Model::Reference.new(page.oid, page.gen),
+            P: page.ref,
             Contents: contents,
             F: flags,
           }.compact
@@ -64,7 +64,7 @@ module Pdfrb
 
         def attach_to_page(page, annot)
           annots = page.value[:Annots]
-          ref = Pdfrb::Model::Reference.new(annot.oid, annot.gen)
+          ref = annot.ref
           if annots.nil?
             page.value[:Annots] = [ref]
           elsif annots.is_a?(::Array)

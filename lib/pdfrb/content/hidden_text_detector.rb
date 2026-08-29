@@ -69,7 +69,7 @@ module Pdfrb
                  end
 
           return obj if list.any? do |c|
-            c_obj = c.is_a?(Pdfrb::Model::Reference) ? @document.object(c) : c
+            c_obj = @document.resolve(c)
             c_obj == stream_obj
           end
         end
