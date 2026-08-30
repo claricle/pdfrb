@@ -33,6 +33,42 @@ RSpec.describe Pdfrb::Writer do
     expect(body).to include("/Type /Catalog")
     expect(body).to include("/Type /Pages")
   end
+
+  describe ".serializer_for encryption handling" do
+    def encrypted_doc
+      Pdfrb::Document.new.tap do |d|
+        d.pages.add
+        handler = Pdfrb::Encryption::StandardSecurityHandler
+          .for_v5(user_password: "s3cret", owner_password: "s3cret")
+        encrypt_dict = d.add(handler.encrypt_dict,
+                             type: Pdfrb::Model::Cos::Dictionary)
+        d.trailer[:Encrypt] = encrypt_dict.ref
+        d.trailer[:ID] = ["id0id0id0id0id0".b, "id0id0id0id0id0".b]
+        d.metadata[:Title] = "topsecret title"
+        d
+      end
+    end
+
+    it "encrypts string payloads when the password verifies" do
+      doc = encrypted_doc
+      doc.config["encryption.password"] = "s3cret"
+      out = StringIO.new
+      described_class.write(doc, out)
+
+      body = out.string
+      expect(body).not_to include("topsecret title")
+      expect(body).to include("/Encrypt")
+    end
+
+    it "raises EncryptionError when the password does not verify" do
+      doc = encrypted_doc
+      doc.config["encryption.password"] = "wrong"
+      out = StringIO.new
+
+      expect { described_class.write(doc, out) }
+        .to raise_error(Pdfrb::EncryptionError, /password/)
+    end
+  end
 end
 
 RSpec.describe "end-to-end Document write/read" do

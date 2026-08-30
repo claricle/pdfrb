@@ -13,16 +13,17 @@ module Pdfrb
     autoload :TimestampHandler, "pdfrb/digital_signature/timestamp_handler"
     autoload :TimestampClient, "pdfrb/digital_signature/timestamp_client"
 
-    HANDLERS = {
-      "adbe.pkcs7.detached": CmsHandler,
-      "adbe.pkcs7.sha1": CmsHandler,
-      "adbe.revision": TimestampHandler,
-    }.freeze
-
     module_function
 
+    # Resolve the handler class for +sub_filter+. Constant references
+    # live inside the case so the autoloads above defer loading the
+    # handlers (and their OpenSSL surface) until an actual
+    # sign/verify call needs them.
     def handler_for(sub_filter)
-      HANDLERS[sub_filter.to_sym]
+      case sub_filter.to_sym
+      when :"adbe.pkcs7.detached", :"adbe.pkcs7.sha1" then CmsHandler
+      when :"adbe.revision" then TimestampHandler
+      end
     end
 
     def sign(document, cert:, key:, **)

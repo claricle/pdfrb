@@ -81,4 +81,58 @@ RSpec.describe Pdfrb::Linearization::Writer do
 
     expect(io.string).to start_with("%PDF-")
   end
+
+  describe "encrypted documents" do
+    let(:encrypted_doc) do
+      Pdfrb::Document.new.tap do |d|
+        font = d.fonts.add("Helvetica")
+        3.times do |i|
+          d.pages.add.canvas.text("Hidden #{i + 1}",
+                                  at: [72, 720], font: font, size: 12)
+        end
+        d.metadata[:Title] = "linsecret title"
+        handler = Pdfrb::Encryption::StandardSecurityHandler
+          .for_v5(user_password: "s3cret", owner_password: "s3cret")
+        encrypt_dict = d.add(handler.encrypt_dict,
+                             type: Pdfrb::Model::Cos::Dictionary)
+        d.trailer[:Encrypt] = encrypt_dict.ref
+        d.trailer[:ID] = ["id0id0id0id0id0".b, "id0id0id0id0id0".b]
+        d.config["encryption.password"] = "s3cret"
+      end
+    end
+
+    it "encrypts strings and stream payloads in the linearized output" do
+      io = StringIO.new
+      described_class.new(encrypted_doc).write(io)
+
+      body = io.string
+      expect(body).not_to include("linsecret title")
+      expect(body).not_to include("Hidden 1")
+    end
+
+    it "carries /Encrypt and /ID in the trailer" do
+      io = StringIO.new
+      described_class.new(encrypted_doc).write(io)
+
+      trailer = io.string[%r{trailer\n.*%%EOF}m]
+      expect(trailer).to include("/Encrypt")
+      expect(trailer).to include("/ID")
+    end
+
+    it "keeps the /Encrypt dictionary entries in cleartext" do
+      io = StringIO.new
+      described_class.new(encrypted_doc).write(io)
+
+      expect(io.string).to include("/Filter /Standard")
+    end
+  end
+
+  it "does not label the hint stream as /Type /XRef" do
+    io = StringIO.new
+    described_class.new(doc).write(io)
+
+    hint = io.string[%r{/S \d+.*?stream}m]
+    expect(hint).not_to include("/Type /XRef")
+    expect(io.string.scan("/Type /XRef").count).to eq(0)
+  end
 end

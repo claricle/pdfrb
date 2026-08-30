@@ -17,24 +17,37 @@ module Pdfrb
   class Writer
     DEFAULT_VERSION = "1.4"
 
+    # Trailer keys each writer recomputes itself; existing values
+    # for these are never carried through from the parsed trailer.
+    TRAILER_OVERRIDDEN_KEYS = %i[Size Root Prev XRefStm].freeze
+
     attr_reader :document, :io, :serializer
 
     def initialize(document, io)
       @document = document
       @io = io
-      @serializer = Serializer.new(
+      @serializer = Writer.serializer_for(document)
+      @xref_offsets = {}
+    end
+
+    # Build a Serializer configured for +document+: stream compression
+    # from config, and an encrypter derived from the trailer /Encrypt.
+    # Raises EncryptionError when the document is encrypted but the
+    # configured password does not open it — writing must never
+    # silently fall back to plaintext.
+    def self.serializer_for(document)
+      Serializer.new(
         compress_streams: document.config["writer.compress_streams"],
         compress_min_size: document.config["writer.compress_min_size"],
-        **serializer_encrypter_opts
+        **serializer_encrypter_opts_for(document)
       )
-      @xref_offsets = {}
     end
 
     # Build the encrypter option for the Serializer from the document's
     # /Encrypt dict. If the document isn't encrypted, returns empty hash.
     # The SecurityHandler's encrypt_data method becomes the Serializer's
     # encrypter, which encrypts string/stream payloads per-object.
-    def serializer_encrypter_opts
+    def self.serializer_encrypter_opts_for(document)
       # Use a pre-configured handler if the document provides one
       # (e.g., set by the encryption CLI).
       handler = document.config["encryption.handler"]
@@ -50,15 +63,21 @@ module Pdfrb
       return {} unless encrypt_dict
 
       handler = Pdfrb::Encryption::StandardSecurityHandler.new(
-        Encrypt: encrypt_dict.value,
-        ID: trailer[:ID]
+        { Encrypt: encrypt_dict.value, ID: trailer[:ID] }
       )
       password = document.config["encryption.password"] || ""
-      handler.verify_user_password(password)
+      unless handler.verify_user_password?(password)
+        raise Pdfrb::EncryptionError,
+              "cannot write encrypted document: password does not verify"
+      end
 
       { encrypter: handler }
-    rescue StandardError
-      {}
+    end
+
+    # The /Encrypt dictionary's own strings (U, O, UE, OE, Perms) must
+    # stay in cleartext — they carry the password hashes.
+    def encryption_dict?(obj)
+      (document.trailer || {})[:Encrypt]&.oid == obj.oid
     end
 
     def self.write(document, io)
@@ -84,7 +103,8 @@ module Pdfrb
         next if packed.key?(obj.oid)
 
         @xref_offsets[obj.oid] = @io.pos
-        @io << @serializer.serialize_indirect(obj)
+        @io << @serializer.serialize_indirect(obj,
+                                              skip_string_encryption: encryption_dict?(obj))
       end
 
       xref_pos = if use_stream
@@ -118,7 +138,8 @@ module Pdfrb
         next unless obj.indirect?
 
         @xref_offsets[obj.oid] = @io.pos
-        @io << @serializer.serialize_indirect(obj)
+        @io << @serializer.serialize_indirect(obj,
+                                              skip_string_encryption: encryption_dict?(obj))
       end
       xref_pos = write_xref(prev: previous_xref_offset)
       write_trailer(xref_pos, prev: previous_xref_offset)
@@ -293,7 +314,7 @@ module Pdfrb
       existing = document.trailer || {}
       trailer_hash = {}
       existing.each do |k, v|
-        next if %i[Size Root Prev XRefStm].include?(k)
+        next if TRAILER_OVERRIDDEN_KEYS.include?(k)
 
         trailer_hash[k] = v
       end
