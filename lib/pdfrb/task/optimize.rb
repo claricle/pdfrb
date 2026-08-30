@@ -55,9 +55,7 @@ module Pdfrb
       # {duplicate_oid => canonical_oid} that was applied.
       def dedup_streams!(document)
         canonical_for = {}
-        document.each_indirect_object do |obj|
-          next unless obj.is_a?(Pdfrb::Model::Cos::Stream)
-          next unless obj.indirect?
+        document.each_indirect_of(Pdfrb::Model::Cos::Stream) do |obj|
           next if obj.value[:Type] == :ObjStm
 
           key = stream_dedup_key(obj)
@@ -65,9 +63,7 @@ module Pdfrb
         end
 
         replacements = {}
-        document.each_indirect_object do |obj|
-          next unless obj.is_a?(Pdfrb::Model::Cos::Stream)
-          next unless obj.indirect?
+        document.each_indirect_of(Pdfrb::Model::Cos::Stream) do |obj|
           next if obj.value[:Type] == :ObjStm
 
           key = stream_dedup_key(obj)

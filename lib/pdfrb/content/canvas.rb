@@ -43,13 +43,11 @@ module Pdfrb
       end
 
       def concat(a, b, c, d, e, f, &)
-        emit_op Pdfrb::Content::Operator::ConcatMatrix, a, b, c, d, e, f
-        return self unless block_given?
+        return emit_op(Pdfrb::Content::Operator::ConcatMatrix, a, b, c, d, e, f) unless block_given?
 
-        begin
+        save_graphics_state do
+          emit_op(Pdfrb::Content::Operator::ConcatMatrix, a, b, c, d, e, f)
           yield self
-        ensure
-          emit_op Pdfrb::Content::Operator::SaveGraphicsState
         end
         self
       end
@@ -282,41 +280,28 @@ module Pdfrb
                 create_ext_g_state(BM: mode.to_s))
       end
 
-      def with_transparency(opacity: 1.0, blend_mode: nil)
-        save_graphics_state
-        self.opacity = opacity if opacity < 1.0
-        self.blend_mode = blend_mode if blend_mode
-
-        begin
+      def with_transparency(opacity: 1.0, blend_mode: nil, &)
+        save_graphics_state do
+          self.opacity = opacity if opacity < 1.0
+          self.blend_mode = blend_mode if blend_mode
           yield self
-        ensure
-          emit_op(Pdfrb::Content::Operator::RestoreGraphicsState)
         end
         self
       end
 
       def draw_image(name, at: nil, width: nil, height: nil, matrix: nil)
-        @used_xobjects[name] = true
-        save_graphics_state do
-          if matrix
-            a, b, c, d, e, f = matrix
-            concat(a, b, c, d, e, f)
-            emit_op(Pdfrb::Content::Operator::InvokeXObject, name)
-          else
-            translate(at[0], at[1])
-            concat(width, 0, 0, height, 0, 0)
-            append(" /#{name} Do\n")
-          end
+        if matrix
+          a, b, c, d, e, f = matrix
+          invoke_xobject(name, matrix: [a, b, c, d, e, f])
+        else
+          invoke_xobject(name, matrix: [width, 0, 0, height, 0, 0],
+                               pre_translate: at)
         end
         self
       end
 
       def draw_image_matrix(name, a:, b:, c:, d:, e:, f:)
-        @used_xobjects[name] = true
-        save_graphics_state do
-          concat(a, b, c, d, e, f)
-          emit_op(Pdfrb::Content::Operator::InvokeXObject, name)
-        end
+        invoke_xobject(name, matrix: [a, b, c, d, e, f])
         self
       end
 
@@ -327,13 +312,20 @@ module Pdfrb
       # @param at [Array<Numeric>] x, y translation.
       # @param matrix [Array<Numeric>, nil] 6-element transform matrix.
       def draw_form_xobject(name, at: [0, 0], matrix: nil)
+        translate = matrix.nil? ? at : nil
+        invoke_xobject(name, matrix: matrix, pre_translate: translate)
+        self
+      end
+
+      # Invoke an XObject (/Do) inside a saved graphics state, applying
+      # an optional translation then a 6-element transform matrix.
+      def invoke_xobject(name, matrix: nil, pre_translate: nil)
         @used_xobjects[name] = true
         save_graphics_state do
+          translate(pre_translate[0], pre_translate[1]) if pre_translate
           if matrix
             a, b, c, d, e, f = matrix
-            concat(a, b, c, d, e, f)
-          elsif at
-            translate(at[0], at[1])
+            emit_op(Pdfrb::Content::Operator::ConcatMatrix, a, b, c, d, e, f)
           end
           emit_op(Pdfrb::Content::Operator::InvokeXObject, name)
         end

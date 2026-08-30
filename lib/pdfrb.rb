@@ -18,6 +18,7 @@ module Pdfrb
   autoload :Configuration, "pdfrb/configuration"
   autoload :DataDir, "pdfrb/data_dir"
   autoload :PdfConstants, "pdfrb/pdf_constants"
+  autoload :PdfVersion, "pdfrb/pdf_version"
 
   autoload :Source, "pdfrb/source"
   autoload :Model, "pdfrb/model"
