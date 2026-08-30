@@ -47,8 +47,6 @@ module Pdfrb
   autoload :Serializer, "pdfrb/serializer"
   autoload :Writer, "pdfrb/writer"
   autoload :Importer, "pdfrb/importer"
-  autoload :Revision, "pdfrb/revision"
-  autoload :Revisions, "pdfrb/revisions"
   autoload :XrefSection, "pdfrb/xref_section"
   autoload :Document, "pdfrb/document"
 

@@ -334,10 +334,16 @@ module Pdfrb
 
       # Set up the handler so Writer can encrypt per-object.
       handler = Pdfrb::Encryption::StandardSecurityHandler.new(
-        Encrypt: { V: v, R: r, Length: length, P: perms, O: o_entry, U: u_entry },
-        ID: [id0.b, id0.b]
+        {
+          Encrypt: { V: v, R: r, Length: length, P: perms,
+                     O: o_entry, U: u_entry },
+          ID: [id0.b, id0.b],
+        }
       )
-      handler.verify_user_password(user_pw)
+      unless handler.verify_user_password?(user_pw)
+        raise Pdfrb::EncryptionError, "failed to derive encryption key"
+      end
+
       doc.config["encryption.handler"] = handler
       doc.config["encryption.password"] = user_pw
     end

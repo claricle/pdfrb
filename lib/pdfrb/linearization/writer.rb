@@ -30,7 +30,7 @@ module Pdfrb
 
       def initialize(document)
         @document = document
-        @serializer = Pdfrb::Serializer.new
+        @serializer = Pdfrb::Writer.serializer_for(document)
       end
 
       # @param io [IO] target output.
@@ -70,7 +70,8 @@ module Pdfrb
 
         ordered.each do |obj|
           offsets[obj.oid] = temp.pos
-          temp << @serializer.serialize_indirect(obj)
+          temp << @serializer.serialize_indirect(obj,
+                                                 skip_string_encryption: encryption_dict?(obj))
         end
         first_page_end = temp.pos if first_page_objects.any?
 
@@ -79,7 +80,6 @@ module Pdfrb
         hint_compressed = ::Zlib::Deflate.deflate(hint_data)
         hint_offset = temp.pos
         hint_dict = @serializer.serialize(
-          Type: :XRef,
           S: HintStream::DEFAULT_ITEM_BITS,
           Filter: :FlateDecode,
           Length: hint_compressed.bytesize
@@ -132,7 +132,8 @@ module Pdfrb
         buf << lin_padded
 
         layout.ordered_objects.each do |obj|
-          buf << @serializer.serialize_indirect(obj)
+          buf << @serializer.serialize_indirect(obj,
+                                                skip_string_encryption: encryption_dict?(obj))
         end
 
         buf << "#{layout.hint_oid} 0 obj\n"
@@ -243,12 +244,26 @@ module Pdfrb
                    end
         size = [@document.next_oid || 1, 2].max
 
-        trailer_str = @serializer.serialize(Size: size, Root: root_ref)
+        trailer_hash = {}
+        (@document.trailer || {}).each do |k, v|
+          next if Pdfrb::Writer::TRAILER_OVERRIDDEN_KEYS.include?(k)
+
+          trailer_hash[k] = v
+        end
+        trailer_hash[:Size] = size
+        trailer_hash[:Root] = root_ref if root_ref
+
+        trailer_str = @serializer.serialize(trailer_hash)
         "trailer\n#{trailer_str}\nstartxref\n#{xref_offset}\n%%EOF\n"
       end
 
       def header_bytes
         "%PDF-1.7\n%\xE2\xE3\xCF\xD3\n"
+      end
+
+      # The /Encrypt dictionary's own strings must stay in cleartext.
+      def encryption_dict?(obj)
+        (@document.trailer || {})[:Encrypt]&.oid == obj.oid
       end
 
       def write_non_linearized(io)
