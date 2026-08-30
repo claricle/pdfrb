@@ -42,6 +42,67 @@ RSpec.describe Pdfrb::Content::Canvas do
     expect(stream.stream).to include("1 0 0 1 100 200 cm\n")
   end
 
+  describe "graphics-state balance" do
+    def operator_counts(str)
+      str.lines.filter_map { |l| l.split.last }.tally
+    end
+
+    it "block-form transforms restore the graphics state (q/Q balance)" do
+      canvas.translate(10, 10) { |c| c.rectangle(0, 0, 5, 5) }
+      canvas.scale(2) { |c| c.circle(1, 1, 1) }
+      canvas.rotate(Math::PI / 2) { |c| c.line(0, 0, 1, 1) }
+      canvas.concat(1, 0, 0, 1, 5, 5) { |c| c.polyline([[0, 0], [1, 1]]) }
+
+      counts = operator_counts(stream.stream)
+      expect(counts["q"]).to eq(4)
+      expect(counts["Q"]).to eq(4)
+    end
+
+    it "scopes the block-form matrix inside the saved state" do
+      canvas.translate(10, 20) { |c| c.line_width = 2 }
+      expect(stream.stream).to eq("q\n1 0 0 1 10 20 cm\n2 w\nQ\n")
+    end
+
+    it "with_transparency restores the graphics state" do
+      doc = Pdfrb::Document.new.tap { |d| d.pages.add }
+      doc.pages.first.canvas.with_transparency(opacity: 0.5,
+                                               blend_mode: :Multiply) do |c|
+        c.rectangle(0, 0, 10, 10)
+      end
+      data = doc.resolve(doc.pages.first.value[:Contents]).stream
+      counts = operator_counts(data)
+      expect(counts["q"]).to eq(1)
+      expect(counts["Q"]).to eq(1)
+      expect(data).to start_with("q\n")
+      expect(data).to end_with("Q\n")
+    end
+
+    it "XObjects are invoked inside a balanced saved state" do
+      canvas.draw_image(:Im0, at: [10, 10], width: 100, height: 50)
+      canvas.draw_image_matrix(:Im1, a: 1, b: 0, c: 0, d: 1, e: 0, f: 0)
+      canvas.draw_form_xobject(:Fx0, at: [5, 5])
+      canvas.draw_image(:Im2, matrix: [1, 0, 0, 1, 0, 0])
+
+      counts = operator_counts(stream.stream)
+      expect(counts["q"]).to eq(4)
+      expect(counts["Q"]).to eq(4)
+      expect(counts["Do"]).to eq(4)
+    end
+  end
+
+  it "draw_image without matrix translates then scales before /Do" do
+    canvas.draw_image(:Im0, at: [10, 20], width: 100, height: 50)
+    expect(stream.stream).to include("1 0 0 1 10 20 cm\n")
+    expect(stream.stream).to include("100 0 0 50 0 0 cm\n")
+    expect(stream.stream).to include("/Im0 Do\n")
+  end
+
+  it "draw_form_xobject with default position still translates" do
+    canvas.draw_form_xobject(:Fx0)
+    expect(stream.stream).to include("1 0 0 1 0 0 cm\n")
+    expect(stream.stream).to include("/Fx0 Do\n")
+  end
+
   it "emits RGB fill color" do
     canvas.fill_color([:rgb, 1, 0, 0])
     expect(stream.stream).to include("1 0 0 rg\n")

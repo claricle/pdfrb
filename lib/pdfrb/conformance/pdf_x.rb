@@ -150,9 +150,7 @@ module Pdfrb
                       spec_clause: "ISO 15930 §6.5",
                       check: ->(doc) {
                         violations = []
-                        doc.each_indirect_object do |obj|
-                          next unless obj.is_a?(Pdfrb::Model::Cos::Dictionary)
-
+                        doc.each_indirect_of(Pdfrb::Model::Cos::Dictionary) do |obj|
                           s = obj[:S]
                           next unless [:JavaScript, :JS, :Launch, :URI].include?(s)
 
@@ -231,7 +229,7 @@ module Pdfrb
         spec_clause: "ISO 15930-11 6.1",
         check: ->(doc) {
           v = doc.version.to_s
-          next nil if compare_versions(v, "2.0") >= 0
+          next nil if Pdfrb::PdfVersion.compare(v, "2.0") >= 0
 
           Violation.new(
             rule_id: "x6-1",
@@ -280,16 +278,8 @@ module Pdfrb
         rs.register(X6_OUTPUT_INTENT_RULE)
       end
 
-      def compare_versions(a, b)
-        aa = a.to_s.split(".").map(&:to_i)
-        bb = b.to_s.split(".").map(&:to_i)
-        (aa <=> bb) || 0
-      end
-
       def scan_color_spaces(doc, &block)
-        doc.each_indirect_object do |obj|
-          next unless obj.is_a?(Pdfrb::Model::Cos::Dictionary)
-
+        doc.each_indirect_of(Pdfrb::Model::Cos::Dictionary) do |obj|
           cs = obj.value[:ColorSpace]
           next unless cs
 

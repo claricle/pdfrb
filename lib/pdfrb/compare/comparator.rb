@@ -96,8 +96,7 @@ module Pdfrb
 
       def inventory_fonts(doc)
         fonts = Set.new
-        doc.each_indirect_object do |obj|
-          next unless obj.is_a?(Pdfrb::Model::Cos::Dictionary)
+        doc.each_indirect_of(Pdfrb::Model::Cos::Dictionary) do |obj|
           next unless obj[:Type] == :Font
 
           name = obj[:BaseFont] || obj[:Name] || "Unknown"
@@ -117,8 +116,7 @@ module Pdfrb
 
       def count_images(doc)
         count = 0
-        doc.each_indirect_object do |obj|
-          next unless obj.is_a?(Pdfrb::Model::Cos::Stream)
+        doc.each_indirect_of(Pdfrb::Model::Cos::Stream) do |obj|
           next unless obj[:Subtype] == :Image
 
           count += 1

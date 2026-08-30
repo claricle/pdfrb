@@ -9,6 +9,34 @@ RSpec.describe Pdfrb::Document do
     expect(doc.io).to be_nil
   end
 
+  describe "#each_indirect_of" do
+    before do
+      doc.add({ Type: :Font }, type: Pdfrb::Model::Cos::Dictionary)
+      stream = doc.add({ Length: 3 }, type: Pdfrb::Model::Cos::Stream)
+      stream.stream = "abc"
+    end
+
+    it "yields only indirect objects of the class" do
+      streams = doc.each_indirect_of(Pdfrb::Model::Cos::Stream).to_a
+      expect(streams).to all(be_a(Pdfrb::Model::Cos::Stream))
+      expect(streams.length).to eq(1)
+
+      dicts = doc.each_indirect_of(Pdfrb::Model::Cos::Dictionary).to_a
+      expect(dicts).to all(be_a(Pdfrb::Model::Cos::Dictionary))
+      expect(dicts.map { |d| d.value[:Type] }).to include(:Font)
+    end
+
+    it "returns an Enumerator when blockless" do
+      expect(doc.each_indirect_of(Pdfrb::Model::Cos::Dictionary))
+        .to be_a(Enumerator)
+    end
+
+    it "composes with Enumerable" do
+      expect(doc.each_indirect_of(Pdfrb::Model::Cos::Stream).map(&:stream))
+        .to eq(["abc"])
+    end
+  end
+
   describe "#wrap" do
     it "wraps a Hash as a Dictionary" do
       obj = doc.wrap({ Type: :Foo })

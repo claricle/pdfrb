@@ -392,26 +392,19 @@ module Pdfrb
       return current unless catalog
 
       v = current
-      if (catalog.value[:AF] || catalog.value[:Collection]) && compare_versions(v, "2.0").negative?
+      if (catalog.value[:AF] || catalog.value[:Collection]) && Pdfrb::PdfVersion.compare(v, "2.0").negative?
         v = "2.0"
       end
-      if catalog.value[:OCProperties] && compare_versions(v, "1.5").negative?
+      if catalog.value[:OCProperties] && Pdfrb::PdfVersion.compare(v, "1.5").negative?
         v = "1.5"
       end
       document.version = v
       v
     end
 
-    def compare_versions(a, b)
-      aa = a.to_s.split(".").map(&:to_i)
-      bb = b.to_s.split(".").map(&:to_i)
-      (aa <=> bb) || 0
-    end
-
     def compress_content_streams
       require "zlib"
-      document.each_indirect_object do |obj|
-        next unless obj.is_a?(Pdfrb::Model::Cos::Stream)
+      document.each_indirect_of(Pdfrb::Model::Cos::Stream) do |obj|
         next if obj.value[:Filter]
         next unless obj.stream
         next if obj.value[:Type] == :Metadata

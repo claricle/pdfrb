@@ -55,8 +55,7 @@ module Pdfrb
       end
 
       def find_page(stream_obj)
-        @document.each_indirect_object do |obj|
-          next unless obj.is_a?(Pdfrb::Model::Cos::Dictionary)
+        @document.each_indirect_of(Pdfrb::Model::Cos::Dictionary) do |obj|
           next unless obj[:Type] == :Page
 
           contents = obj[:Contents]

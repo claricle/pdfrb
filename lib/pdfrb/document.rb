@@ -282,6 +282,16 @@ module Pdfrb
       end
     end
 
+    # Yield every indirect object of +klass+ (e.g. all Streams, all
+    # Dictionaries). Enumerator when blockless.
+    def each_indirect_of(klass)
+      return enum_for(:each_indirect_of, klass) unless block_given?
+
+      each_indirect_object do |obj|
+        yield obj if obj.is_a?(klass)
+      end
+    end
+
     # Walk every revision in the document's incremental-update chain,
     # from the latest (most recent) revision backward via /Prev.
     # Each revision yields a (revision_index, xref, trailer) tuple

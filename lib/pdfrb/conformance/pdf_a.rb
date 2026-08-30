@@ -31,8 +31,7 @@ module Pdfrb
                       id: "6.1-4", description: "JavaScript prohibited",
                       severity: :error, spec_clause: "ISO 19005-1 6.1",
                       check: ->(doc) {
-                        doc.each_indirect_object do |obj|
-                          next unless obj.is_a?(Pdfrb::Model::Cos::Dictionary)
+                        doc.each_indirect_of(Pdfrb::Model::Cos::Dictionary) do |obj|
                           if obj.value[:S] == :JavaScript
                             return Violation.new(rule_id: "6.1-4", message: "PDF/A prohibits JavaScript actions",
                                                  object: "JavaScript action", severity: :error,
@@ -201,8 +200,7 @@ module Pdfrb
                       id: "a1-1", description: "JPEG2000 not allowed in A-1",
                       severity: :error, spec_clause: "ISO 19005-1 6.2.4",
                       check: ->(doc) {
-                        doc.each_indirect_object do |obj|
-                          next unless obj.is_a?(Pdfrb::Model::Cos::Stream)
+                        doc.each_indirect_of(Pdfrb::Model::Cos::Stream) do |obj|
                           next unless obj[:Filter] == :JPXDecode
 
                           return Violation.new(rule_id: "a1-1",
@@ -217,8 +215,7 @@ module Pdfrb
                       id: "a1-2", description: "Object streams not allowed in A-1",
                       severity: :error, spec_clause: "ISO 19005-1 6.2.4",
                       check: ->(doc) {
-                        doc.each_indirect_object do |obj|
-                          next unless obj.is_a?(Pdfrb::Model::Cos::Dictionary)
+                        doc.each_indirect_of(Pdfrb::Model::Cos::Dictionary) do |obj|
                           next unless obj.value[:Type] == :ObjStm
 
                           return Violation.new(rule_id: "a1-2",
@@ -247,9 +244,7 @@ module Pdfrb
                       id: "a1-4", description: "LZWDecode not allowed in A-1",
                       severity: :error, spec_clause: "ISO 19005-1 6.2.4",
                       check: ->(doc) {
-                        doc.each_indirect_object do |obj|
-                          next unless obj.is_a?(Pdfrb::Model::Cos::Stream)
-
+                        doc.each_indirect_of(Pdfrb::Model::Cos::Stream) do |obj|
                           f = obj[:Filter]
                           fs = f.is_a?(::Array) ? f : [f]
                           next unless fs.include?(:LZWDecode)
@@ -269,8 +264,7 @@ module Pdfrb
                       id: "a2-1", description: "PostScript XObjects prohibited",
                       severity: :warning, spec_clause: "ISO 19005-2 6.2.4",
                       check: ->(doc) {
-                        doc.each_indirect_object do |obj|
-                          next unless obj.is_a?(Pdfrb::Model::Cos::Stream)
+                        doc.each_indirect_of(Pdfrb::Model::Cos::Stream) do |obj|
                           next unless [:PS, :PSXObject].include?(obj[:Subtype])
 
                           return Violation.new(rule_id: "a2-1",
@@ -285,8 +279,7 @@ module Pdfrb
                       id: "a2-2", description: "Embedded files not allowed in A-2",
                       severity: :error, spec_clause: "ISO 19005-2 6.2",
                       check: ->(doc) {
-                        doc.each_indirect_object do |obj|
-                          next unless obj.is_a?(Pdfrb::Model::Cos::Dictionary)
+                        doc.each_indirect_of(Pdfrb::Model::Cos::Dictionary) do |obj|
                           next unless obj.value[:Type] == :EmbeddedFile
 
                           return Violation.new(rule_id: "a2-2",
@@ -316,8 +309,7 @@ module Pdfrb
                       severity: :error, spec_clause: "ISO 19005-3 6.2",
                       check: ->(doc) {
                         vs = []
-                        doc.each_indirect_object do |obj|
-                          next unless obj.is_a?(Pdfrb::Model::Cos::Dictionary)
+                        doc.each_indirect_of(Pdfrb::Model::Cos::Dictionary) do |obj|
                           next unless obj.value[:Type] == :Filespec
                           next if obj.value[:AFRelationship]
 
@@ -348,8 +340,7 @@ module Pdfrb
                       severity: :error, spec_clause: "ISO 19005-4 6.2",
                       check: ->(doc) {
                         vs = []
-                        doc.each_indirect_object do |obj|
-                          next unless obj.is_a?(Pdfrb::Model::Cos::Dictionary)
+                        doc.each_indirect_of(Pdfrb::Model::Cos::Dictionary) do |obj|
                           next unless obj.value[:Type] == :Filespec
                           next if obj.value[:AFRelationship]
 
@@ -366,8 +357,7 @@ module Pdfrb
                       severity: :error, spec_clause: "ISO 19005-4 6.2.3",
                       check: ->(doc) {
                         vs = []
-                        doc.each_indirect_object do |annot|
-                          next unless annot.is_a?(Pdfrb::Model::Cos::Dictionary)
+                        doc.each_indirect_of(Pdfrb::Model::Cos::Dictionary) do |annot|
                           next unless annot.value[:Type] == :Annot
 
                           st = annot.value[:Subtype]
