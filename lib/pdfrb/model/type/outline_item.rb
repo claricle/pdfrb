@@ -8,7 +8,10 @@ module Pdfrb
       class OutlineItem < Pdfrb::Model::Cos::Dictionary
         arlington_object "OutlineItem"
 
-        def title; self[:Title]; end
+        def title
+          Pdfrb::Model::Cos::TextString.decode(self[:Title])
+        end
+
         def parent; self[:Parent]; end
         def prev; self[:Prev]; end
         def next; self[:Next]; end
