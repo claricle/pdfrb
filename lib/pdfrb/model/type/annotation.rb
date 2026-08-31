@@ -26,8 +26,15 @@ module Pdfrb
         # ---- Accessors ----
         def subtype; self[:Subtype]; end
         def rect; self[:Rect]; end
-        def contents; self[:Contents]; end
-        def name; self[:NM]; end
+
+        def contents
+          Pdfrb::Model::Cos::TextString.decode(self[:Contents])
+        end
+
+        def name
+          Pdfrb::Model::Cos::TextString.decode(self[:NM])
+        end
+
         def modified_date; self[:M]; end
         def flags; self[:F] || 0; end
         def color; self[:C]; end
