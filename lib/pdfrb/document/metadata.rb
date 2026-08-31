@@ -45,7 +45,10 @@ module Pdfrb
         raw = info.value[field]
         return nil if raw.nil?
 
-        raw.is_a?(::String) ? raw.dup.force_encoding("UTF-8") : raw
+        # Info values are text strings (s7.9.2.2): they may arrive as
+        # UTF-16BE+BOM or PDFDocEncoding bytes (decryption hands back
+        # wire bytes). Decode rather than relabel the encoding.
+        raw.is_a?(::String) ? Pdfrb::Model::Cos::StringEncoding.decode_text(raw) : raw
       end
 
       def write_field(field, value)

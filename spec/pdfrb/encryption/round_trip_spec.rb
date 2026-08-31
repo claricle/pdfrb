@@ -30,12 +30,19 @@ RSpec.describe "encrypted round trip" do
 
         reopened = write_and_reopen(doc, password: "s3cret")
 
-        title = reopened.metadata[:Title]
-        expect(Pdfrb::Model::Cos::StringEncoding.decode_text(title))
-          .to eq("confidential title")
+        expect(reopened.metadata[:Title]).to eq("confidential title")
 
         content = reopened.resolve(reopened.pages.first.value[:Contents])
         expect(content.stream).to include("Secret page 1")
+      end
+
+      it "decodes UTF-16 text strings back to UTF-8" do
+        doc = build_document(title: "極秘文書 résumé")
+        doc.encrypt!(user_password: "s3cret", owner_password: "s3cret", bits: bits)
+
+        reopened = write_and_reopen(doc, password: "s3cret")
+
+        expect(reopened.metadata[:Title]).to eq("極秘文書 résumé")
       end
 
       it "raises EncryptionError when the password does not verify" do
