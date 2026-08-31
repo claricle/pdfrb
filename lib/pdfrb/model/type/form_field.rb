@@ -8,11 +8,27 @@ module Pdfrb
         register_type :Field
 
         def field_type; self[:FT]; end
-        def field_name; self[:T]; end
-        def alternate_field_name; self[:TU]; end
-        def mapping_field_name; self[:TM]; end
-        def field_value; self[:V]; end
-        def default_value; self[:DV]; end
+
+        def field_name
+          Pdfrb::Model::Cos::TextString.decode(self[:T])
+        end
+
+        def alternate_field_name
+          Pdfrb::Model::Cos::TextString.decode(self[:TU])
+        end
+
+        def mapping_field_name
+          Pdfrb::Model::Cos::TextString.decode(self[:TM])
+        end
+
+        def field_value
+          Pdfrb::Model::Cos::TextString.decode(self[:V])
+        end
+
+        def default_value
+          Pdfrb::Model::Cos::TextString.decode(self[:DV])
+        end
+
         def kids; self[:Kids]; end
         def parent; self[:Parent]; end
         def flags; self[:Ff] || 0; end

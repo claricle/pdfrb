@@ -86,7 +86,9 @@ module Pdfrb
 
       # Find a field by fully qualified name.
       def find(name)
-        each_field.find { |f| f.value[:T] == name }
+        each_field.find do |f|
+          Pdfrb::Model::Cos::TextString.decode(f.value[:T]) == name
+        end
       end
 
       # Enumerate all top-level fields.
@@ -105,7 +107,9 @@ module Pdfrb
 
       # List of fully qualified field names (T values).
       def field_names
-        each_field.filter_map { |f| f.value[:T] }
+        each_field.filter_map do |f|
+          Pdfrb::Model::Cos::TextString.decode(f.value[:T])
+        end
       end
 
       # Set a field value by name. Auto-regenerates the appearance stream
@@ -129,7 +133,7 @@ module Pdfrb
         field = find(name)
         return nil unless field
 
-        field.value[:V]
+        Pdfrb::Model::Cos::TextString.decode(field.value[:V])
       end
 
       # Flatten all form fields: stamp their appearance streams into page
