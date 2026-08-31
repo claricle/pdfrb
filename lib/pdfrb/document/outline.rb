@@ -2,8 +2,12 @@
 
 module Pdfrb
   class Document
-    # Bookmark/outline facade. Builds the /Outlines tree on the
-    # Catalog so PDF viewers show a navigation panel.
+    # Bookmark/outline facade. Two directions:
+    #   * build — add/build! construct the /Outlines tree on the
+    #     Catalog so PDF viewers show a navigation panel;
+    #   * read — each/to_a walk an existing outline depth-first
+    #     (parents before children), yielding typed
+    #     Model::Type::OutlineItem objects.
     class Outline
       attr_reader :document, :entries
 
@@ -52,6 +56,55 @@ module Pdfrb
 
         @document.catalog.value[:Outlines] = root_ref
         root
+      end
+
+      # Enumerate bookmark items depth-first (preorder: a parent
+      # yields before its children). Returns an Enumerator when
+      # blockless. Malformed chains (loops, dangling refs) are
+      # tolerated: each item is visited once.
+      def each(&)
+        return enum_for(:each) unless block_given?
+
+        root = outline_root
+        walk_outline_chain(root&.value&.[](:First), {}, &)
+        self
+      end
+
+      def to_a
+        each.to_a
+      end
+
+      def empty?
+        root = outline_root
+        root.nil? || root.value[:First].nil?
+      end
+
+      private
+
+      def outline_root
+        ref = document.catalog.value[:Outlines]
+        return nil if ref.nil?
+
+        obj = document.resolve(ref)
+        obj.is_a?(Pdfrb::Model::Object) ? obj : nil
+      end
+
+      # Follow a sibling chain starting at +ref+, recursing into
+      # each item's children (/First) before the next sibling.
+      def walk_outline_chain(ref, seen, &)
+        return if ref.nil?
+
+        item = document.object(ref)
+        return unless item.is_a?(Pdfrb::Model::Object)
+        return if seen.key?(item.oid)
+
+        seen[item.oid] = true
+        typed = document.wrap(item.value,
+                              type: Pdfrb::Model::Type::OutlineItem,
+                              oid: item.oid, gen: item.gen)
+        yield typed
+        walk_outline_chain(typed.value[:First], seen, &)
+        walk_outline_chain(typed.value[:Next], seen, &)
       end
     end
 
