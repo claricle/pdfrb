@@ -53,24 +53,24 @@ module Pdfrb
     # header and (for streams) the stream payload. When an encrypter
     # is set, all strings in the object's dictionaries and the stream
     # payload are encrypted with the per-object key (s7.6.1) — pass
-    # +skip_string_encryption:+ for the /Encrypt dictionary itself,
-    # whose entries must stay readable.
-    def serialize_indirect(obj, skip_string_encryption: false)
+    # +skip_encryption:+ for objects that must stay readable: the
+    # /Encrypt dictionary itself (s7.6.3) and cross-reference streams.
+    def serialize_indirect(obj, skip_encryption: false)
       raise ArgumentError, "not indirect: #{obj.inspect}" unless obj.indirect?
 
-      encrypt_strings = !skip_string_encryption && encrypter
+      encrypt_strings = !skip_encryption && encrypter
       buffer = +""
       buffer << "#{obj.oid} #{obj.gen} obj\n"
       case obj
       when Pdfrb::Model::Cos::Stream
-        dict_value = encrypt_strings ? encrypt_value_strings(obj.value, obj.oid, obj.gen) : obj.value
+        dict_value = encrypt_strings ? Pdfrb::Encryption::ValueStrings.encrypt(obj.value, obj.oid, obj.gen, encrypter) : obj.value
         dict, payload = emit_stream(obj, dict_value)
         buffer << dict
         buffer << "\nstream\n"
-        buffer << (encrypter ? encrypter.encrypt(payload, obj.oid, obj.gen) : payload)
+        buffer << (encrypter && !skip_encryption ? encrypter.encrypt_stream(payload, obj.oid, obj.gen) : payload)
         buffer << "\nendstream\n"
       else
-        value = encrypt_strings ? encrypt_value_strings(obj.value, obj.oid, obj.gen) : obj.value
+        value = encrypt_strings ? Pdfrb::Encryption::ValueStrings.encrypt(obj.value, obj.oid, obj.gen, encrypter) : obj.value
         buffer << serialize(value)
         buffer << "\n"
       end
@@ -79,33 +79,6 @@ module Pdfrb
     end
 
     private
-
-    # Deep-transform +value+ so every literal string carries the
-    # per-object ciphertext (s7.6.1: strings AND streams encrypt).
-    def encrypt_value_strings(value, oid, gen)
-      case value
-      when ::Hash
-        value.each_with_object({}) do |(k, v), h|
-          h[k] = encrypt_value_strings(v, oid, gen)
-        end
-      when ::Array
-        value.map { |v| encrypt_value_strings(v, oid, gen) }
-      when Pdfrb::Model::PdfArray
-        Pdfrb::Model::PdfArray.new(value.map { |v| encrypt_value_strings(v, oid, gen) })
-      when Pdfrb::Model::Object
-        Pdfrb::Model::Object.new(encrypt_value_strings(value.value, oid, gen),
-                                 oid: value.oid, gen: value.gen)
-      when ::String
-        bytes = if value.encoding == Encoding::UTF_8
-                  Pdfrb::Model::Cos::StringEncoding.encode_text(value)
-                else
-                  value.dup.force_encoding(Encoding::BINARY)
-                end
-        encrypter.encrypt(bytes, oid, gen)
-      else
-        value
-      end
-    end
 
     # Build the dict body + payload for a stream object, applying
     # FlateDecode compression when enabled and the stream is large

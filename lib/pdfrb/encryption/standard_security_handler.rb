@@ -173,10 +173,76 @@ module Pdfrb
         end
       end
 
+      # Direction-aware entry points (s7.6.3.2 Table 21): streams
+      # use the StmF crypt filter, strings use StrF. V5 is always
+      # AES-256; V2/V3 are always RC4; V4 resolves the cipher from
+      # the CF dictionary's CFM (defaulting to Identity, per spec).
+      def encrypt_string(data, oid, gen)
+        encrypt_with(str_crypt_method, data, oid, gen)
+      end
+
+      def encrypt_stream(data, oid, gen)
+        encrypt_with(stm_crypt_method, data, oid, gen)
+      end
+
+      def decrypt_string(data, oid, gen)
+        decrypt_with(str_crypt_method, data, oid, gen)
+      end
+
+      def decrypt_stream(data, oid, gen)
+        decrypt_with(stm_crypt_method, data, oid, gen)
+      end
+
       # Serializer-compatible alias for encrypt_data. The Serializer
       # calls encrypter.encrypt(payload, oid, gen) on string/stream
       # payloads during serialization.
       alias encrypt encrypt_data
+
+      def stm_crypt_method
+        crypt_method_for(@encrypt[:StmF])
+      end
+
+      def str_crypt_method
+        crypt_method_for(@encrypt[:StrF])
+      end
+
+      # @return [:aes256, :aes, :rc4, :identity]
+      def crypt_method_for(filter_name)
+        return :aes256 if @version >= 5
+        return :rc4 if @version <= 3
+
+        # V4: resolve CFM from the CF dictionary; absent filters
+        # default to Identity (s7.6.3.2 Table 21).
+        return :identity if filter_name.nil? || filter_name == :Identity
+
+        cf = @encrypt[:CF]
+        cfm = cf && cf[filter_name] ? cf[filter_name][:CFM] : nil
+        case cfm
+        when :AESV2 then :aes
+        when :V2 then :rc4
+        else :identity
+        end
+      end
+
+      def encrypt_with(method, data, oid, gen)
+        return data if method == :identity || @key.nil?
+
+        obj_key = compute_object_key(oid, gen)
+        case method
+        when :aes256, :aes then encrypt_aes_cbc(data, obj_key)
+        else encrypt_rc4(data, obj_key)
+        end
+      end
+
+      def decrypt_with(method, data, oid, gen)
+        return data if method == :identity || @key.nil?
+
+        obj_key = compute_object_key(oid, gen)
+        case method
+        when :aes256, :aes then decrypt_aes_cbc(data, obj_key)
+        else decrypt_rc4(data, obj_key)
+        end
+      end
 
       def decrypt_data(data, oid, gen)
         return data unless @key
@@ -194,7 +260,9 @@ module Pdfrb
 
       def pad_password(password)
         pw = password.to_s.encode(Encoding::BINARY)[0, 32]
-        pw + PAD[pw.bytesize, 32 - pw.bytesize]
+        # Algorithm 3.2: append the FIRST (32 - n) bytes of the pad
+        # string — not a slice offset by the password length.
+        pw + PAD[0, 32 - pw.bytesize]
       end
 
       def id_bytes
@@ -205,10 +273,14 @@ module Pdfrb
       end
 
       def verify_user_password_hash?(key)
-        return true if @revision < 3
-
-        hash = compute_user_password_hash(key)
-        stored = @encrypt[:U] || ""
+        stored = @encrypt[:U] || "".b
+        hash = if @revision < 3
+                 # Algorithm 3.4/3.6 (R2): U = RC4(file_key, PAD).
+                 RC4Impl.new(key).process(PAD)
+               else
+                 Pdfrb::Encryption::PasswordVerification
+                   .user_password_hash_r3plus(file_key: key, id0: id_bytes)
+               end
         hash[0, 16] == stored[0, 16]
       end
 
@@ -236,11 +308,15 @@ module Pdfrb
         RC4Impl.new(key).process(data)
       end
 
+      def aes_cipher_name(key)
+        "aes-#{key.bytesize * 8}-cbc"
+      end
+
       def encrypt_aes_cbc(data, key)
         iv = OpenSSL::Random.random_bytes(16)
-        cipher = OpenSSL::Cipher.new("aes-128-cbc")
+        cipher = OpenSSL::Cipher.new(aes_cipher_name(key))
         cipher.encrypt
-        cipher.key = key[0, 16]
+        cipher.key = key
         cipher.iv = iv
         encrypted = cipher.update(data) + cipher.final
         iv + encrypted
@@ -251,9 +327,9 @@ module Pdfrb
 
         iv = data[0, 16]
         ciphertext = data[16..]
-        decipher = OpenSSL::Cipher.new("aes-128-cbc")
+        decipher = OpenSSL::Cipher.new(aes_cipher_name(key))
         decipher.decrypt
-        decipher.key = key[0, 16]
+        decipher.key = key
         decipher.iv = iv
         decipher.update(ciphertext) + decipher.final
       rescue OpenSSL::Cipher::CipherError

@@ -17,6 +17,7 @@ module Pdfrb
     autoload :AES, "pdfrb/encryption/aes"
     autoload :PasswordVerification, "pdfrb/encryption/password_verification"
     autoload :Identity, "pdfrb/encryption/identity"
+    autoload :ValueStrings, "pdfrb/encryption/value_strings"
     autoload :PublicKeySecurityHandler, "pdfrb/encryption/public_key_security_handler"
     autoload :V5Writer, "pdfrb/encryption/v5_writer"
 
@@ -31,6 +32,29 @@ module Pdfrb
     # Returns nil if the document is not encrypted.
     def handler_for_document(document, **opts)
       SecurityHandler.for(document, decryption_opts: opts)
+    end
+
+    # Crypt-filter entries a V4 /Encrypt dict must carry when the
+    # cipher is AES-128: absent StmF/StrF default to Identity
+    # (s7.6.3.2 Table 21), leaving the ciphertext unreadable.
+    V4_AESV2_FILTERS = {
+      CF: { StdCF: { CFM: :AESV2, Length: 16 } },
+      StmF: :StdCF,
+      StrF: :StdCF,
+    }.freeze
+
+    def v4_crypt_filters(v)
+      v == 4 ? V4_AESV2_FILTERS : {}
+    end
+
+    # Objects whose bytes are never encrypted (both write and read
+    # directions consult this): the /Encrypt dictionary itself
+    # (s7.6.3 — its values carry the password hashes) and
+    # cross-reference streams (always cleartext).
+    def exempt_object?(document, obj)
+      encrypt_oid = (document.trailer || {})[:Encrypt]&.oid
+      obj.oid == encrypt_oid ||
+        (obj.is_a?(Pdfrb::Model::Cos::Stream) && obj.value[:Type] == :XRef)
     end
   end
 end

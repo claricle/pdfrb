@@ -29,10 +29,34 @@ module Pdfrb
         return nil if entry.nil? || entry.free?
 
         obj = case entry.type
-              when :in_use then parse_at(entry.offset, oid, entry.gen)
+              when :in_use then decrypt_loaded(parse_at(entry.offset, oid, entry.gen), entry.gen)
               when :compressed then load_from_objstm(entry.obj_stm_oid, entry.index, oid)
               end
         @cache[oid] = obj
+        obj
+      end
+
+      # The single funnel for read-side decryption (s7.6.1): strings
+      # in the object's dictionaries and the stream payload decrypt
+      # with the per-object key as the object enters the Model.
+      # Objects inside object streams need no separate treatment —
+      # only the containing ObjStm stream is encrypted — and the
+      # /Encrypt dictionary is exempt (s7.6.3).
+      def decrypt_loaded(obj, gen)
+        return obj if obj.nil?
+        # The exemption check must precede handler construction:
+        # building the handler resolves the /Encrypt dict through
+        # this same funnel, which would recurse before the memo is
+        # set.
+        return obj if Pdfrb::Encryption.exempt_object?(document, obj)
+
+        handler = document.encryption.reader_handler
+        return obj if handler.nil?
+
+        Pdfrb::Encryption::ValueStrings.decrypt!(obj.value, obj.oid, gen, handler)
+        if obj.is_a?(Pdfrb::Model::Cos::Stream) && obj.stream
+          obj.stream = handler.decrypt_stream(obj.stream, obj.oid, gen)
+        end
         obj
       end
 
