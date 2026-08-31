@@ -99,22 +99,26 @@ module Pdfrb
         rc4.process(pack_bytes(PADDING_BYTES))
       end
 
-      # Algorithm 5 (R>=3): build the /U entry.
-      def build_u_r3plus(file_key:, id0:, revision:)
+      # Algorithm 5 (R>=3): the /U entry. The 19 additional RC4
+      # rounds use the file key XORed with the round index, for
+      # i = 1..19 in ascending order.
+      def user_password_hash_r3plus(file_key:, id0:)
         digest = Digest::MD5.new
         digest.update(pack_bytes(PADDING_BYTES))
         digest.update(id0.b)
         hash = digest.digest
-        rc4 = RC4.new(file_key)
-        encrypted = rc4.process(hash)
-        # 19 more rounds with key XORed by round index.
-        19.times do |i|
+        hash = RC4.new(file_key).process(hash)
+        (1..19).each do |i|
           key = file_key.bytes.map { |b| (b ^ i).chr }.join
-          encrypted = RC4.new(key).process(encrypted)
+          hash = RC4.new(key).process(hash)
         end
-        # Pad / truncate to 32 bytes.
-        encrypted = encrypted + ("\x00" * (32 - encrypted.bytesize))
-        encrypted.byteslice(0, 32)
+        hash
+      end
+
+      def build_u_r3plus(file_key:, id0:, revision:)
+        hash = user_password_hash_r3plus(file_key: file_key, id0: id0)
+        # Pad to 32 bytes.
+        hash + ("\x00" * (32 - hash.bytesize))
       end
 
       # Algorithm 6: verify a user password. Returns true if it

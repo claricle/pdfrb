@@ -325,9 +325,10 @@ module Pdfrb
                   )
                 end
 
+      cf_entries = Pdfrb::Encryption.v4_crypt_filters(v)
       encrypt_dict = doc.add(
         { Filter: :Standard, V: v, R: r, Length: length, P: perms,
-          O: o_entry, U: u_entry },
+          O: o_entry, U: u_entry, **cf_entries },
         type: Pdfrb::Model::Cos::Dictionary
       )
       doc.trailer[:Encrypt] = encrypt_dict.ref
@@ -336,7 +337,7 @@ module Pdfrb
       handler = Pdfrb::Encryption::StandardSecurityHandler.new(
         {
           Encrypt: { V: v, R: r, Length: length, P: perms,
-                     O: o_entry, U: u_entry },
+                     O: o_entry, U: u_entry, **cf_entries },
           ID: [id0.b, id0.b],
         }
       )

@@ -65,6 +65,30 @@ module Pdfrb
         !trailer.nil? && !trailer[:Encrypt].nil?
       end
 
+      # Handler for reading an encrypted document: memoized, built
+      # from the trailer /Encrypt, verifying the configured password
+      # (config "encryption.password"). Returns nil for unencrypted
+      # documents. Raises EncryptionError when the password does not
+      # verify — the reader must never hand back ciphertext as
+      # plaintext.
+      def reader_handler
+        return nil unless encrypted?
+
+        @reader_handler ||= begin
+          trailer = document.trailer
+          encrypt_dict = document.resolve(trailer[:Encrypt])
+          handler = Pdfrb::Encryption::StandardSecurityHandler.new(
+            { Encrypt: encrypt_dict.value, ID: trailer[:ID] }
+          )
+          password = document.config["encryption.password"] || ""
+          unless handler.verify_user_password?(password)
+            raise Pdfrb::EncryptionError,
+                  "document is encrypted and the password does not verify"
+          end
+          handler
+        end
+      end
+
       # Remove /Encrypt from the trailer (decrypt use case). Returns
       # self for chaining; use encrypted? to check the result.
       def decrypt!
@@ -78,6 +102,7 @@ module Pdfrb
           document.config["encryption.handler"] = nil
           document.config["encryption.password"] = nil
         end
+        @reader_handler = nil
         self
       end
 
@@ -123,8 +148,9 @@ module Pdfrb
             )
           end
 
+        cf_entries = Pdfrb::Encryption.v4_crypt_filters(v)
         register({ Filter: :Standard, V: v, R: r, Length: length,
-                   P: p_bits, O: o_entry, U: u_entry },
+                   P: p_bits, O: o_entry, U: u_entry, **cf_entries },
                  user_password: user_pw)
       end
 
@@ -193,7 +219,10 @@ module Pdfrb
                     trailer[:ID]
                   end }
           )
-          h.verify_user_password?(user_password)
+          unless h.verify_user_password?(user_password)
+            raise Pdfrb::EncryptionError,
+                  "derived key does not verify against the /U entry"
+          end
           h
         end
         document.config["encryption.handler"] = handler

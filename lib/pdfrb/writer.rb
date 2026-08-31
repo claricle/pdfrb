@@ -74,12 +74,6 @@ module Pdfrb
       { encrypter: handler }
     end
 
-    # The /Encrypt dictionary's own strings (U, O, UE, OE, Perms) must
-    # stay in cleartext — they carry the password hashes.
-    def encryption_dict?(obj)
-      (document.trailer || {})[:Encrypt]&.oid == obj.oid
-    end
-
     def self.write(document, io)
       new(document, io).write
     end
@@ -104,7 +98,7 @@ module Pdfrb
 
         @xref_offsets[obj.oid] = @io.pos
         @io << @serializer.serialize_indirect(obj,
-                                              skip_string_encryption: encryption_dict?(obj))
+                                              skip_encryption: Pdfrb::Encryption.exempt_object?(document, obj))
       end
 
       xref_pos = if use_stream
@@ -139,7 +133,7 @@ module Pdfrb
 
         @xref_offsets[obj.oid] = @io.pos
         @io << @serializer.serialize_indirect(obj,
-                                              skip_string_encryption: encryption_dict?(obj))
+                                              skip_encryption: Pdfrb::Encryption.exempt_object?(document, obj))
       end
       xref_pos = write_xref(prev: previous_xref_offset)
       write_trailer(xref_pos, prev: previous_xref_offset)

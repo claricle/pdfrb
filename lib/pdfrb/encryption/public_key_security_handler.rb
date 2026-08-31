@@ -85,6 +85,22 @@ module Pdfrb
 
       # Per-object encryption: AES-256-CBC with IV prefix. The
       # per-object key is SHA-256(file_key ‖ oid ‖ gen).
+      def encrypt_string(data, oid, gen)
+        encrypt_data(data, oid, gen)
+      end
+
+      def encrypt_stream(data, oid, gen)
+        encrypt_data(data, oid, gen)
+      end
+
+      def decrypt_string(data, oid, gen)
+        decrypt_data(data, oid, gen)
+      end
+
+      def decrypt_stream(data, oid, gen)
+        decrypt_data(data, oid, gen)
+      end
+
       def encrypt_data(data, oid, gen)
         return data unless @file_key
 

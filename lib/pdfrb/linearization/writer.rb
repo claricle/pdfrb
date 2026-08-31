@@ -71,7 +71,7 @@ module Pdfrb
         ordered.each do |obj|
           offsets[obj.oid] = temp.pos
           temp << @serializer.serialize_indirect(obj,
-                                                 skip_string_encryption: encryption_dict?(obj))
+                                                 skip_encryption: Pdfrb::Encryption.exempt_object?(@document, obj))
         end
         first_page_end = temp.pos if first_page_objects.any?
 
@@ -133,7 +133,7 @@ module Pdfrb
 
         layout.ordered_objects.each do |obj|
           buf << @serializer.serialize_indirect(obj,
-                                                skip_string_encryption: encryption_dict?(obj))
+                                                skip_encryption: Pdfrb::Encryption.exempt_object?(@document, obj))
         end
 
         buf << "#{layout.hint_oid} 0 obj\n"
@@ -259,11 +259,6 @@ module Pdfrb
 
       def header_bytes
         "%PDF-1.7\n%\xE2\xE3\xCF\xD3\n"
-      end
-
-      # The /Encrypt dictionary's own strings must stay in cleartext.
-      def encryption_dict?(obj)
-        (@document.trailer || {})[:Encrypt]&.oid == obj.oid
       end
 
       def write_non_linearized(io)
