@@ -148,14 +148,40 @@ RSpec.describe "docs/USAGE.md cookbook" do
   it "encryption" do
     doc = Pdfrb::Document.new
     doc.pages.add
+    doc.metadata[:Title] = "Confidential"
     encrypted = tmp("encrypted.pdf")
     doc.encrypt!(user_password: "secret", owner_password: "owner", bits: 128)
     doc.write(encrypted)
     expect(File.binread(encrypted)).to include("/Encrypt")
+    expect(File.binread(encrypted)).not_to include("Confidential")
 
     reopened = Pdfrb.open(encrypted,
                           config: { "encryption.password" => "secret" })
     expect(reopened.pages.count).to eq(1)
+    expect(reopened.metadata[:Title]).to eq("Confidential")
+
+    wrong_pw = Pdfrb.open(encrypted,
+                          config: { "encryption.password" => "wrong" })
+    expect { wrong_pw.metadata[:Title] }
+      .to raise_error(Pdfrb::EncryptionError)
+  end
+
+  it "bookmarks (outlines)" do
+    doc = Pdfrb::Document.new
+    page = doc.pages.add
+    font = doc.fonts.add("Helvetica")
+    page.canvas.text("Intro", at: [72, 720], font: font, size: 12)
+
+    chapter = doc.outline.add("Chapter 1", dest: :xyz)
+    chapter.add_child(Pdfrb::Document::OutlineEntry.new(title: "1.1", dest: :xyz))
+    doc.outline.add("Chapter 2", dest: :xyz)
+    doc.outline.build!
+    path = tmp("bookmarked.pdf")
+    doc.write(path)
+
+    reopened = Pdfrb.open(path)
+    expect(reopened.outline.each.map(&:title))
+      .to eq(["Chapter 1", "1.1", "Chapter 2"])
   end
 
   it "Pdfrb.parse accepts bytes and IO" do
