@@ -78,6 +78,31 @@ RSpec.describe Pdfrb::DigitalSignature::Verification do
     [cert, key]
   end
 
+  describe ".der_prefix" do
+    it "drops placeholder padding after the declared DER length" do
+      der = [0x30, 0x03, 0x02, 0x01, 0x05].pack("C*")
+      padded = der + ("\x00" * 64)
+      expect(described_class.der_prefix(padded)).to eq(der)
+    end
+
+    it "keeps legitimate trailing zero bytes inside the structure" do
+      der = [0x30, 0x03, 0x02, 0x01, 0x00].pack("C*")
+      expect(described_class.der_prefix(der)).to eq(der)
+    end
+
+    it "reads the long-form length" do
+      content = "\x02\x01\x01" * 90
+      header = [0x30, 0x82, content.bytesize / 256, content.bytesize % 256].pack("C*")
+      der = header + content
+      expect(described_class.der_prefix("#{der}\x00\x00")).to eq(der)
+    end
+
+    it "passes non-SEQUENCE input through" do
+      bytes = "plain".b
+      expect(described_class.der_prefix(bytes)).to eq(bytes)
+    end
+  end
+
   it "verifies a self-signed document" do
     cert, key = cert_key
     doc = Pdfrb::Document.new.tap do |d|

@@ -68,33 +68,60 @@ module Pdfrb
         hex_start = sig_info[:contents_hex_start]
         hex_end = sig_info[:contents_hex_end]
         contents_hex = pdf_bytes[hex_start...hex_end]
-        contents_hex = contents_hex.sub(/0+$/, "")
 
-        begin
-          der = [contents_hex].pack("H*")
-          pkcs7 = OpenSSL::PKCS7.new(der)
+        # The /Contents placeholder is zero-padded to its reserved
+        # size; DER is self-delimiting, so der_prefix reads the
+        # declared length instead of guessing where the signature
+        # ends (blindly trimming trailing zeros also eats legitimate
+        # 0x00 final bytes and can split a hex byte).
+        verify_pkcs7(der_prefix([contents_hex].pack("H*")),
+                     signed_data, trusted_certs)
+      end
 
-          store = OpenSSL::X509::Store.new
-          trusted_certs.each { |c| store.add_cert(c) }
+      def verify_pkcs7(der, signed_data, trusted_certs)
+        pkcs7 = OpenSSL::PKCS7.new(der)
 
-          valid = pkcs7.verify(nil, store, signed_data,
-                               OpenSSL::PKCS7::DETACHED |
-                               OpenSSL::PKCS7::BINARY)
+        store = OpenSSL::X509::Store.new
+        trusted_certs.each { |c| store.add_cert(c) }
 
-          VerificationResult.new(
-            signer: pkcs7.signers.first&.issuer&.to_s,
-            valid?: valid,
-            byte_range_ok?: true,
-            cert_chain: pkcs7.certificates || [],
-            trusted?: !trusted_certs.empty? && valid,
-            error: valid ? nil : "signature verification failed",
-          )
-        rescue OpenSSL::PKCS7::PKCS7Error, ArgumentError => e
-          VerificationResult.new(valid?: false,
-                                 byte_range_ok?: true,
-                                 cert_chain: [],
-                                 error: e.message)
+        valid = pkcs7.verify(nil, store, signed_data,
+                             OpenSSL::PKCS7::DETACHED |
+                             OpenSSL::PKCS7::BINARY)
+
+        VerificationResult.new(
+          signer: pkcs7.signers.first&.issuer&.to_s,
+          valid?: valid,
+          byte_range_ok?: true,
+          cert_chain: pkcs7.certificates || [],
+          trusted?: !trusted_certs.empty? && valid,
+          error: valid ? nil : "signature verification failed",
+        )
+      rescue OpenSSL::PKCS7::PKCS7Error, ArgumentError => e
+        VerificationResult.new(valid?: false,
+                               byte_range_ok?: true,
+                               cert_chain: [],
+                               error: e.message)
+      end
+
+      # The DER structure starting at +bytes+ (a SEQUENCE), exactly
+      # as long as its own declared length - any placeholder padding
+      # after it is dropped. Non-SEQUENCE input passes through.
+      def der_prefix(bytes)
+        return bytes if bytes.bytesize < 2 || bytes.getbyte(0) != 0x30
+
+        length = bytes.getbyte(1)
+        offset = 2
+        if length.anybits?(0x80)
+          count = length & 0x7F
+          return bytes if count.zero? || bytes.bytesize < 2 + count
+
+          length = 0
+          count.times do |i|
+            length = (length << 8) | bytes.getbyte(2 + i)
+          end
+          offset = 2 + count
         end
+        bytes.byteslice(0, offset + length)
       end
     end
   end
