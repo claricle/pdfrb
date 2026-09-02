@@ -153,16 +153,40 @@ File.binwrite("linearized.pdf", io.string)
 ```ruby
 doc = Pdfrb::Document.new
 doc.pages.add
+doc.metadata[:Title] = "Confidential"
 doc.encrypt!(user_password: "secret", owner_password: "owner", bits: 128)
 doc.write("encrypted.pdf")
 
-# Opening an encrypted document:
+# Opening an encrypted document — strings and streams decrypt on
+# read; a wrong password raises Pdfrb::EncryptionError:
 doc = Pdfrb.open("encrypted.pdf",
                  config: { "encryption.password" => "secret" })
+doc.metadata[:Title] # => "Confidential"
 
 # Removing encryption from a parsed document:
 doc.decrypt!
 doc.write("decrypted.pdf")
+```
+
+## Bookmarks (Outlines)
+
+```ruby
+doc = Pdfrb::Document.new
+page = doc.pages.add
+font = doc.fonts.add("Helvetica")
+page.canvas.text("Intro", at: [72, 720], font: font, size: 12)
+
+chapter = doc.outline.add("Chapter 1", dest: :xyz)
+chapter.add_child(Pdfrb::Document::OutlineEntry.new(title: "1.1", dest: :xyz))
+doc.outline.add("Chapter 2", dest: :xyz)
+doc.outline.build!
+doc.write("bookmarked.pdf")
+
+# Reading an outline back (depth-first, parents before children):
+doc = Pdfrb.open("bookmarked.pdf")
+doc.outline.each do |item|
+  puts item.title   # "Chapter 1", "1.1", "Chapter 2"
+end
 ```
 
 ## Merging PDFs

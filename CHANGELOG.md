@@ -2,6 +2,160 @@
 
 All notable changes to the pdfrb gem will be documented in this file.
 
+## [0.8.11] — 2026-08-31
+
+### Added
+
+* **Outline reading** — `Document::Outline#each` / `#to_a` walk an
+  existing outline depth-first (preorder), yielding typed
+  `Model::Type::OutlineItem` objects (title, count, destination,
+  bold/italic flags); `#empty?` for outline-less documents.
+  `OutlineItem#title` decodes via the shared TextString seam.
+
+## [0.8.10] — 2026-08-31
+
+### Added
+
+* **Text-string decoding at every semantic accessor** — the shared
+  `Model::Cos::TextString.decode` seam now serves
+  `Annotation#contents`/`#name`, the `FormField` accessors, the
+  `Form` facade (`find`/`field_names`/`get_value`), and
+  `Document::Metadata#read_field`. UTF-16BE+BOM and
+  PDFDocEncoding bytes read back as UTF-8; non-strings pass through.
+
+## [0.8.9] — 2026-08-31
+
+### Fixed
+
+* `Document::Metadata#read_field` relabelled string bytes with
+  `force_encoding("UTF-8")`, which never converts — UTF-16 titles
+  read back as garbage. Info values are text strings (s7.9.2.2) and
+  now decode properly.
+
+## [0.8.8] — 2026-08-31
+
+### Added
+
+* **Read-path decryption** — `ObjectReader#load_oid` decrypts
+  strings and stream payloads with the per-object key (s7.6.1) as
+  objects enter the Model, via a memoized
+  `Document::Encryption#reader_handler` that verifies the configured
+  password and raises `EncryptionError` when it does not verify.
+  Round trips now close at 256/128/40-bit.
+
+### Fixed
+
+* `pad_password` sliced the pad string at the password length
+  instead of its head (Algorithm 3.2), so handler-derived keys
+  diverged from `PasswordVerification`'s.
+* Algorithm 3.5 existed twice with different RC4 round sets
+  (writer 0..18, verifier 19..1; the spec runs 1..19 ascending);
+  one implementation now serves both, and R2 verification compares
+  instead of returning true unconditionally.
+* V4 /Encrypt dicts declared no `CF`/`StmF`/`StrF`, but absent
+  filters default to Identity (s7.6.3.2 Table 21) — conforming
+  readers saw AES ciphertext as cleartext. V4 now declares AESV2.
+* The cipher is chosen from the resolved CFM (AESV2/V2/Identity),
+  direction-aware (`encrypt_string`/`encrypt_stream` + decrypt
+  twins), instead of `V >= 4` always meaning AES.
+* AES helpers hard-coded aes-128-cbc and truncated 32-byte V5 object
+  keys to 16 bytes; the cipher now follows the key size.
+* Cross-reference streams are never encrypted; the writer now skips
+  them alongside the /Encrypt dictionary.
+
+**Compatibility:** 128-bit files written by 0.8.7 will not decrypt
+under 0.8.8 (they were non-interoperable outside pdfrb); re-encrypt.
+
+## [0.8.7] — 2026-08-30
+
+### Fixed
+
+* **Silent plaintext writes** — the Writer's encrypter construction
+  rescued `StandardError` to `{}`, so any handler failure (wrong
+  password, unsupported filter) wrote encrypted documents as
+  plaintext. Behind that rescue: calls to a nonexistent
+  `verify_user_password` and keyword-args construction where the
+  handler takes a positional trailer hash. A wrong password now
+  raises `EncryptionError`.
+
+### Changed
+
+* `Writer.serializer_for(document)` is the single Serializer factory
+  (compression + encrypter); `Linearization::Writer` shares it
+  instead of a bare serializer that emitted encrypted documents
+  unencrypted.
+* `serialize_indirect` encrypts dictionary strings with the
+  per-object key (s7.6.1), not just stream payloads; the /Encrypt
+  dictionary stays cleartext.
+* Linearized trailers carry /Encrypt and /ID; the hint stream no
+  longer claims a fictitious `/Type /XRef`.
+* Dead autoloads for nonexistent `Revision`/`Revisions` removed;
+  `DigitalSignature.handler_for` resolves handler classes lazily.
+
+## [0.8.6] — 2026-08-30
+
+### Fixed
+
+* **Canvas `concat` with a block emitted `SaveGraphicsState` in its
+  `ensure` instead of `Restore`** — every block-form
+  translate/scale/rotate left an unbalanced `q` on the graphics
+  state stack. The block form now scopes the matrix inside
+  `save_graphics_state`; `with_transparency` reuses the same seam;
+  the draw_image trio folds onto one `invoke_xobject`.
+
+### Added
+
+* `Pdfrb::PdfVersion.compare` / `.at_least?` (extracted from
+  byte-identical private copies in Writer and Conformance::PdfX).
+* `Document#each_indirect_of(klass)` — type-filtered object
+  iteration, Enumerator when blockless; 15 mechanical call sites
+  migrated.
+
+## [0.8.5] — 2026-08-29
+
+### Changed
+
+* Document/Font seams deepened: `Document#resolve` (dereference),
+  `Model::Object#ref`, `Pages#attach_resource`,
+  `Document::Fonts::Subsetting`, shared `Pdfrb::Font::Sfnt` module
+  (sfnt directory parsing/rebuild with real checksums) used by both
+  the TrueType and CFF subsetters.
+
+### Fixed
+
+* TrueType subsetting regression: `rubocop -A` had rewritten
+  `sorted.each do |_tag, data|` on an Array to `each_value`,
+  silently falling back to the full font (773KB instead of 205KB).
+
+## [0.8.4] — 2026-08-29
+
+### Changed
+
+* `Model::Type::NameMap` concern extracted from 17 hand-duplicated
+  resource-map classes (symbol-or-string `[]`, normalizing `add`,
+  `names`, `each_entry`).
+
+## [0.8.3] — 2026-08-28
+
+### Added
+
+* PDF/A generation section in the executable USAGE cookbook
+  (`spec/pdfrb/usage_doc_spec.rb` runs every snippet).
+
+## [0.8.2] — 2026-08-28
+
+### Added
+
+* veraPDF round-trip sweep over the fixture corpus.
+
+## [0.8.1] — 2026-08-27
+
+### Added
+
+* veraPDF cross-check integration (local `rake verapdf` + macOS CI
+  job) with PDF/A conformance fixes: trailer /ID, explicit page
+  /Resources, parseable XMP.
+
 ## [0.8.0] — 2026-08-27
 
 ### Added
