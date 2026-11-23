@@ -14,3 +14,21 @@ on:
 jobs:
   rake:
     uses: metanorma/ci/.github/workflows/generic-rake.yml@main
+    with:
+      cascade: false
+    secrets:
+      pat_token: ${{ secrets.CLARICLE_CI_PAT_TOKEN }}
+
+  tests-passed:
+    needs: rake
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Tests passed
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.CLARICLE_CI_PAT_TOKEN || github.token }}
+          repository: ${{ github.repository }}
+          event-type: tests-passed
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}", "type": "tests-passed"}'
