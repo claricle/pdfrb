@@ -123,10 +123,12 @@ module Pdfrb
 
       def read_stream_payload(dict_value)
         skip_single_eol
+        # Prefer /Length when it self-validates: the stored payload is
+        # followed by at most one EOL before "endstream". Only fall
+        # back to scanning (real-world generators emit wrong /Length)
+        # when the declared length contradicts the available span.
         # Always scan for "endstream" from the current position.
-        # /Length is unreliable in real-world PDFs (generator bugs,
-        # CRLF→LF conversion). Scanning is correct in all cases.
-        scan_to_endstream
+        scan_to_endstream(dict_value)
       end
 
       def endstream_next?
@@ -149,7 +151,7 @@ module Pdfrb
         peek_str == "endstream"
       end
 
-      def scan_to_endstream
+      def scan_to_endstream(dict_value = nil)
         start = io.pos
         chunk = io.read
         idx = chunk.index("endstream")
@@ -158,14 +160,31 @@ module Pdfrb
           # expect_keyword("endstream") can consume it normally.
           io.seek(start + idx, IO::SEEK_SET)
           content = chunk.byteslice(0, idx)
-          # Strip one trailing EOL before "endstream" (spec: it's
-          # not part of the stream data).
-          content = content.sub(/\r?\n\z/, "".b) if content.end_with?("\n")
-          content
+          strip_stream_eol(content, dict_value)
         else
           io.seek(start, IO::SEEK_SET)
           +""
         end
+      end
+
+      # Stripping the EOL that precedes "endstream" (it is not part of
+      # the stream data) is only unambiguous against the declared
+      # /Length: when /Length is present and the bytes after it are
+      # pure EOL, the payload is exactly /Length bytes. Without a
+      # trustworthy /Length, strip exactly one EOL ("\r\n", "\n", or
+      # "\r") — never more, or a payload whose final data byte looks
+      # like an EOL loses a real byte (this corrupted AES ciphertext
+      # whose last byte happened to be 0x0D).
+      def strip_stream_eol(content, dict_value)
+        length = length_of(dict_value)
+        if length && content.bytesize >= length &&
+            content.byteslice(length, 2).match?(/\A(\r\n|\n|\r)?\z/)
+          return content.byteslice(0, length)
+        end
+
+        return content.sub(/\r\n\z/, "".b) if content.end_with?("\r\n")
+
+        content.sub(/\n\z|\r\z/, "".b)
       end
 
       def length_of(dict_value)

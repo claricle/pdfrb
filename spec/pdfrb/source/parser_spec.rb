@@ -88,4 +88,26 @@ RSpec.describe Pdfrb::Source::Parser do
     expect(obj).to be_a(Pdfrb::Model::Cos::Stream)
     expect(obj.stream).to eq("hello".b)
   end
+
+  it "keeps a payload ending in CR when /Length is exact" do
+    # Payload "ab\r" (3 bytes) + the writer's "\n" before "endstream".
+    # The tail looks like "\r\n", so a heuristic EOL strip must not
+    # eat the CR data byte — trust the exact /Length instead.
+    src = "1 0 obj\n<< /Length 3 >>\nstream\nab\r\nendstream\nendobj\n"
+    io = StringIO.new(src.b)
+    parser = described_class.new(Pdfrb::Source::Tokenizer.new(io))
+    obj = parser.parse_indirect_object
+    expect(obj.stream).to eq("ab\r".b)
+  end
+
+  it "strips one \\r\\n when /Length is absent (ambiguous tail)" do
+    # Without /Length the "ab\r" + "\n" case is genuinely ambiguous;
+    # the reader treats the trailing \r\n as one EOL. Documents that
+    # need byte-exact tails must carry a correct /Length.
+    src = "1 0 obj\n<< >>\nstream\nab\r\nendstream\nendobj\n"
+    io = StringIO.new(src.b)
+    parser = described_class.new(Pdfrb::Source::Tokenizer.new(io))
+    obj = parser.parse_indirect_object
+    expect(obj.stream).to eq("ab".b)
+  end
 end

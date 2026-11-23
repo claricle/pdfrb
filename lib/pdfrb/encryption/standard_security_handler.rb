@@ -332,8 +332,9 @@ module Pdfrb
         decipher.key = key
         decipher.iv = iv
         decipher.update(ciphertext) + decipher.final
-      rescue OpenSSL::Cipher::CipherError
-        data
+      rescue OpenSSL::Cipher::CipherError => e
+        raise Pdfrb::EncryptionError,
+              "AES stream/string decryption failed (#{e.message})"
       end
     end
 
