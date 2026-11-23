@@ -26,8 +26,8 @@ module Pdfrb
         def long_loca?; @index_to_loc_format == 1; end
         def short_loca?; @index_to_loc_format.zero?; end
 
-        def bold?; (@mac_style || 0) & 0x01 != 0; end
-        def italic?; (@mac_style || 0) & 0x02 != 0; end
+        def bold?; (@mac_style || 0).anybits?(0x01); end
+        def italic?; (@mac_style || 0).anybits?(0x02); end
 
         private
 

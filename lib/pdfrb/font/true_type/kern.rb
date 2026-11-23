@@ -21,7 +21,7 @@ module Pdfrb
             sub_length = u16(data, offset + 2)
             coverage = u16(data, offset + 4)
 
-            if version.zero? && coverage & 0x0001 != 0
+            if version.zero? && coverage.anybits?(0x0001)
               n_pairs = u16(data, offset + 6)
               pair_offset = offset + 14
 

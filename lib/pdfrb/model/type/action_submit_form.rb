@@ -13,51 +13,51 @@ module Pdfrb
         def flags; self[:Flags] || 0; end
 
         def include_exclude?
-          flags & 1 != 0
+          flags.anybits?(1)
         end
 
         def include_no_value_fields?
-          flags & 2 != 0
+          flags.anybits?(2)
         end
 
         def export_format?
-          flags & 4 != 0
+          flags.anybits?(4)
         end
 
         def get_method?
-          flags & 8 != 0
+          flags.anybits?(8)
         end
 
         def submit_coordinates?
-          flags & 16 != 0
+          flags.anybits?(16)
         end
 
         def submit_as_xfdf?
-          flags & 32 != 0
+          flags.anybits?(32)
         end
 
         def submit_as_append?
-          flags & 64 != 0
+          flags.anybits?(64)
         end
 
         def submit_as_pdf?
-          flags & 256 != 0
+          flags.anybits?(256)
         end
 
         def canonical_date_format?
-          flags & 512 != 0
+          flags.anybits?(512)
         end
 
         def submit_as_xfdf_with_annotations?
-          flags & 1024 != 0
+          flags.anybits?(1024)
         end
 
         def submit_as_xdp?
-          flags & 2048 != 0
+          flags.anybits?(2048)
         end
 
         def submit_as_xfdf_charset?
-          flags & 4096 != 0
+          flags.anybits?(4096)
         end
       end
     end
