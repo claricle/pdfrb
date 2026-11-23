@@ -30,3 +30,11 @@ RSpec/DescribeClass:
 # the snake_case → CamelCase file-path convention.
 RSpec/SpecFilePathFormat:
   Enabled: false
+
+# actions/checkout v6 injects `.required_attributes` (`* text=auto`)
+# into .git/info/attributes, which overrides this repo's .gitattributes
+# (`*.rb eol=lf`) and checks text files out as CRLF on Windows runners.
+# Line endings are a git/checkout concern, not a code concern, so the
+# cop is disabled here rather than fought per-runner.
+Layout/EndOfLine:
+  Enabled: false
