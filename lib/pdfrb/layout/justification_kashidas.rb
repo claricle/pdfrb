@@ -52,14 +52,14 @@ module Pdfrb
       # right-joining letter that's not already followed by a space).
       def kashida_insertion_points(text)
         points = []
-        prev = nil
+        nil
         text.to_s.each_char.with_index do |ch, i|
           next_char = text.to_s[i + 1]
           if RIGHT_JOINING.include?(ch) && next_char &&
               RIGHT_JOINING.include?(next_char)
             points << (i + 1)
           end
-          prev = ch
+          ch
         end
         points
       end

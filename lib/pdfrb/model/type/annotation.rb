@@ -53,15 +53,15 @@ module Pdfrb
         end
 
         # ---- Flag predicates ----
-        def hidden?; flags & 1 != 0; end
-        def print?; flags & 2 != 0; end
-        def no_zoom?; flags & 4 != 0; end
-        def no_rotate?; flags & 8 != 0; end
-        def no_view?; flags & 16 != 0; end
-        def read_only?; flags & 32 != 0; end
-        def locked?; flags & 128 != 0; end
-        def toggle_no_view?; flags & 256 != 0; end
-        def locked_contents?; flags & 512 != 0; end
+        def hidden?; flags.anybits?(1); end
+        def print?; flags.anybits?(2); end
+        def no_zoom?; flags.anybits?(4); end
+        def no_rotate?; flags.anybits?(8); end
+        def no_view?; flags.anybits?(16); end
+        def read_only?; flags.anybits?(32); end
+        def locked?; flags.anybits?(128); end
+        def toggle_no_view?; flags.anybits?(256); end
+        def locked_contents?; flags.anybits?(512); end
 
         # ---- Appearance management ----
         def normal_appearance

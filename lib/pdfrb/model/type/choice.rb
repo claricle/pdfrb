@@ -10,12 +10,12 @@ module Pdfrb
         def top_index; self[:TI]; end
         def indices; self[:I]; end
 
-        def combo?; flags & 0x20000 != 0; end
+        def combo?; flags.anybits?(0x20000); end
         def list?; !combo?; end
-        def edit?; flags & 0x40000 != 0; end
-        def multi_select?; flags & 0x200000 != 0; end
-        def sort?; flags & 0x80000 != 0; end
-        def commit_on_change?; flags & 0x4000000 != 0; end
+        def edit?; flags.anybits?(0x40000); end
+        def multi_select?; flags.anybits?(0x200000); end
+        def sort?; flags.anybits?(0x80000); end
+        def commit_on_change?; flags.anybits?(0x4000000); end
       end
     end
   end

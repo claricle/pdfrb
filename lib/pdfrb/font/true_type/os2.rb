@@ -34,8 +34,8 @@ module Pdfrb
           @fs_selection = u16(62)
         end
 
-        def bold?; (@fs_selection || 0) & 0x20 != 0; end
-        def italic?; (@fs_selection || 0) & 0x01 != 0; end
+        def bold?; (@fs_selection || 0).anybits?(0x20); end
+        def italic?; (@fs_selection || 0).anybits?(0x01); end
 
         private
 

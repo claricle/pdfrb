@@ -9,13 +9,13 @@ module Pdfrb
         def value; self[:V]; end
         def rich_text_value; self[:RV]; end
 
-        def multiline?; flags & 0x1000 != 0; end
-        def password?; flags & 0x2000 != 0; end
-        def file_select?; flags & 0x100000 != 0; end
-        def do_not_spell_check?; flags & 0x400000 != 0; end
-        def do_not_scroll?; flags & 0x800000 != 0; end
-        def comb?; flags & 0x1000000 != 0; end
-        def rich_text?; flags & 0x2000000 != 0; end
+        def multiline?; flags.anybits?(0x1000); end
+        def password?; flags.anybits?(0x2000); end
+        def file_select?; flags.anybits?(0x100000); end
+        def do_not_spell_check?; flags.anybits?(0x400000); end
+        def do_not_scroll?; flags.anybits?(0x800000); end
+        def comb?; flags.anybits?(0x1000000); end
+        def rich_text?; flags.anybits?(0x2000000); end
       end
     end
   end

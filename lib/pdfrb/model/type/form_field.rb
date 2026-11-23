@@ -40,9 +40,9 @@ module Pdfrb
         def choice?; field_type&.to_sym == :Ch; end
         def signature?; field_type&.to_sym == :Sig; end
 
-        def read_only?; flags & 1 != 0; end
-        def required?; flags & 2 != 0; end
-        def no_export?; flags & 4 != 0; end
+        def read_only?; flags.anybits?(1); end
+        def required?; flags.anybits?(2); end
+        def no_export?; flags.anybits?(4); end
 
         def has_kids?
           kids && (!kids.is_a?(Array) || !kids.empty?)

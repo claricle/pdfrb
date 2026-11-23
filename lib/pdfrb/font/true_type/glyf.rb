@@ -61,8 +61,8 @@ module Pdfrb
             components << glyph_index
             offset += 4
 
-            offset += 4 if flags & 0x0001 != 0
-            offset += 2 if flags & 0x0002 != 0
+            offset += 4 if flags.anybits?(0x0001)
+            offset += 2 if flags.anybits?(0x0002)
             break if flags.nobits?(0x0020)
           end
           components
