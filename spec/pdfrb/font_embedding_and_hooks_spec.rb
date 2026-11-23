@@ -2,6 +2,7 @@
 
 require "spec_helper"
 require "stringio"
+require "tempfile"
 
 RSpec.describe Pdfrb::Document::Fonts do
   let(:doc) { Pdfrb::Document.new.tap { |d| d.pages.add } }
@@ -82,24 +83,38 @@ RSpec.describe Pdfrb::Document::Fonts do
   end
 
   describe "PostScript name extraction (Issue #63)" do
-    let(:ttf_path) { "/Users/mulgogi/Library/Fonts/RiboseLogoType-Alternate.ttf" }
-    let(:otf_path) { "/Users/mulgogi/Library/Fonts/Posterama 1901 Light.otf" }
+    # Synthesised well-formed sfnt bytes: a real table directory plus a
+    # real name table carrying nameID 6, so the extraction path runs
+    # identically on any machine (the specs below previously pointed at
+    # absolute paths under ~/Library/Fonts and skipped everywhere else).
+
+    def name_table(ps_name)
+      str = ps_name.encode(Encoding::UTF_16BE).b
+      [0, 1, 6 + 12].pack("n3") +
+        [3, 1, 0x409, 6, str.bytesize, 0].pack("n6") + str
+    end
+
+    def sfnt_bytes(version, ps_name)
+      Pdfrb::Font::Sfnt.rebuild(version.b, [["name", name_table(ps_name)]])
+    end
 
     def font_names(doc)
       doc.fonts.each.map(&:first)
     end
 
     it "extracts PS name when adding from file path" do
-      skip "test font not available" unless File.file?(ttf_path)
+      Tempfile.create(["ps-name", ".ttf"]) do |f|
+        f.binmode
+        f.write(sfnt_bytes("\x00\x01\x00\x00", "RiboseLogoType-Alternate"))
+        f.close
 
-      doc.fonts.add(ttf_path)
-      expect(font_names(doc)).to include(include("RiboseLogoType-Alternate"))
+        doc.fonts.add(f.path)
+        expect(font_names(doc)).to include(include("RiboseLogoType-Alternate"))
+      end
     end
 
-    it "extracts PS name when adding from IO" do
-      skip "test font not available" unless File.file?(otf_path)
-
-      data = File.binread(otf_path)
+    it "extracts PS name from an OTF (OTTO) container added via IO" do
+      data = sfnt_bytes("OTTO", "Posterama1901-Light")
       doc.fonts.add(StringIO.new(data))
       expect(font_names(doc)).to include(include("Posterama1901-Light"))
     end
@@ -111,14 +126,24 @@ RSpec.describe Pdfrb::Document::Fonts do
       expect(font_names(doc).first).to match(/EmbeddedFont\d+\z/)
     end
 
-    it "produces a BaseFont with subset tag plus PS name" do
-      skip "test font not available" unless File.file?(ttf_path)
+    it "sanitises PS names into valid PDF name tokens" do
+      data = sfnt_bytes("\x00\x01\x00\x00", "Weird Font(Name)")
+      doc.fonts.add(StringIO.new(data))
+      expect(font_names(doc).first).not_to match(/[ ()<>\[\]{}\/%]/)
+    end
 
-      resource = doc.fonts.add(ttf_path)
-      font_ref = doc.pages.pages_root.value[:Resources][:Font][resource]
-      font_dict = doc.object(font_ref)
-      base_font = font_dict.value[:BaseFont].to_s
-      expect(base_font).to match(/\A[A-Z]{6}\+RiboseLogoType-Alternate\z/)
+    it "produces a BaseFont with subset tag plus PS name" do
+      Tempfile.create(["ps-name-base", ".ttf"]) do |f|
+        f.binmode
+        f.write(sfnt_bytes("\x00\x01\x00\x00", "RiboseLogoType-Alternate"))
+        f.close
+
+        resource = doc.fonts.add(f.path)
+        font_ref = doc.pages.pages_root.value[:Resources][:Font][resource]
+        font_dict = doc.object(font_ref)
+        base_font = font_dict.value[:BaseFont].to_s
+        expect(base_font).to match(/\A[A-Z]{6}\+RiboseLogoType-Alternate\z/)
+      end
     end
   end
 end
