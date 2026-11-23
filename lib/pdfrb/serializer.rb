@@ -64,10 +64,10 @@ module Pdfrb
       case obj
       when Pdfrb::Model::Cos::Stream
         dict_value = encrypt_strings ? Pdfrb::Encryption::ValueStrings.encrypt(obj.value, obj.oid, obj.gen, encrypter) : obj.value
-        dict, payload = emit_stream(obj, dict_value)
+        dict, payload = emit_stream(obj, dict_value, encrypter: encrypter && !skip_encryption ? encrypter : nil)
         buffer << dict
         buffer << "\nstream\n"
-        buffer << (encrypter && !skip_encryption ? encrypter.encrypt_stream(payload, obj.oid, obj.gen) : payload)
+        buffer << payload
         buffer << "\nendstream\n"
       else
         value = encrypt_strings ? Pdfrb::Encryption::ValueStrings.encrypt(obj.value, obj.oid, obj.gen, encrypter) : obj.value
@@ -82,8 +82,12 @@ module Pdfrb
 
     # Build the dict body + payload for a stream object, applying
     # FlateDecode compression when enabled and the stream is large
-    # enough to benefit. Returns [dict_bytes, payload_bytes].
-    def emit_stream(stream_obj, dict_value = stream_obj.value)
+    # enough to benefit, then encryption. Returns [dict_bytes,
+    # payload_bytes]. Encryption is applied before /Length is
+    # recorded: AESV2 grows the payload (IV + padding), so the
+    # declared /Length must be computed from the final stored bytes
+    # (s7.3.8.2 — filters first, then encryption).
+    def emit_stream(stream_obj, dict_value = stream_obj.value, encrypter: nil)
       payload = stream_obj.stream
       hash = dict_value.dup
       existing_filter = hash[:Filter]
@@ -92,11 +96,11 @@ module Pdfrb
         compressed = compress_bytes(payload)
         if compressed.bytesize < payload.bytesize
           hash[:Filter] = combine_filters(existing_filter, :FlateDecode)
-          hash[:Length] = compressed.bytesize
-          return [serialize_dict(hash), compressed]
+          payload = compressed
         end
       end
 
+      payload = encrypter.encrypt_stream(payload, stream_obj.oid, stream_obj.gen) if encrypter
       hash[:Length] = payload.bytesize
       [serialize_dict(hash), payload]
     end
